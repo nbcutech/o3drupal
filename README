@@ -10,4 +10,4 @@ to be merged with DEV code in repository promotoolsdev
 settings.php
 sites/default/files/* (you can get the image assets from the server)
 
-Backup & Migrate file: Dropbox\oxygen dev team shared\Shared\Tools- Exports Modules and Guides\OxygenAdmin-2011-10-19T18-23-00.mysql.gz
+Backup & Migrate file: sites/default/files/backup_migrate/manual/OxygenAdmin-2011-10-19T18-23-00.mysql.gz
