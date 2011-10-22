@@ -1,0 +1,5 @@
+; $Id$
+name = OxygenDart
+description = Module to create and modify ads, specifically for DART
+core = 6.x
+package = "Oxygen"

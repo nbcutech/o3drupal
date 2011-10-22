@@ -1,0 +1,72 @@
+<?php
+// $Id: multiblock.install,v 1.1.4.3 2009/01/25 06:07:14 andrewlevine Exp $
+
+function multiblock_schema() {
+  $schema = array();
+
+  $schema['multiblock'] = array(
+    'description' => t('Table for storing information about block instances used by the multiblock module.'),
+    'fields' => array(
+      'delta' => array(
+        'description' => t('Unique key for each created block instance.'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => t('The title used to display a block instance in the instance administration.'),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'module' => array(
+        'description' => t('The name of the module that provided the original block.'),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'orig_delta' => array(
+        'description' => t('The delta of the original block.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '0',
+      ),
+      'multi_settings' => array(
+        'description' => t('Boolean flag that stores if the original module has multiblock support for multiple instance of this block.'),
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('delta'),
+  );
+
+  return $schema;
+}
+
+function multiblock_install() {
+  drupal_install_schema('multiblock');
+}
+
+function multiblock_uninstall() {
+  drupal_uninstall_schema('multiblock');
+}
+
+/**
+ * Upgrade to Drupal 6.
+ */
+function multiblock_update_6100() {
+  $ret = array();
+  // Keys must be dropped before altering the column.
+  db_drop_primary_key($ret, 'multiblock');
+  // Alter to add primary key with auto-increment.
+  db_change_field($ret, 'multiblock', 'delta', 'delta', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('delta')));
+
+  // Reduce the size of the multi_settings flag column.
+  db_change_field($ret, 'multiblock', 'multi_settings', 'multi_settings', array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+  return $ret;
+}

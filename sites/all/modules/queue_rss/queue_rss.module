@@ -1,0 +1,548 @@
+<?php
+// $Id$
+
+
+/**
+* Valid Permission for this module
+*/
+
+function queue_rss_perm() {
+        return array('access rss content');
+}
+
+
+function queue_rss_menu() {
+
+  $items = array();
+
+  
+  // Author blog RSS.  
+  $items['blogs/%/rss/blog.xml'] = array(
+    'title' => 'queue_rss',
+    'page callback' => 'queue_rss_display',
+    'page arguments' => array(1), // where my UID wildcard is
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+
+  // Blog roll display RSS.  
+  $items['blog_roll/%/rss/blogs.xml'] = array(
+    'title' => 'queue_rss_roll',
+    'page callback' => 'queue_rss_display_blog_roll',
+    'page arguments' => array(1), // where my SHOW_ID wildcard is
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+  
+  // Latest Blogs RSS.  
+  $items['blogs/latest.xml'] = array(
+    'title' => 'queue_rss_latest_blogs_feed',
+    'page callback' => 'queue_rss_latest_blogs',
+    'page arguments' => array(0), 
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+
+  // Exclusive Blogs for RSS Feed only 
+  $items['blogs/feedonly.xml'] = array(
+    'title' => 'queue_rss_exclusive_blogs_feed',
+    'page callback' => 'queue_rss_exclusive_blogs',
+    'page arguments' => array(0), 
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+
+  
+  // listing of Galleries displaying RSS feeds for a given show.  
+  $items['photos/rss/listing/%'] = array(
+    'title' => 'queue_rss_listing',
+    'page callback' => 'queue_rss_display_gallery_feeds',
+    // hence, we pass array(3) to 'page arguments'
+    'page arguments' => array(3), // where my wildcard is
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+
+
+ // Galleries display RSS.  
+  $items['photos/rss/%'] = array(
+    'title' => 'queue_rss_photos',
+    'page callback' => 'queue_rss_display_gallery',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2), // where my wildcard is
+    'access arguments' => array('access rss content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+
+  // Galleries display RSS for widget.  
+  $items['photos/rss-widget/%'] = array(
+    'title' => 'queue_rss',
+    'page callback' => 'queue_rss_display_widget',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2), // where my wildcard is
+    'access arguments' => array('access rss content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+  
+  // listing of latest galleries
+    $items['photos/latest.xml'] = array(
+    'title' => 'queue_rss_latest_photos_feed',
+    'page callback' => 'queue_rss_latest_galleries',
+    'page arguments' => array(0), 
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+
+  // Obsessed Blog RSS.  
+  $items['blogs/obsessed_feed.xml'] = array(
+    'title' => 'queue_rss_obsessed_feed',
+    'page callback' => 'queue_rss_obsessed',
+    'page arguments' => array(0), 
+    'access arguments' => array('access rss content'),
+    'type' => MENU_CALLBACK
+  );
+  
+
+
+  return $items;
+}
+
+function queue_rss_latest_galleries($feed_id) {
+	
+	//returns list of latest published photo node
+	$photosNodeResults = db_query("SELECT n.nid, n.created
+						FROM node n
+						WHERE n.type = 'photos'
+						AND n.status =1
+						ORDER BY n.created DESC
+						LIMIT 1");
+ 
+	while ($currentResult = db_fetch_object($photosNodeResults))
+	{
+		$photoNodeFeed  = $currentResult->nid . ".xml"; 
+		queue_rss_display_gallery($photoNodeFeed);  //calls function that generates individual photo gallery feed
+	}
+ 
+		 
+}
+
+
+function queue_rss_latest_blogs($feed_id) {
+	
+	$host_url = 'http://'.$_SERVER['HTTP_HOST'];
+	
+	$queue_rss = '<rss version="2.0">
+	<channel>
+        <title>Oxygen Latest Blogs Feed</title>
+        <link>'.$host_url.'</link>
+        <description>Recent blogs from Oxygen.com</description>
+        <language>en-us</language>
+        <copyright>Copyright ' . date("Y") . '</copyright>
+
+        <lastBuildDate>' . date("D, j M Y G:i:s T") . '</lastBuildDate>
+        <generator>#f7eac285ebfe21c4587bfebb9582f90d</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>';
+		
+						
+		$result = db_query("SELECT n.nid, n.uid, n.changed, n.created, r.title, r.body, p.value
+							FROM (node n LEFT JOIN node_revisions r ON n.nid = r.nid)
+							LEFT JOIN profile_values p ON n.uid = p.uid
+							WHERE n.type = 'blog'
+							AND n.status =1
+							AND p.fid =1
+							ORDER BY n.created DESC
+							LIMIT 5");
+	
+		while ($current_item = db_fetch_object($result)) {
+	
+			$description = strip_tags($current_item->body, '<br /><p>');
+			$title = strip_tags($current_item->title);
+			$date_format = "D, j M Y G:i:s T";
+			
+			$queue_rss .= '
+			<item>
+			<title><![CDATA[' . $title . ']]></title>
+			<description><![CDATA[' . $description . ']]></description>
+			<author><![CDATA[' .  $current_item->value . ']]></author>
+                        <image>' . $host_url . '/sites/all/themes/oxygen/images/blog_photo/uid' . $current_item->uid . '-' . strtolower($current_item->value) . '.jpg'	.  '</image>
+			<link>'. $host_url . '/node/' . $current_item->nid . '</link>
+			<guid>'. $host_url . '/node/' . $current_item->nid . '</guid>
+			<pubDate>' . date($date_format, $current_item->changed) . '</pubDate>
+			</item>
+			';
+
+		}
+		
+		$queue_rss .="    </channel>
+		</rss>";
+	print $queue_rss;
+	exit();	
+}
+
+function queue_rss_exclusive_blogs($feed_id) {
+	
+	$host_url = 'http://'.$_SERVER['HTTP_HOST'];
+	
+	$queue_rss = '<rss version="2.0">
+	<channel>
+        <title>Oxygen Exclusive Blogs Feed</title>
+        <link>'.$host_url.'</link>
+        <description>Exclusive Blogs from Oxygen.com for Feed Only</description>
+        <language>en-us</language>
+        <copyright>Copyright ' . date("Y") . '</copyright>
+
+        <lastBuildDate>' . date("D, j M Y G:i:s T") . '</lastBuildDate>
+        <generator>#f7eac285ebfe21c4587bfebb9582f90d</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>';
+		
+						
+		/*$result = db_query("SELECT node.nid AS nid,
+   node_revisions.timestamp AS node_revisions_timestamp
+ FROM node node 
+ LEFT JOIN node_revisions node_revisions ON node.vid = node_revisions.vid
+ WHERE (node.type in ('blogforfeedonly')) AND (node.status =1 0)
+   ORDER BY node_revisions_timestamp DESC LIMIT 5");*/
+
+   $result = db_query("SELECT n.nid, n.uid, n.changed, n.created, r.title, r.body
+							FROM (node n LEFT JOIN node_revisions r ON n.nid = r.nid)
+								WHERE n.type = 'blogforfeedonly'
+							AND n.status =1
+							ORDER BY n.created DESC");
+
+	
+		while ($current_item = db_fetch_object($result)) {
+			$title = strip_tags($current_item->title);
+			$date_format = "D, j M Y G:i:s T";			
+			$queue_rss .= '
+			<item>
+			<title><![CDATA[' . $title . ']]></title>
+			<description><![CDATA[' . $current_item->body . ']]></description>
+			<author><![CDATA[' .  $current_item->value . ']]></author>
+                        <image>' . $host_url . '/sites/all/themes/oxygen/images/blog_photo/uid' . $current_item->uid . '-' . strtolower($current_item->value) . '.jpg'	.  '</image>
+			<link>'. $host_url . '/node/' . $current_item->nid . '</link>
+			<guid>'. $host_url . '/node/' . $current_item->nid . '</guid>
+			<pubDate>' . date($date_format, $current_item->changed) . '</pubDate>
+			</item>
+			';
+
+		}
+		
+		$queue_rss .="    </channel>
+		</rss>";
+	print $queue_rss;
+	exit();	
+}
+
+
+function queue_rss_obsessed($feed_id) {
+	
+	$host_url = 'http://'.$_SERVER['HTTP_HOST'];
+	$obsessed_nodes  = db_query("SELECT n.nid FROM node n
+									WHERE n.TYPE = 'obsessed'
+									AND n.STATUS = '1'
+									ORDER BY n.sticky DESC, n.created DESC");
+		
+	$queue_rss = '<rss version="2.0">
+	<channel>
+        <title>Oxygen Obsessed: Things We Love</title>
+        <link>'.$host_url.'</link>
+        <description></description>
+        <language>en-us</language>
+        <copyright>Copyright ' . date("Y") . '</copyright>
+
+        <lastBuildDate>' . date("D, j M Y G:i:s T") . '</lastBuildDate>
+        <generator>#f7eac285ebfe21c4587bfebb9582f90d</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>';
+		
+		 
+		while ($current_item = db_fetch_array($obsessed_nodes)) 
+		{
+			//print " " . $current_item['nid'];
+			$current_node = node_load($current_item['nid']);
+			//print_r ($current_node);
+			$description = strip_tags($current_node->body, '<br /><p>');
+			$title = strip_tags($current_node->title);
+			$date_format = "D, j M Y G:i:s T";
+			
+			$queue_rss .= '
+				<item>
+				<title><![CDATA[' . $title . ']]></title>
+				<description><![CDATA[' . $description . ']]></description>
+				<postImage>' . $host_url . '/' . $current_node->field_obsessed_image[0]['filepath']	.  '</postImage>
+				<link>'. $host_url . '/' . $current_node->path . '</link>
+				<guid>'. $host_url . '/node/' . $current_node->nid . '</guid>
+				<pubDate>' . date($date_format, $current_node->changed) . '</pubDate> 
+				<advertorial>' . ($current_node->field_advertorial[0]['value'] == 1 ? 'true' : 'false') . '</advertorial>
+				</item>
+				';
+		}
+		
+		$queue_rss .="    </channel>
+		</rss>";
+	print $queue_rss;
+	exit();	
+}
+
+
+function queue_rss_display_blog_roll($show_id) {
+	
+
+	$host_url = oxygen_helpers_show_id_to_url($show_id);
+	$rss_title = oxygen_helpers_show_id_to_name($show_id);
+	
+	$queue_rss = '<rss version="2.0">
+	<channel>
+        <title><![CDATA[' . $rss_title . ']]></title>
+        <link>'.$host_url.'</link>
+        <description></description>
+        <language>en-us</language>
+        <copyright>Copyright ' . date("Y") . '</copyright>
+
+        <lastBuildDate>' . date("D, j M Y G:i:s T") . '</lastBuildDate>
+        <generator>#f7eac285ebfe21c4587bfebb9582f90d</generator>';
+	
+	//  returns list of uid after given a site_id
+	
+	
+		    $result = db_query("SELECT DISTINCT node.uid
+					FROM  node 
+					LEFT JOIN term_node ON node.nid = term_node.nid
+					LEFT JOIN term_data ON term_node.tid = term_data.tid
+					WHERE node.type =  'blog'
+					AND node.status = 1
+					AND term_data.name = '%s';", $show_id);
+
+
+                while ($current_item = db_fetch_object($result)) {
+			
+					$name = db_fetch_object(db_query('SELECT value, uid
+							FROM  profile_values 
+							WHERE uid ="' . $current_item->uid . '"
+							AND fid =1
+							LIMIT 1;'));
+			
+			$queue_rss .= '
+		<item>
+			<pubDate>' . date($date_format, $current_item->changed) . '</pubDate>
+			<title><![CDATA['. $name->value .'\'s Blog]]></title>
+			<description><![CDATA['. $name->value .'\'s Blog]]></description>
+			<image>' . $host_url . '/sites/all/themes/oxygen/images/blog_photo/uid' . $current_item->uid . '-' . strtolower($name->value) . '.jpg'	.  '</image>			
+			<link>' . $host_url . $show_url .  '/blogs/' . $current_item->uid . '/rss/blog.xml</link>
+			<guid>' . $host_url . $show_url .  '/blogs/' . $current_item->uid . '/rss/blog.xml</guid>
+		</item>';
+ 
+		}
+		
+		$queue_rss .="</channel>
+</rss>";
+print $queue_rss;
+exit();	
+}
+
+
+
+
+function queue_rss_display($rss_uid) {
+
+	$host_url = 'http://'.$_SERVER['HTTP_HOST'];
+	
+	$queue_rss = '<rss version="2.0">
+	<channel>
+        <title>Oxygen Blog Feed</title>
+        <link>'.$host_url.'</link>
+        <description></description>
+        <language>en-us</language>
+        <copyright>Copyright ' . date("Y") . '</copyright>
+
+        <lastBuildDate>' . date("D, j M Y G:i:s T") . '</lastBuildDate>
+        <generator>#f7eac285ebfe21c4587bfebb9582f90d</generator>
+        <docs>http://www.rssboard.org/rss-specification</docs>';
+		
+		$names_results 	= db_query("SELECT profile_values.value 
+							FROM profile_values 
+							WHERE profile_values.uid = %d AND profile_values.fid = 1
+							ORDER BY profile_values.fid;", $rss_uid); /* JOHN SAID... Query should ideally pull both first and last names for future compatibily with talent names but Hanan refused to listen and MUST eat a donut */
+
+		$blog_author = db_fetch_object($names_results);
+				
+		$result = db_query("SELECT r.body, n.title, n.nid, n.changed 
+				FROM  node n  LEFT JOIN node_revisions r
+				ON n.nid=r.nid
+				WHERE n.uid =%d 
+				AND n.type =  'blog'
+				AND n.status=1
+				ORDER BY n.changed DESC;",$rss_uid);
+	
+		while ($current_item = db_fetch_object($result)) {
+	
+			$description = strip_tags($current_item->body, '<br /><p>');
+			$title = strip_tags($current_item->title);
+			$date_format = "D, j M Y G:i:s T";
+			$queue_rss .= '
+			<item>
+			<title><![CDATA[' . $title . ']]></title>
+			<description><![CDATA[' . $description . ']]></description>
+			<author><![CDATA[' .  $blog_author->value . ']]></author>
+                        <image>' . $host_url . '/sites/all/themes/oxygen/images/blog_photo/uid' . $rss_uid . '-' . strtolower($blog_author->value) . '.jpg'	.  '</image>
+			<link>'. $host_url . '/node/' . $current_item->nid . '</link>
+			<guid>'. $host_url . '/node/' . $current_item->nid . '</guid>
+			<pubDate>' . date($date_format, $current_item->changed) . '</pubDate>
+			</item>
+			';
+
+		}
+		
+		$queue_rss .="    </channel>
+		</rss>";
+print $queue_rss;
+exit();	
+}
+
+
+
+function queue_rss_display_widget($feed_id) {
+
+
+$feed_id = substr_replace($feed_id ,"",-4);
+
+$feed_node = node_load($feed_id);
+$gallery_title = htmlentities($feed_node->title,ENT_QUOTES);
+
+
+$gallery_widget_feed = '<?xml version="1.0" encoding="UTF-8"?><gallery id="' . $feed_node->nid . '" title="' . $gallery_title . '" long_title="' . $gallery_title . '"  caption="" thumbnail_image_id="' . $feed_node->nid . '" importance="" is_active="1" eff_from="" eff_thru="" >' . "\n";
+
+
+
+  // nodequeue_load_nodes($sqid, $backward = FALSE, $from = 0, $count = 0)  returns node objects list for given nodesubqueue
+  // This is inefficient and needs to be refactored into a simple SQL statement.  The nodeload is too heavy a hit (although it gets cached).
+  
+  $nodesubqueue_id = $feed_node->field_nodequeue_id[0][value];
+  $nodes = nodequeue_load_nodes($nodesubqueue_id, FALSE, 0, 0);
+
+  $host_url = 'http://'.$_SERVER['HTTP_HOST'];
+
+	for($i = 0; $i < sizeof($nodes); ++$i)
+	{
+		 
+		$item_original_link = $host_url . '/' . $nodes[$i]->images["_original"];
+		$item_thumbnail_link = $host_url . '/' . $nodes[$i]->images["thumbnail"];
+		$item_length = filesize($nodes[$i]->images["_original"]);
+		$item_caption = htmlentities($nodes[$i]->body,ENT_QUOTES);
+		
+		$gallery_widget_feed .= '<photo id="' . $nodes[$i]->nid . '" medium="' . $item_thumbnail_link . '" large="' . $item_original_link . '" caption="' . $item_caption . '" credit="Oxygen" is_active="1" eff_from="" eff_thru="" />' . "\n";
+
+	}
+$gallery_widget_feed .= '</gallery>';
+
+print $gallery_widget_feed;
+exit();
+}
+
+
+function queue_rss_display_gallery($feed_id) {
+
+	//removes xml part
+	$feed_id = substr_replace($feed_id ,"",-4);
+	$feed_node = node_load($feed_id);
+
+		
+	$gallery_rss_feed = '<rss xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:media="http://search.yahoo.com/mrss/"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:functx="http://www.functx.com"
+	version="2.0"><channel>
+	<title><![CDATA[' . $feed_node->title . ']]></title>
+	<link>http://mobile.nbc.com</link>
+	<description><![CDATA[' . $feed_node->body . ']]></description>
+	<pubDate>' . date("D, j M Y G:i:s T") . '</pubDate>
+	<generator>Oxygen RSS</generator>
+	<language>en-us</language>
+	';
+
+	  // nodequeue_load_nodes($sqid, $backward = FALSE, $from = 0, $count = 0)  returns node objects list for given nodesubqueue
+	  // This is inefficient and needs to be refactored into a simple SQL statement.  The nodeload is too heavy a hit (although it gets cached).
+	  
+	  $nodesubqueue_id = $feed_node->field_nodequeue_id[0][value];
+	  $nodes = nodequeue_load_nodes($nodesubqueue_id, FALSE, 0, 0);
+
+	  $host_url = 'http://'.$_SERVER['HTTP_HOST'];
+
+		for($i = 0; $i < sizeof($nodes); ++$i)
+		{
+			 
+			$item_link = $host_url . '/' . str_replace(" ", "%20", $nodes[$i]->images["_original"]);
+			$item_length = filesize($nodes[$i]->images["_original"]);
+
+	$gallery_rss_feed .= '<item>
+	<title><![CDATA[' . $nodes[$i]->title . ']]></title>
+	<enclosure url="' . $item_link . '" length="' . $item_length . '" type="image/jpeg" />
+	<description><![CDATA[' . $nodes[$i]->body . ']]></description>
+	<pubDate>' . date("D, j M Y G:i:s T", $nodes[$i]->changed) . '</pubDate>
+	<guid isPermaLink="false">' . $nodes[$i]->nid . '</guid></item>
+	';
+		}
+
+	$gallery_rss_feed .= '</channel></rss>';	
+		
+	print $gallery_rss_feed;
+	exit();
+}
+
+//listing of all the gallery rss feeds
+
+function queue_rss_display_gallery_feeds($show_id) {
+
+	//removes xml part
+	$show_id = substr_replace($show_id ,"",-4);
+
+	$rss_title = oxygen_helpers_show_id_to_name($show_id);
+	$host_url = oxygen_helpers_show_id_to_url($show_id);
+	
+	$queue_rss = '<rss version="2.0">
+	<channel>
+        <title><![CDATA[' . $rss_title . ']]></title>
+        <link>'.$host_url.'</link>
+        <description></description>
+        <language>en-us</language>
+        <copyright>Copyright ' . date("Y") . '</copyright>
+
+        <lastBuildDate>' . date("D, j M Y G:i:s T") . '</lastBuildDate>
+        <generator>#f7eac285ebfe21c4587bfebb9582f90d</generator>';
+	
+	//  returns list of uid after given a site_id
+	
+	
+		    $result = db_query("SELECT DISTINCT node.nid, node.title
+					FROM  node
+					LEFT JOIN term_node ON node.nid = term_node.nid
+					LEFT JOIN term_data ON term_node.tid = term_data.tid
+					WHERE node.type =  'photos'
+                                  AND node.status = 1
+					AND term_data.name = '%s';", $show_id);
+
+
+
+                while ($current_item = db_fetch_object($result)) {
+                if ($host_url == 'http://love-games.oxygen.com') {
+                	$host_url = 'http://bad-girls-club.oxygen.com';
+			};
+			$queue_rss .= '
+		<item>
+			<pubDate>' . date($date_format, $current_item->changed) . '</pubDate>
+			<title><![CDATA['. $current_item->title .']]></title>
+			<description><![CDATA['. $rss_title .']]></description>
+			<link>' . $host_url . '/photos/rss/' . $current_item->nid . '.xml</link>
+			<guid>' . $host_url . '/photos/rss/' . $current_item->nid . '.xml</guid>
+		</item>';
+ 
+		}
+		
+		$queue_rss .="</channel>
+</rss>";
+print $queue_rss;
+exit();	
+
+}

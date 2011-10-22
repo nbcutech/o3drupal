@@ -1,0 +1,11 @@
+name = Views date range
+description = Allow views to be filtered by a customized date range.
+core = 6.x
+php = 5.2
+package = Views
+; Information added by drupal.org packaging script on 2009-03-18
+version = "6.x-1.0"
+core = "6.x"
+project = "views_daterange"
+datestamp = "1237405575"
+

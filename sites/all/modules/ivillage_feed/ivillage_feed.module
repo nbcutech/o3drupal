@@ -1,0 +1,67 @@
+<?php
+
+
+function ivillage_feed_cron() {
+
+// TODO:add check for time that only runs this code at off-peak hours.
+
+//if (date(G)!= "1" ) {return;}
+
+
+$article_rss_feed = "http://www.neversaydiet.com/nsd_feed.rss/article";
+$story_rss_feed = "http://www.neversaydiet.com/nsd_feed.rss/story";
+
+}
+
+function clean_quotes($text) {
+    
+               $search = array(
+              "‘", 
+               "’", 
+
+                '&nbsp;',
+                '—'
+                ); 
+
+            $replace = array(
+                      "'", 
+                       "'", 
+
+                             ' ',
+                             '-'
+                             ); 
+            $text = str_replace($search, $replace, $text);
+            return $text;
+}
+
+function ivillage_node_create($title,$body,$type,$timestamp,$guid,$author) {
+    $node = new stdClass();
+    $node->is_new=1;
+    $node->title = $title;
+    $node->body = $body;
+    $node->type = $type;
+    $node->uid = 1;
+    $node->teaser = "";
+    $node->filter = 1;
+    $node->status = 1;
+    $node->comment = 2;
+    $node->created = $timestamp;
+    $node->changed = $timestamp;
+    $node->field_feed_guid[0]['value']=$guid;
+    $node->field_author[0]['value']=$author;
+    node_save($node);
+    
+            $result = db_fetch_object(db_query("SELECT content_field_feed_guid.nid FROM content_field_feed_guid WHERE content_field_feed_guid.field_feed_guid_value = %d", $guid));
+            $new_node = node_load($result->nid);
+            $tids = array(21,144,150,178,560,558,808,672,126,129,130,785,673); // hard coded to DYAO
+           
+            foreach ($tids as $tid) {
+                
+             db_query("INSERT INTO term_node (nid,vid,tid) VALUES (%d,%d,%d)",$new_node->nid,$new_node->vid,$tid);               
+               
+            }
+            
+            
+}
+
+

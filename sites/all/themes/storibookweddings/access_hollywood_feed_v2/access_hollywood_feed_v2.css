@@ -1,0 +1,68 @@
+/* CSS Document */
+
+#readxmltoarticle_div {
+	height:470px;
+	width:300px;
+	background-image:url('http://storibook-weddings.oxygen.com/sites/all/themes/storibookweddings/access_hollywood_feed_v2/background.png');
+	background-repeat:no-repeat;
+	font-family:Arial, Helvetica, sans-serif;
+	clear:both;
+	}
+	#readxmltoarticle_div > div.top {
+		height:127px;
+	}
+	#readxmltoarticle_div > ul {
+		height:290px;
+		width:285px;
+		overflow:auto;
+		margin:0px;
+		margin-left:5px;
+		padding:0px;
+		background-color:#346667;
+		border:1px solid #003463;
+		}
+		#readxmltoarticle_div > ul > li {
+			padding:5px 8px;
+			clear:both;
+			height:65px;
+			color:white;
+			font-size:11px;
+		}
+		#readxmltoarticle_div > ul > li:hover{
+			background-color:#204241;
+		}
+		#readxmltoarticle_div > ul > li > div.thumb{
+			width:60px;
+			float:left;
+			margin-right:10px;
+			}
+			#readxmltoarticle_div > ul > li > div.thumb > img{
+				border:1px solid white;
+				}
+		#readxmltoarticle_div > ul > li > div.info{
+			float:left;
+			padding-right:5px;
+			padding-top:5px;
+			width:165px;
+			}
+			#readxmltoarticle_div > ul > li > div.info > a{
+				color:#F6FF0D;
+				}
+	#readxmltoarticle_div > div.bottom {
+		padding-top:5px;
+		}
+		#readxmltoarticle_div > div.bottom > a.see-all {
+			display:block;
+			width:74px;
+			height:21px;
+			background-image:url('http://storibook-weddings.oxygen.com/sites/all/themes/storibookweddings/access_hollywood_feed_v2/see-all.png');
+			position:relative;
+			left:15px;
+			top:5px;
+			}
+			#readxmltoarticle_div > div.bottom > a.see-all > span {
+				display:none;
+			}
+		
+	
+

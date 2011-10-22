@@ -1,0 +1,8 @@
+.main-content { display:inline; float:left; font-family:helvetica, Arial; background: url('./images/interior_content_BG.jpg') no-repeat top right; text-align:center; padding:0px; margin:0px; padding: 0 0 45px; }
+.main-content .left-panel { display:inline; float:left; width:647px; margin:0px; margin-left:10px; margin-top:0px; overflow:hidden;}
+.main-content .left-panel .sb-header {margin-top:12px; padding:0px;height:71px; background:url('/sites/all/themes/storibookweddings/contest_images/sTORIbook_Weddings_page_headers_Winning_Theme.png') no-repeat top left; background-size:100%; width:647px; overflow:hidden;}
+.main-content .right-panel { display: inline; float: left; margin-left: 10px; overflow: hidden; padding: 0; text-align: center; width: 310px; }
+.main-content .left-panel .outter-image {margin:0px; height: 821px; padding:0px; background:url('/sites/all/themes/storibookweddings/contest_images/sTORIbook_Weddings_Winning_Main.jpg') no-repeat top left; background-size:100%; width:647px; overflow:hidden;}
+.main-content .left-panel .outter-image .image-holder {margin-left:138px; margin-right:auto; margin-top:144px;  height: 567px; padding:0px; background:url('/sites/all/themes/storibookweddings/contest_images/sTORIbook_Weddings_Winning_Couple.jpg') no-repeat top left; background-size:100%; width:374px; overflow:hidden;}
+
+

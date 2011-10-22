@@ -1,0 +1,88 @@
+<?php
+
+function oxygen_omniture_perm() {
+	return array('access omniture omniture');
+}
+
+
+
+function oxygen_omniture_block($op='list', $delta=0) {
+	if ($op == "list") {
+		$block[0]['info'] = t('Ominture Tracking Module');
+		return $block;
+	} else if ($op == 'view') {
+		$block = array();
+		switch ($delta) {
+			case 0:
+				if ( arg(0) == 'node' && is_numeric(arg(1)) && ! arg(2) ) {  
+					// if page is a node and not an edit page ie: /node/15 but not node/15/edit
+					$node = node_load(arg(1));
+				}
+				// creating Omniture tag string.
+				if ($node->taxonomy) {
+				$omniture = array();
+				foreach ($node->taxonomy as $term) {
+					$vocab_name = taxonomy_vocabulary_load($term->vid)->name;
+					if(preg_match("/^omniture/i", $vocab_name)) {
+						$key = str_ireplace("omniture ", "", $vocab_name);
+						$omniture[$key] = $term->name;
+					}
+					/*
+					switch ($omniture_name) {
+						case "OMNITURE s.channel":
+							$channel = 's.channel="' . $term->name . '";';
+						break;
+						case "OMNITURE s.pageType":
+							$pageType = 's.pageType="' . $term->name . '";';
+						break;
+						case "OMNITURE s.prop2":
+							$prop2 = 's.prop2="' . $term->name . '";';
+						break;
+						case "OMNITURE s.prop3":
+							$prop3 = 's.prop3="' . $term->name . '";';
+						break;
+						case "OMNITURE s.prop4":
+							$prop4 = 's.prop4="' . $term->name . '";';
+						 break;
+						case "OMNITURE s.prop5":
+							$prop5 = 's.prop5="' . $term->name . '";';
+						break;
+						case "OMNITURE s.prop7":
+							$prop7 = 's.prop7="' . $term->name . '";';
+						break;
+						case "OMNITURE s.prop10":
+							$prop10 = 's.prop10="' . $term->name . '";';
+						break;
+					}
+					*/
+				}
+			}
+			$block_content  = "";
+			$block_content .= "<script language='javascript' type='text/javascript' src='http://www.oxygen.com/js/omniture/s_wrapper.js'></script>\n";
+			$block_content .= "<!-- SiteCatalyst code version: H.2. Copyright 1997-2008 Omniture, Inc. and NBCU More info available at http://www.omniture.com -->\n";
+			$block_content .= "<script type='text/javascript' language='javascript'>\n";
+			$block_content .= "<!-- \n";
+			foreach($omniture as $tag => $val) {
+				$trimVal = "";
+				$trimVal = ltrim($val);
+				$trimVal = rtrim($trimVal);
+				$block_content .= "{$tag}=\"{$trimVal}\";\n";
+			}
+			$block_content .= "s.pageName=document.title;		//// page name, auto reads from the page TITLE tag\n";
+			$block_content .= "/************* DO NOT ALTER ANYTHING BELOW THIS LINE ! **************/\n";
+			$block_content .= " var s_code=s.t(); if(s_code) document.write(s_code)\n";
+			$block_content .= "//-->\n";
+			$block_content .= "</script><script type='text/javascript' language='javascript'>\n";
+			$block_content .= "<!--\n";
+			$block_content .= "if(navigator.appVersion.indexOf('MSIE') >= 0) document.write(unescape('%3C')+'\!-'+'-')\n";
+			$block_content .= "//-->\n";
+			$block_content .= "</script><!--/DO NOT REMOVE/-->\n";
+			$block_content .= "<!-- End SiteCatalyst code version: H.2. -->\n";
+			$block['subject'] = 'Promo';
+			$block['content'] = $block_content;
+			break;
+		    
+		}
+		return $block;
+	}
+}

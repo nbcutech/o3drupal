@@ -1,0 +1,224 @@
+<?php
+// $Id$
+
+
+/**
+*
+* QueueGalleryAdmin - jkl
+*
+* Helps simplify the process of gallery creation for editorial staff.
+*
+*
+*/
+
+
+
+/**
+* Valid Permission for this module
+*/
+
+function queuegalleryadmin_perm() {
+	return array('comment abuse moderation');
+}
+
+
+function queuegalleryadmin_menu() {
+
+  $items = array();
+
+
+  $items['admin/galleries'] = array(
+    'title' => 'admin galleries',
+    'page callback' => 'queuegalleryadmin_gallery_form',
+    'page arguments' => array(), // where my wildcard is
+    'access arguments' => array('comment abuse moderation'),
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+
+
+/**
+ * The function for returning the form after it's been processed by drupal_get_form()
+ */
+
+
+
+function queuegalleryadmin_gallery_form() {
+
+  // This form calls the form builder function via the
+  // drupal_get_form() function which takes the name of this form builder
+  // function as an argument. It returns the results to display the form. 
+
+return drupal_get_form('queuegalleryadmin_gallery_my_form');
+
+}
+
+
+
+/**
+ * Form creation, multi-step form generator.  Increments the $form_state['storage']['step'] and references switch/case to invoke correct form elements.
+ */
+
+
+function queuegalleryadmin_gallery_my_form($form_state) {
+
+  $form = array();
+
+	if (empty($form_state['storage']['step'])) {
+	    // we are coming in without a step, so default to step 1
+	    $form_state['storage']['step'] = 1;
+	}
+
+    switch ($form_state['storage']['step']) {
+        case 1:
+		
+		  $form['title_textfield'] = array(
+		  '#type' => 'textfield',
+		  '#title' => 'Title',
+		  '#required' => TRUE,
+		);
+
+		  $gallery_sites = _queuegalleryadmin_create_taxonomy_list(0);
+		  $gallery_sites_list = array();
+		  
+		  foreach($gallery_sites as $gallery_site) {
+			$gallery_site_list[$gallery_site->tid] = $gallery_site->name;
+		  }
+
+		  $form['show_site'] = array(
+		  '#type' => 'select',
+		  '#title' => 'Site',
+		  '#options' => $gallery_site_list,
+		  '#description' => 'Select the show this gallery will be a part of.',
+
+		);
+		
+		
+	break;
+	case 2:
+		  $gallery_buckets = _queuegalleryadmin_create_taxonomy_list($form_state['values']['show_site']);
+		  $name = taxonomy_get_term($form_state['values']['show_site']);		  
+		  $gallery_bucket_list = array();
+		  
+		  foreach($gallery_buckets as $gallery_bucket) {
+			$gallery_bucket_list[$gallery_bucket->tid] = $gallery_bucket->name;
+		  }
+
+		  $form['bucket'] = array(
+		  '#type' => 'select',
+		  '#title' => 'Select a ' . $name->name . ' Bucket',
+		  '#options' => $gallery_bucket_list,
+		  '#description' => 'Select the bucket to place this gallery in.',
+		);
+
+		  $form['new_bucket'] = array(
+		  '#type' => 'textfield',
+		  '#title' => 'OR Create a New Bucket Below',
+		  '#description' => 'Enter the name of the new bucket you would like to create.',
+		);
+
+		
+		
+	break;
+        default:
+            ///blah blah, really you should never get here, or that's what the guy who wrote this code snippet said.
+        break;
+    }
+
+
+		  $form['my_button'] = array(
+		  '#type' => 'submit',
+		  '#title' => 'Next',
+		  '#value' => 'Next',
+		);
+
+
+ return $form;  
+
+}
+
+
+/**
+ * The submit function that is invoked when the submit button is pressed.  Responsible for changing the $form_state['storage']['step']
+ */
+
+
+function queuegalleryadmin_gallery_my_form_submit($form, &$form_state) {
+
+    drupal_set_message('The Gallery Title has been created. Select the photo gallery section ("bucket") below.');
+    
+    //save the values for the current step into the storage array
+    $form_state['storage']['values'][$form_state['storage']['step']] = $form_state['values'];  
+
+    if ($form_state['storage']['step']==2) {
+
+	// if there is a new bucket entered into the text field, create that new bucket and select that tid.
+	if ($form_state['storage']['values'][2]['new_bucket']) {
+		$new_bucket_tid = _queuegalleryadmin_create_taxonomy_term($form_state['storage']['values'][2]['new_bucket']); //create new bucket taxonomy
+		db_query('INSERT INTO term_hierarchy (tid,parent) VALUES (' . $new_bucket_tid . ',' . $form_state['storage']['values'][1]['show_site'] . ')');
+		$form_state['storage']['values'][2]['bucket'] = $new_bucket_tid; //change bucket to new bucket tid
+	} 
+	
+	$tid_image_import = _queuegalleryadmin_create_taxonomy_term($form_state['storage']['values'][1]['title_textfield']);
+	$site_id_image_import = _queuegalleryadmin_taxonomy_to_site_id($form_state['storage']['values'][1]['show_site']);
+	db_query('INSERT INTO term_hierarchy (tid,parent) VALUES (' . $tid_image_import . ',' . $form_state['storage']['values'][2]['bucket'] . ')');
+
+	drupal_goto('admin/content/image_import','tid=' . $tid_image_import . '&site_id=' . $site_id_image_import );
+
+    }
+    
+    $form_state['storage']['step']++;
+
+    //tell Drupal we are redrawing the same form
+    $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Create new taxonomy term based on title.
+ * Returns tid.
+ */
+
+function _queuegalleryadmin_create_taxonomy_term($text) {
+
+	db_query('INSERT INTO term_data (vid,name,description,weight) VALUES (6, "'.$text.'", "", 0)');
+	$tid = db_last_insert_id('term_data', 'tid');
+	return $tid;
+}
+
+
+function _queuegalleryadmin_taxonomy_to_site_id($tid) {
+	$site = db_fetch_object(db_query("SELECT name FROM term_synonym WHERE tid =" . $tid));
+
+
+	return $site->name;
+}
+
+
+/**
+ *
+ * Creates the "bucket" list of categories associated with the $tid.  The second variable "6" is hardcoded reference to the gallery taxonomy vocabulary.
+ */
+
+function _queuegalleryadmin_create_taxonomy_list($tid) {
+	
+	return taxonomy_get_children($tid, 6);
+}
+
+
+
+// Reference array returned from taxonomy_get_children($tid, 6)
+//
+//[253] => stdClass Object
+//        (
+//            [tid] => 253
+//            [vid] => 6
+//            [name] => Uber Gallery
+//            [description] => 
+//            [weight] => 30
+//        )
+
+
+

@@ -1,0 +1,12 @@
+name = "IMCE Directory Manager"
+description = "Allows for per user management of directory restrictions in IMCE"
+dependencies[] = imce
+
+package = "Other"
+core = 6.x
+; Information added by drupal.org packaging script on 2011-03-01
+version = "6.x-1.1"
+core = "6.x"
+project = "imce_tools"
+datestamp = "1299006367"
+

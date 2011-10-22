@@ -1,0 +1,15 @@
+/* CELEB GOSSIP STYLES*/
+#hp_celeb_gossip_box {
+	width:300px;
+	height:350px;
+	background:url(http://features.oxygen.com/sites/all/themes/features/images/o2_homepage/celeb_gossip_BG.jpg) no-repeat 0 0;
+	font-size:11px;
+	line-height: 1;
+}
+ 
+#hp_celeb_gossip_box ul {padding:90px 0 0 25px; list-style-image:none; list-style-position:outside; list-style-type:none;margin:0px;}
+#hp_celeb_gossip_box ul li {height:40px;margin:0 0 4px 0;}
+#hp_celeb_gossip_box ul li img {float:left; margin: 0 20px 0 0;border: 1px solid #cab52a;}
+#hp_celeb_gossip_box ul li a:hover img {border: 1px solid #ccc;}
+#hp_celeb_gossip_box ul li a {display:block; height:40px;color:#626262;font-size:11px;}
+#hp_celeb_gossip_box ul li .gossipCopy {padding: 8px 0 0 0;display:block;width:170px;overflow:hidden;font-size:11px;}

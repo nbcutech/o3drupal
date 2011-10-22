@@ -1,0 +1,26 @@
+name = Bachelorette Party
+description = Oxygen Bachelorette Party Drupal Template
+screenshot = screenshot.png
+core = 6.x
+engine = phptemplate
+
+regions[right] = Right Column
+regions[left] = Left Column
+regions[header] = Header
+regions[middle] = Middle Column
+regions[content] = Main Content
+regions[footer] = Footer
+regions[topAdBlock] = Top Ad Block
+
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+; features[] = secondary_links
+
+version = "6.x"
+core = "6.x"
+project = "oxygen"
+datestamp = "1203746106"
+

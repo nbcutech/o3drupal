@@ -1,0 +1,5 @@
+; $Id$
+name = OxygenForms
+description = Form Alterations for the Oxygen Site
+core = 6.x
+package = "Oxygen"

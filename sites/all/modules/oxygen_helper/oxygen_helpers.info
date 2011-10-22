@@ -1,0 +1,5 @@
+; $Id$
+name = Oxygen Helpers
+description = Helper functions for various modules around the world
+core = 6.x
+package = "Oxygen"

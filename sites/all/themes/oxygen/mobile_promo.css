@@ -1,0 +1,36 @@
+/* MOBILE STYLES*/
+.mobileSidebarTout {
+	background-image:url(http://features.oxygen.com/sites/all/themes/features/images/o2_homepage/mobile_BG.jpg);
+	background-repeat:no-repeat;
+	background-color:#fff;
+	background-position: 0px;
+	height:184px;
+	width:300px;
+}
+
+.mobileSidebarTout .mobileCopy {
+	font-size: 13px;
+	color: #333333;
+	padding:67px 0 0 145px;
+	width:150px;
+}
+
+.mobileCopy h4 {
+	font-size:13x;
+	margin-top:3px;
+	font-weight:bold;
+	color:#850077;
+}
+.mobileCopy h3 a {
+	font-weight:bold;
+	line-height:1.1;
+	margin: 3px 0 0 0;
+	color:#000;
+	font-size:12px;
+	text-decoration:underline;
+}
+
+.mobileCopy .mobiDisclaimer {
+	margin:3px 0 0 0;
+	font-size:10px;
+}

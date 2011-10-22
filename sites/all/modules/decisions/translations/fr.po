@@ -1,0 +1,563 @@
+# $Id: fr.po,v 1.1 2009/07/31 16:26:13 slybud Exp $
+#
+# French translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  decisions.inc,v 1.2 2008/12/05 03:48:02 anarcat
+#  decisions_node.inc,v 1.2 2008/12/05 03:48:02 anarcat
+#  ranking.module,v 1.16 2008/12/05 03:48:02 anarcat
+#  decisions.module,v 1.202 2008/12/05 03:48:02 anarcat
+#  selection.module,v 1.11 2008/12/05 03:48:03 anarcat
+#  decisions.info,v 1.9 2008/11/26 17:28:15 anarcat
+#  ranking.info,v 1.3 2008/11/26 17:22:26 anarcat
+#  selection.info,v 1.3 2008/11/26 17:22:26 anarcat
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: french translation for drupal6 decisions module\n"
+"POT-Creation-Date: 2009-07-31 08:59+0200\n"
+"PO-Revision-Date: 2009-07-31 18:17+0100\n"
+"Last-Translator: Sylvain Moreau <sylvain.moreau@ows.fr>\n"
+"Language-Team: Pierre Ternon, OWS/Reviewed by Sylvain Moreau, OWS <pierre@ows.fr>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=0; plural=;\n"
+"X-Poedit-Language: French\n"
+
+#: decisions.inc:72;71
+msgid "Unknown decision mode : @mode in \"@function\"."
+msgstr "Méthode de réponse inconnue : @mode dans \"@function\"."
+
+#: decisions.inc:181
+msgid "January"
+msgstr "Janvier"
+
+#: decisions.inc:181
+msgid "February"
+msgstr "Février"
+
+#: decisions.inc:181
+msgid "March"
+msgstr "Mars"
+
+#: decisions.inc:181
+msgid "April"
+msgstr "Avril"
+
+#: decisions.inc:181
+msgid "May"
+msgstr "Mai"
+
+#: decisions.inc:181
+msgid "June"
+msgstr "Juin"
+
+#: decisions.inc:181
+msgid "July"
+msgstr "Juillet"
+
+#: decisions.inc:181
+msgid "August"
+msgstr "Août"
+
+#: decisions.inc:181
+msgid "September"
+msgstr "Septembre"
+
+#: decisions.inc:181
+msgid "October"
+msgstr "Octobre"
+
+#: decisions.inc:181
+msgid "November"
+msgstr "Novembre"
+
+#: decisions.inc:181
+msgid "December"
+msgstr "Décembre"
+
+#: decisions.inc:184
+msgid "g"
+msgstr "g"
+
+#: decisions.inc:186
+msgid "am"
+msgstr "am"
+
+#: decisions.inc:186
+msgid "pm"
+msgstr "pm"
+
+#: decisions.inc:189
+msgid "H"
+msgstr "H"
+
+#: decisions.inc:291
+msgid "No active decisions."
+msgstr "Pas de sondage actif."
+
+#: decisions.inc:71
+msgid "decisions"
+msgstr "sondages"
+
+#: decisions_node.inc:80;158
+msgid "The specified close date is less than the opening date, setting it to the same for now."
+msgstr "La date de clôture spécifiée est inférieure à la date d'ouverture. Elle est maintenant égale à cette dernière."
+
+#: decisions_node.inc:124
+msgid "You must fill in at least two choices."
+msgstr "Vous devez proposer au moins deux choix de réponse."
+
+#: decisions_node.inc:130
+msgid "The specified close date is less than the opening date."
+msgstr "La date de clôture spécifiée est inférieure à la date d'ouverture."
+
+#: decisions_node.inc:203
+msgid "This decision is not valid. You will not be able to see it until the quorum is met. The quorum is set at @quorum."
+msgstr "Ce sondage est invalide. Vous ne pourrez pas le consulter tant que le quorum ne sera pas atteint. Celui-ci est fixé à @quorum."
+
+#: decisions_node.inc:206
+msgid "This decision is currently closed."
+msgstr "Ce sondage est fermé."
+
+#: decisions_node.inc:211
+msgid "This decision is not yet opened."
+msgstr "Ce sondage n'est pas encore ouvert."
+
+#: decisions_node.inc:214
+msgid "This decision is now closed."
+msgstr "Ce sondage est dorénavant fermé."
+
+#: decisions_node.inc:253
+msgid "Question"
+msgstr "Question"
+
+#: decisions_node.inc:260
+#: modes/ranking.module:40
+msgid "Description"
+msgstr "Description"
+
+#: decisions_node.inc:279
+msgid "Need more choices"
+msgstr "Besoin de plus de choix de réponses"
+
+#: decisions_node.inc:284
+msgid "If the amount of boxes above isn't enough, check this box and click the Preview button below to add some more."
+msgstr "Si vous avez besoin de plus de choix de réponses, cochez cette case et cliquez sur le bouton Aperçu ci-dessous pour en ajouter d'autres."
+
+#: decisions_node.inc:291
+msgid "Decision choices"
+msgstr "Choix de réponses"
+
+#: decisions_node.inc:301;461
+msgid "Choice @n"
+msgstr "Choix @n"
+
+#: decisions_node.inc:310
+msgid "Decision settings"
+msgstr "Paramètres du sondage"
+
+#: decisions_node.inc:323
+msgid "Maximum Choices"
+msgstr "Nombre Maximum de Choix"
+
+#: decisions_node.inc:326
+msgid "Limits the total number of choices voters may select."
+msgstr "Détermine le nombre maximum de réponses que les votants peuvent choisir."
+
+#: decisions_node.inc:339
+msgid "Algorithm"
+msgstr "Algorithme"
+
+#: decisions_node.inc:349
+msgid "Active"
+msgstr "Actif"
+
+#: decisions_node.inc:349
+msgid "Closed"
+msgstr "Fermé"
+
+#: decisions_node.inc:352
+msgid "Decision Status"
+msgstr "Statut du sondage"
+
+#: decisions_node.inc:355
+msgid "When a decision is closed users may no longer vote on it."
+msgstr "Lorsqu'un sondage est fermé, les utilisateurs ne peuvent plus y répondre."
+
+#: decisions_node.inc:358
+#: decisions.module:183
+msgid "Disabled"
+msgstr "Désactivé"
+
+#: decisions_node.inc:358
+#: decisions.module:183
+msgid "Enabled"
+msgstr "Activé"
+
+#: decisions_node.inc:361
+msgid "Restrict voting to electoral list"
+msgstr "Restreint les votants à une liste prédéfinie d'utilisateurs"
+
+#: decisions_node.inc:362
+msgid "If enabled, a list of eligible voters will be created and only that group will be able to vote in the decision."
+msgstr "Si l'option est activée, une liste d'utilisateurs sera créée et eux seuls seront autorisés à répondre à ce sondage."
+
+#: decisions_node.inc:369
+msgid "Show individual votes"
+msgstr "Afficher les votes individuels"
+
+#: decisions_node.inc:370
+msgid "Users with the appropriate permissions will be able to see how each person voted."
+msgstr "Les utilisateurs disposant des droits adéquats pourront consulter le détail des réponses de chaque personne au sondage."
+
+#: decisions_node.inc:377
+msgid "Date options"
+msgstr "Options de date"
+
+#: decisions_node.inc:394
+msgid "Opening date"
+msgstr "Date d'ouverture"
+
+#: decisions_node.inc:401
+msgid "No closing date"
+msgstr "Aucune date de clôture"
+
+#: decisions_node.inc:403
+msgid "Check this box if you do not want the vote to close on a specific date."
+msgstr "Cocher la case pour ne pas fermer le sondage à une date programmée."
+
+#: decisions_node.inc:409
+msgid "Closing date"
+msgstr "Date de fermeture"
+
+#: decisions_node.inc:417
+msgid "Quorum"
+msgstr "Quorum"
+
+#: decisions_node.inc:421
+msgid "These settings allow for a decision to be valid only if a certain number of eligible voters have cast their ballot. It can be configured both with an absolute number and a percentage of eligible voters. For example, a common setting is \"50% + 1\", which would be expressed as \"@percent: 50\" and \"@number: 1\". Note that the quorum has no impact on the winning conditions."
+msgstr "Ces paramètres permettent de ne considérer un sondage valide qu'à partir d'un certain nombre d'utilisateurs ayant voté. Cette limite peut être en nombre ou en pourcentage de votants. Par exemple, on peut la fixer à \"50% + 1\" en renseignants les champs \"@percent : 50\" et \"@number : 1\". Il est à noter que le quorum n'a aucune influence sur les conditions de validité des réponses."
+
+#: decisions_node.inc:421;436
+msgid "Percentage (%)"
+msgstr "Pourcentage (%)"
+
+#: decisions_node.inc:421;427
+msgid "Number"
+msgstr "Nombre"
+
+#: decisions_node.inc:430
+msgid "Minimum number of voters required to cast their ballot for this decision to be valid, in addition to the percentage."
+msgstr "Nombre minimum d'utilisateurs devant avoir voté pour que le sondage soit valide, en plus du pourcentage."
+
+#: decisions_node.inc:439
+msgid "Minimum numbers of voters required for this decision to be valid, expressed as a percentage of the eligible voters rounded up."
+msgstr "Nombre minimum d'utilisateurs devant avoir voté pour que le sondage soit valide, exprimé en pourcentage des votants autorisés."
+
+#: decisions.module:62;68
+msgid "Decisions - Newest"
+msgstr "Sondages - Les plus récents"
+
+#: decisions.module:111
+msgid "Allow people to reproduce and surpass the kinds of decision-making instances that exist in face-to-face meetings."
+msgstr "Permettre aux utilisateurs de reproduire ou d'améliorer les outils d'aide à la décision utilisés pour les entretiens. "
+
+#: decisions.module:187
+msgid "Use electoral list by default"
+msgstr "Utiliser par défaut une liste d'utilisateurs autorisés à voter"
+
+#: decisions.module:188
+msgid "Use an electoral list by default for new decisions."
+msgstr "Utiliser par défaut une liste d'utilisateurs autorisés à répondre aux nouveaux sondages."
+
+#: decisions.module:194
+msgid "Always"
+msgstr "Toujours"
+
+#: decisions.module:195
+msgid "After user has voted"
+msgstr "Après que l'utilisateur ait voté"
+
+#: decisions.module:196
+msgid "After voting has closed"
+msgstr "Après la clôture des votes"
+
+#: decisions.module:201
+msgid "When should results be displayed"
+msgstr "A quel moment les résultats doivent être affichés"
+
+#: decisions.module:202
+msgid "Determines when users may view the results of the decision."
+msgstr "Détermine le moment auquel l'utilisateur peut voir les résultats du sondage."
+
+#: decisions.module:212
+msgid "Cancel your vote"
+msgstr "Annuler votre vote"
+
+#: decisions.module:244
+msgid "Current date: @date"
+msgstr "Date actuelle : @date"
+
+#: decisions.module:245
+msgid "Opening date: @date"
+msgstr "Date d'ouverture : @date"
+
+#: decisions.module:247
+msgid "No closing date."
+msgstr "Aucune date de clôture."
+
+#: decisions.module:248
+msgid "Closing date: @date"
+msgstr "Date de clôture : @date"
+
+#: decisions.module:255
+msgid "Total votes: @num-votes (out of @num-voters eligible @voters)"
+msgstr "Total des réponses : @num-votes (sur un total de @num-voters @voters autorisés)"
+
+#: decisions.module:268
+msgid "Quorum: @d"
+msgstr "Quorum : @d"
+
+#: decisions.module:329;373
+msgid "Administer electoral list"
+msgstr "Administrer la liste des votants autorisés"
+
+#: decisions.module:337;381
+msgid "Add user"
+msgstr "Ajouter un utilisateur"
+
+#: decisions.module:340;384
+msgid "Add an individual user to the electoral list"
+msgstr "Ajouter un utilisateur à la liste des votants autorisés"
+
+#: decisions.module:345;389
+msgid "Modify electoral list"
+msgstr "Modifier la liste"
+
+#: decisions.module:350;394;445
+msgid "Reset electoral list"
+msgstr "Réinitialiser la liste "
+
+#: decisions.module:400
+msgid "This table lists all the eligible voters for this Decision."
+msgstr "Cette table liste les utilisateurs autorisés à participer à ce sondage."
+
+#: decisions.module:402
+msgid "Voter"
+msgstr "Réponse"
+
+#: decisions.module:410
+msgid "remove"
+msgstr "supprimer"
+
+#: decisions.module:432
+msgid "%user removed from the electoral list."
+msgstr "%user supprimé de la liste."
+
+#: decisions.module:435
+msgid "No user found with a uid of %uid."
+msgstr "Aucun utilisateur ne correspond à l'uid %uid."
+
+#: decisions.module:448
+msgid "Electoral list cleared."
+msgstr "Liste vidée"
+
+#: decisions.module:451
+msgid "Electoral list reset."
+msgstr "Liste réinitialisée."
+
+#: decisions.module:460
+msgid "User %user does not exist."
+msgstr "L'utilisateur %user n'existe pas."
+
+#: decisions.module:474
+msgid "%user added to electoral list."
+msgstr "%user ajouté à la liste."
+
+#: decisions.module:527
+msgid "Your vote was registered."
+msgstr "Votre vote a été enregistré."
+
+#: decisions.module:570
+msgid "You are not eligible to vote on this decision."
+msgstr "Vous n'êtes pas autorisé à répondre à ce sondage."
+
+#: decisions.module:583
+msgid "Element returned by the call to function @function is not an array, returning dummy value."
+msgstr "L'élément retourné par la fonction @function n'est pas un tableau. La valeur est incorrecte."
+
+#: decisions.module:587
+msgid "Array returned by the call to function @function is empty, returning dummy value."
+msgstr "Le tableau retourné par la fonction @function est vide. La valeur est incorrecte."
+
+#: decisions.module:616
+msgid "Your vote was canceled."
+msgstr "Votre vote a été annulé."
+
+#: decisions.module:619
+msgid "You are not allowed to cancel an invalid choice."
+msgstr "Vous n'êtes pas autorisé à annuler un choix incorrect."
+
+#: decisions.module:639
+msgid "This table lists all the recorded votes for this Decision. If anonymous users are allowed to vote, they will be identified by the IP address of the computer they used when they voted."
+msgstr "Cette table liste les réponses enregistrée pour ce sondage. Si les utilisateurs anonymes sont autorisés à voter, ils sont ici identifiés par leur adresse IP."
+
+#: decisions.module:641
+msgid "Visitor"
+msgstr "Visiteur"
+
+#: decisions.module:642
+#: modes/ranking.module:112
+#: modes/selection.module:85
+msgid "Vote"
+msgstr "Voter"
+
+#: decisions.module:175
+msgid "create decisions"
+msgstr "créer des sondages"
+
+#: decisions.module:175
+msgid "delete decisions"
+msgstr "supprimer des sondages"
+
+#: decisions.module:175
+msgid "view decisions"
+msgstr "voir les sondages"
+
+#: decisions.module:175
+msgid "vote on decisions"
+msgstr "répondre aux sondages"
+
+#: decisions.module:175
+msgid "cancel own vote"
+msgstr "supprimer son propre vote"
+
+#: decisions.module:175
+msgid "administer decisions"
+msgstr "administrer les sondages"
+
+#: decisions.module:175
+msgid "inspect all votes"
+msgstr "contrôler tous les votes"
+
+#: decisions.module:175
+msgid "view electoral list"
+msgstr "visualiser la liste des utilisateurs autorisés à répondre"
+
+#: decisions.module:175
+msgid "remove voters"
+msgstr "retirer des utilisateurs"
+
+#: decisions.module:124
+msgid "Configure decisions"
+msgstr "Configurer les sondages"
+
+#: decisions.module:125
+msgid "Configure Decisions"
+msgstr "Configurer Decisions"
+
+#: decisions.module:133
+msgid "Votes"
+msgstr "Votes"
+
+#: decisions.module:142
+msgid "Results"
+msgstr "Résultats"
+
+#: decisions.module:150
+msgid "Electoral list"
+msgstr "Liste des votants"
+
+#: decisions.info:0
+msgid "Decisions"
+msgstr "Decisions"
+
+#: decisions.info:0
+msgid "An advanced voting module that includes plurarity voting, instant-runoff voting, and electoral lists."
+msgstr "Un module avancé de gestion de sondages incluant les fonctionnalités suivantes : réponses multiples, annulation de son vote et liste d'utilisateurs autorisés à répondre."
+
+#: decisions.info:0
+#: modes/ranking.info:0
+#: modes/selection.info:0
+msgid "Voting"
+msgstr "Voting"
+
+#: modes/ranking.module:22
+msgid "Creates a vote where n options are ranked from 1 to n."
+msgstr "Créé un type de réponse proposant n options classées de 1 à n."
+
+#: modes/ranking.module:39
+msgid "Ranking decision"
+msgstr "Sondage de type Ranking"
+
+#: modes/ranking.module:72
+msgid "1st"
+msgstr "1er"
+
+#: modes/ranking.module:75
+msgid "2nd"
+msgstr "2ème"
+
+#: modes/ranking.module:78
+msgid "3rd"
+msgstr "3ème"
+
+#: modes/ranking.module:81
+msgid "!{num}th"
+msgstr "!{num}th"
+
+#: modes/ranking.module:89
+msgid "Choices"
+msgstr "Choix"
+
+#: modes/ranking.module:90
+msgid "Rank the following options in your prefered order, the lower the number the better"
+msgstr "Classez les options suivantes dans votre ordre de préférence, de la plus petite à la plus grande."
+
+#: modes/ranking.module:132
+msgid "Results: "
+msgstr "Résultats :"
+
+#: modes/ranking.module:262
+msgid "@num choices were selected but only @max are allowed."
+msgstr "@num réponses sélectionnées mais seulement @max autorisés."
+
+#: modes/ranking.module:269
+#: modes/selection.module:234
+msgid "At least one choice must be selected."
+msgstr "Vous devez sélectionner au moins une réponse."
+
+#: modes/ranking.module:276
+msgid "Multiple choices given the rank of @val."
+msgstr "Plusieurs réponses ont le même classement que @val."
+
+#: modes/selection.module:18;26
+msgid "Creates a decision where the user selects one or many options."
+msgstr "Créé un sondage pour lequel l'utilisateur choisit une ou plusieurs réponses."
+
+#: modes/selection.module:26
+msgid "Decisions - selection"
+msgstr "Decisions - selection"
+
+#: modes/selection.module:226
+msgid "%num choices were selected but only %max are allowed."
+msgstr "Vous avez fait %num choix, mais vous ne pouvez en faire que %max"
+
+#: modes/ranking.info:0
+msgid "Ranking"
+msgstr "Ranking"
+
+#: modes/ranking.info:0
+msgid "A decision mode for the Decisions module that allows voters to rank choices."
+msgstr "Un type de sondage pour le module Decisions qui permet aux utilisateurs de classer leurs réponses."
+
+#: modes/selection.info:0
+msgid "Selection"
+msgstr "Selection"
+
+#: modes/selection.info:0
+msgid "A decision mode for the Decisions module that allows select one or many options."
+msgstr "Un type de sondage pour le module Decisions qui permet aux utilisateurs sélectionner plusieurs réponses."
+

@@ -1,0 +1,35 @@
+/* CSS Document */
+
+#bgc7-shout-out {
+	background-color:#12DF2A;
+}
+div.bgc7-shout-out-form {
+	font-size:12px;
+	width:231px;
+	height:314px;
+	margin:auto;
+	background-image:url(images/meebo-form-bkg.jpg);
+	}
+	div.bgc7-shout-out-form div.inner {
+		padding:10px;
+		}
+		div.bgc7-shout-out-form div.inner p{
+			font-size:11px;
+		}
+		div.bgc7-shout-out-form div.inner p.top {
+			margin-top:0px;
+		}
+		div.bgc7-shout-out-form div.inner p label {
+			display:block;
+			width:75px;
+			float:left;
+		}
+		div.bgc7-shout-out-form div.inner p input.txt_field {
+			width:110px;
+		}
+		div.bgc7-shout-out-form div.inner p a.rules {
+			color:black;
+			font-size:10px;
+		}
+		
+

@@ -1,0 +1,8 @@
+<?php
+// $Id$  crop_presets.install September 24, 2011 Randall Goya decibel.places
+// Prefills Focus Crop & Resize values from Imagecache settings
+
+//set module weight after Imagecache
+
+$weight = db_result(db_query("SELECT weight FROM {system} WHERE name = 'imagecache'"));
+db_query("UPDATE {system} SET weight = %d WHERE name = 'crop_presets'", $weight + 1);

@@ -1,0 +1,165 @@
+<?php
+function oxygen_access_hollywood_feed_perm() {
+        return array('access hollywood content'); //Hanan, this is just a short way of not having to create a new permission type.
+}
+
+function access_hollywood_feed_cron() {
+	$currentMinute = date("i");
+	if ($currentMinute >= "30") 
+	{
+		$article_rss_feed = "http://www.accesshollywood.com/content/xml/rss/wap/celebrities-articles.xml";
+		$story = oxygen_helpers_xml2array($article_rss_feed);
+
+        // grab array of GUID fields from feed
+        $result = db_query("SELECT content_type_access_hollywood_feed.field_hollywood_feed_guid_value
+			FROM content_type_access_hollywood_feed;");
+
+        // array filled, hopefully, with all existing guid's from the database representing each unique bit of data already existing there.
+        $access_hollywood_feed_nids = array();
+        
+        while ($story_guids = db_fetch_object($result)){
+            $access_hollywood_feed_nids[] = $story_guids->field_hollywood_feed_guid_value;
+        }
+
+        // add story to database as 'access_hollywood_feed' content type
+        foreach ($story[rss][channel][item] as $story_item) 
+		{
+			$guid = strip_cdata($story_item[guid]);
+            //check for $guid in array, if exists, continue to next one.
+            if (in_array($guid, $access_hollywood_feed_nids)) {continue;}
+
+            $title = clean_quotes(strip_cdata($story_item[title]));
+            $body = $story_item[description];
+//            $body = preg_replace($pattern, '', $body);
+            $type ="access_hollywood_feed";
+            $timestamp = strtotime($story_item[pubDate]);
+            $author = strip_cdata($story_item[author]);
+			$image = $story_item[enclosure_attr][url];
+
+            access_hollywood_feed_node_create($title,$body,$type,$timestamp,$guid,$author,$image);
+
+        }
+	}	
+}
+
+ 
+function strip_cdata($string) 
+{ 
+    preg_match_all('/<!\[cdata\[(.*?)\]\]>/is', $string, $matches); 
+    return str_replace($matches[0], $matches[1], $string); 
+} 
+
+function access_hollywood_feed_node_create($title,$body,$type,$timestamp,$story_guid,$author,$image) {
+    $node = new stdClass();
+    $node->is_new=1;
+    $node->title = $title;
+    $node->body = $body;
+    $node->type = $type;
+    $node->uid = 1;
+    $node->teaser = "";
+    $node->filter = 1;
+    $node->status = 1;
+    $node->comment = 2;
+    $node->created = $timestamp;
+    $node->changed = $timestamp;
+    $node->field_hollywood_feed_guid[0]['value']=$story_guid;
+    $node->field_author[0]['value']=$author;
+    $node->field_hollywood_image_link[0]['value']=$image;
+
+    $node->taxonomy[tags]['9'] = "oxygen"; //Dart Categories
+    $node->taxonomy[tags]['13'] = "celebnews"; //Dart sect
+	$node->taxonomy[tags]['16'] = "article";	//Dart sub
+	$node->taxonomy[tags]['11'] = "reality";	//Dart genre
+	$node->taxonomy[tags]['10'] = "primetime";	//Dart daypart	
+	/****$node->taxonomy[tags]['14'] = "celebnews"; ****/ //Dart show
+	
+    $node->taxonomy[tags]['18'] = "Entertainment"; //Omni Channel
+    $node->taxonomy[tags]['24'] = "Oxygen Celeb News Article : " . $title; //Omni Prop4
+    $node->taxonomy['21'] = "148"; //Omni Prop2
+    $node->taxonomy['22'] = "150"; //Omni Prop3
+    $node->taxonomy['20'] = "1344"; //Omni Prop10
+
+    node_save($node);
+
+}
+
+//
+// Call this function from a access hollywood story template in this form:
+// $next_nid = getNextAHStory(arg(1));
+//
+
+function getNextAHStory($nid) 
+{
+    $resultSet = db_query("SELECT * FROM node WHERE TYPE = 'access_hollywood_feed' AND node.status =1 ORDER BY node.created DESC");
+    $accessHollywood_list = array();
+    while ($currentRow = db_fetch_object($resultSet)) 
+	{
+        $accessHollywood_list[] = $currentRow->nid;
+	}
+
+    $nid_location = array_search($nid,$accessHollywood_list);
+	if ($nid_location===FALSE) {return NULL;} // making sure the page isn't used to display any given NID.
+    
+    // assign next nid for links        
+    if (count($accessHollywood_list > $nid_location+1)) 
+	{
+        $storyID=$accessHollywood_list[$nid_location+1];
+    } 
+	else 
+	{
+         return NULL;
+    }
+  
+    return $storyID;
+}
+
+
+function access_hollywood_feed_block($op='list', $delta=0) {
+    if ($op == "list") 
+	{
+		$block[0]['info'] = t('access_hollywood_feed_promo');
+		return $block;
+    } 
+	else if ($op == 'view') 
+	{
+		$block = array();
+		switch($delta) 
+		{
+			case 0:
+			
+			$block_content .= "
+						<link rel=\"stylesheet\" href=\"http://features.oxygen.com/sites/all/themes/oxygen/celeb_gossip.css\" type=\"text/css\" />						
+						<div id=\"hp_celeb_gossip_box\">
+						<h4><span class=\"hp_caption\">get the latest celebrity gossip</span></h4>
+						<ul>";
+			$AH_results = db_query("  SELECT node.nid, node.title, AH.field_hollywood_image_link_value
+									FROM node
+									LEFT JOIN content_type_access_hollywood_feed AH ON AH.nid = node.nid
+									WHERE node.type = 'access_hollywood_feed' AND node.status = 1
+									ORDER BY node.created DESC
+									LIMIT 5  ");
+									
+				
+			
+			while ($access_hollywood_data = db_fetch_object($AH_results)) 
+			{
+				$cleanURL = "http://features.oxygen.com/" . drupal_get_path_alias("node/" . $access_hollywood_data->nid);
+				$block_content .= '<li><a href="' . $cleanURL . '">';
+				$block_content .= '<img src="' . $access_hollywood_data->field_hollywood_image_link_value . '" width="38" height="38" alt="" />';
+				$block_content .= '<span class="gossipCopy">' . $access_hollywood_data->title . '</span>';
+				$block_content .= '</a>';
+				$block_content .= '</li>';
+			}
+			
+			$block_content .= '</ul></div>';
+					
+			$block['subject'] = 'Promo';
+			$block['content'] = $block_content;
+			break;
+		}
+
+
+		return $block;
+
+    }
+}

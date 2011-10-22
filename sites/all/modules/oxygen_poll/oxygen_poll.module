@@ -1,0 +1,141 @@
+<?php
+
+/**
+ * 
+ * @param $oxygen_poll
+ * @param $oxygen_poll_data
+ */
+function _oxygen_poll_voted_for($oxygen_poll_nid, $oxygen_poll_data_nid) {
+  return $_COOKIE ['oxygen_poll'] [$oxygen_poll_nid . '-' . $oxygen_poll_data_nid];
+}
+
+function _oxygen_poll_data_by_title($oxygen_poll_data, $title) {
+  for($i = 0; $i < count($oxygen_poll_data->field_option_title); $i ++) {
+    if ($title == $oxygen_poll_data->field_option_title [$i] ['value']) {
+      return $i;
+    }
+  }
+}
+
+/**
+ * create a voting form from an oxygen_poll_data node
+ * @param $form_state
+ * @param $oxygen_poll_data_nid
+ */
+function oxygen_poll_voting_form(&$form_state, $oxygen_poll, $oxygen_poll_data_nid) {
+  $oxygen_poll_data = node_load($oxygen_poll_data_nid);
+  if ($oxygen_poll_data) {
+    // get the cookie for this subpoll, if it exists
+    $voted_for = _oxygen_poll_voted_for($oxygen_poll->nid, $oxygen_poll_data->nid);
+    // this is the index of the record they voted for, if they did. Otherwise it's null...and unused      
+  }
+  
+  // I want to know if the current user can edit 
+  $can_edit_sub_polls = (($oxygen_poll_data->uid == $GLOBALS ['user']->uid) and user_access('edit own image_poll_data content')) or user_access('edit any image_poll_data content');
+  
+  drupal_add_css(drupal_get_path('module', 'oxygen_poll') . '/oxygen_poll.css', 'theme');
+  
+  $form = array ();
+  $form ['subpoll_name'] = array (
+    '#type' => 'markup', '#value' => "<div style=\"padding-left: 1em; font-weight: bold; font-size:2em;\">$oxygen_poll_data->title</div>" 
+  );
+  $form ['subpoll_desc'] = array (
+    '#type' => 'markup', '#value' => "<div>$oxygen_poll_data->body</div>" 
+  );
+  if ($can_edit_sub_polls)
+    $form ['subpoll_editlink'] = array (
+      '#type' => 'markup', '#value' => '<div>' . l('Edit sub-poll', "node/$oxygen_poll_data->nid/edit", array (
+      'query' => 'destination=' . drupal_get_path_alias($_GET ['q']) 
+    )) . '</div>' 
+    );
+  
+  $form ['vote_expires'] = array (
+    '#type' => 'value', '#value' => $oxygen_poll->field_vote_expires [0] ['value'] 
+  );
+  if (isset($voted_for)) {
+    $form ['voted_for'] = array (
+      '#type' => 'markup', '#value' => '<div class="clear-block" style="width:200px; margin-left:auto;margin-right:auto;">
+      <div style="font-weight: bold;">You voted for</div>
+        <table style="width:200px;margin-left:2px;margin-right:2px;">' . '<tr><td>
+        <div style="font-weight: bold; font-size:1.5em;">' . $oxygen_poll_data->field_option_title [$voted_for] ['value'] . '</div>
+        </td></tr>' . '<tr><td><a href="' . $oxygen_poll_data->field_option_link [$voted_for] ['value'] . '"><img src="' . $oxygen_poll_data->field_option_image [$voted_for] ['imceimage_path'] . '" /></a></td></tr>' 
+        . '<tr><td>' . $oxygen_poll_data->field_option_text [$voted_for] ['value'] . '</td></tr>' . '</table></div><hr />' 
+    );
+  }
+  else {
+    $form ['votes'] = array (
+      '#tree' => TRUE, 'vote' => array (
+      '#type' => 'fieldset' 
+    ) 
+    );
+    for($i = 0; $i < count($oxygen_poll_data->field_option_title); $i ++) {
+      $image_string = isset($oxygen_poll_data->field_option_link [$i] ['value']) ? 
+      '<a href="' . $oxygen_poll_data->field_option_link [$i] ['value'] . '">
+      <img src="' . $oxygen_poll_data->field_option_image [$i] ['imceimage_path'] . '"  width="200" height="156" /></a>' 
+      : '<img src="' . $oxygen_poll_data->field_option_image [$i] ['imceimage_path'] . '"  width="200" height="156" />';
+      
+//      $label = "<label for=\"\"></label>";
+      $form ['votes'] ['vote'] [$i] = array (
+        '#type' => 'radio', 
+        '#title' => 'Vote for ' . $oxygen_poll_data->field_option_title [$i] ['value'], 
+        '#return_value' => $oxygen_poll->nid . '-' . $oxygen_poll_data->nid .'-'. $i .'-'. $oxygen_poll_data->field_option_title [$i] ['value'], 
+        '#name' => "vote", '#parents' => array (
+        'vote' 
+      ), 
+      '#prefix' => '<table style="float:left;width:200px;margin-left:2px;margin-right:2px;">' 
+      . '<tr><td><div style="font-weight: bold;">' . $oxygen_poll_data->field_option_title [$i] ['value'] . '</div></td></tr>' 
+      . '<tr><td>' . $image_string . '</td></tr>' . '<tr><td>' . $oxygen_poll_data->field_option_text [$i] ['value'] . '</td></tr>' 
+      . '<tr><td>', '#suffix' => '</td></tr></table>' 
+      );
+    }
+    $form ['submit'] = array (
+      '#type' => 'submit', '#value' => 'Vote!', '#submit' => array (
+      'oxygen_poll_voting_form_submit' 
+    ), '#suffix' => '<hr />' 
+    );
+  }
+  return $form;
+}
+
+function oxygen_poll_voting_form_submit($form, &$form_state) {
+  $vote_data = explode('-', $form_state ['values'] ['vote']);
+
+  db_query('INSERT INTO {poll_group_votes} (poll_group_nid, sub_poll_nid, vote_for, vote_date, uid) VALUES (%n, %n, \'%s\', %n, %n)', 
+    $vote_data [0], $vote_data [1], $vote_data [3], time(), $GLOBALS ['user']->uid);
+  
+  // write a cookie that says the vote was recorded
+  setcookie('oxygen_poll[' . $vote_data [0] . '-' . $vote_data [1] . ']', $vote_data [2], time() + ($form_state ['values'] ['vote_expires'] * 86400));
+}
+
+function oxygen_poll_expired_message($node) {
+  return "<div style=\"padding-left: 1em; font-weight: bold; font-size:2em;\">$node->title</div>
+  	<p style=\"padding-left: 1em;\">Voting for <strong><em>$node->title</em></strong> is now closed. Thank you for participating!</p>
+  	<p style=\"padding-left: 1em;\">We'll be reporting the results soon, so stay tuned...meanwhile, keep visiting the <a href=\"http://bad-girls-club.oxygen.com/\">BGC showsite</a> for the latest pics, videos, blogs, 
+  	and more from your favorite -- and least favorite -- Bad Girls!</p>
+  ";
+}
+
+function oxygen_poll_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'view' :
+      if (($node->type == 'image_poll') and ($a3 == FALSE)) {
+        // get the array of oxygen_poll_data nids
+        $poll_nids = $node->field_polls;
+        // TODO: this field has NO VALIDATION because I really want to use the Date CCK field...        
+        $theDate = strtotime($node->field_poll_expires[0]['value']);
+        
+        // Since we actually want to be able to vote on the day the poll expires, add one day worth of seconds to the expiration date
+        if ($theDate + 86400 < time()) {        	
+        	$node->content['body']['#value'] = oxygen_poll_expired_message($node);
+        }
+        else if (count($poll_nids)) {
+          for($i = count($poll_nids) - 1; $i >= 0; $i --) {
+            // render the poll(s)
+            $node->content ['polls'] [] = array (
+              '#value' => drupal_get_form('oxygen_poll_voting_form', $node, $poll_nids [$i] ['nid']), '#weight' => 3 
+            );
+          }
+        }
+      }
+  }
+}

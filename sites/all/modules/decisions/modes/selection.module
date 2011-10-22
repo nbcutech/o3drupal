@@ -1,0 +1,404 @@
+<?php
+// $Id: selection.module,v 1.31 2010/04/12 17:57:22 ezrag Exp $
+/**
+ * @file
+ *
+ * This file implements a selection voting mode
+ */
+
+/*
+ * Implementation of hook_menu().
+ */
+function selection_menu() {
+  $items['decisions_selection/vote/%node'] = array(
+    'title' => 'Vote',
+    'page callback' => 'selection_vote',
+    'page arguments' => array(2),
+    'access arguments' => array('vote on decisions'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/*
+ * Implementation of hook_theme().
+ */
+function selection_theme() {
+  return array(
+    'selection_decisions_view_results' => array(
+      'arguments' => array('node' => NULL, 'teaser' => FALSE, 'page' => FALSE, 'this_vote' => array()),
+    ),
+  );
+}
+function selection_help($section) {
+  $help = "";
+  switch ($section) {
+    case 'admin/modules#description':
+      break;
+
+    default:
+      if ($section == 'node/add#decisions-selection') {
+        $help = t('Creates a decision where the user selects one or many options.');
+      }
+      break;
+  }
+  return $help;
+}
+
+function selection_node_info() {
+  return array('decisions_selection' => array('name' => t('Decisions - selection'), 'module' => 'decisions', 'description' => t('Creates a decision where the user selects one or many options.')));
+}
+
+/**
+ * Implementation of the decisions_algorithms() hook
+ */
+function selection_decisions_algorithms() {
+  return array('plurality' => t('The plurality algorithm determines the winner based solely on the number of votes received: the one with the larger number of votes wins. See the <a href="http://en.wikipedia.org/wiki/Plurality_voting_system">Plurality voting system on Wikipedia</a> for more information'));
+}
+
+/*
+ * Callback for single-click voting.
+ * @param $nid
+ * The nid being voted upon.
+ * @param $cid
+ * The choice ID used in the vote.
+ * @return
+ * Returns HTML for AHAH voting, or redirects to the destination for synchronous voting.
+ */
+function selection_vote($node, $cid) {
+  global $user;
+  $new_vote = array();
+  if (selection_check_token($_REQUEST['token'], $node->nid, $cid)) {
+    $valid_cid = !empty($node->choice[$cid]['label']);
+    if (empty($valid_cid)) {
+      if (empty($_REQUEST['ajax'])) {
+        drupal_goto(drupal_get_destination());
+      }
+      else {
+        exit();
+      }
+    }
+    if (empty($voted)) {
+      $new_vote = array(
+        'value' => 1,
+        'tag' => $cid,
+        'value_type' => 'option',
+        'content_type' => 'decisions',
+        'content_id' => $node->nid,
+      );
+      $votes[] = $new_vote;
+      votingapi_add_votes($votes);
+      votingapi_recalculate_results('decisions', $node->nid);
+    }
+    else {
+      if (empty($_REQUEST['ajax'])) {
+        drupal_set_message(t("You have already voted."));
+        drupal_goto(drupal_get_destination());
+      }
+      else {
+        exit();
+      }
+    }
+    // Render the results
+    if (empty($_REQUEST['ajax'])) {
+      // Vote confirmation is displayed in the results so that the degradable behavior matches the AHAH behavior.
+      drupal_goto(drupal_get_destination());
+    }
+    else {
+      // We pass along the vote cast in this request so that the user's choice
+      // can be displayed along with the results.
+      print theme('selection_decisions_view_results', $node, FALSE, FALSE, $new_vote);
+      exit();
+    }
+  }
+  // Invalid token.
+  if (empty($_REQUEST['ajax'])) {
+    drupal_set_message(t("Invalid token. Please try voting again."));
+    drupal_goto(drupal_get_destination());
+  }
+  else {
+    exit();
+  }
+}
+
+/*
+ * Generates a token for use with AJAX voting.
+ */
+function selection_get_token($nid = 0, $cid = 0) {
+  global $user;
+  $session_id = isset($user->uid) && $user->uid > 0 ? session_id() : '';
+  $private_key = drupal_get_private_key();
+  return md5($session_id . "selection-vote-$nid-$cid" . $private_key);
+}
+
+/*
+ * Checks a token for use with AJAX voting.
+ */
+function selection_check_token($token, $nid = 0, $cid = 0) {
+  return selection_get_token($nid, $cid) == $token;
+}
+
+/**
+ * Implementation of decisions_hook_voting_form.
+ * Presents a list of choices for the user to vote on.
+ */
+function decisions_selection_voting_form($form_state, $node, $teaser, $page) {
+  $one_click = variable_get('decisions_1click', 0);
+  global $user;
+  $form['node'] = array(
+    '#type' => 'value',
+    '#value' => $node,
+  );
+  $form['#prefix'] = '<div class="decisions_selection_voting"><div class="decisions_selection_error"></div>';
+  //The decisions_selection_results div exists as a workaround for 1click voting when jQuery 1.3+'s live() is unavailable.
+  $form['#suffix'] = '</div><div class="decisions_selection_results" style="display: none;"></div>';
+
+  if ($node->choice) {
+    $list = array();
+    // Put options in random order if randomize option
+    // selected on node create/edit form.
+    if ($node->randomize) {
+      $node->choice = _decisions_randomize_options($node->choice, $node->choices);
+    }
+    //Single choice, "Plurality" voting.
+    if ($node->maxchoices == 1) {
+      //Are we using the 1-click form?
+      if ($one_click == 1) {
+        drupal_add_css(drupal_get_path('module', 'selection') . '/selection.css', 'module');
+        $links = '';
+
+        foreach ($node->choice as $i => $choice) {
+          $links[$i]['attributes']['class'] = 'decisions_selection_vote';
+          $links[$i]['query'] = drupal_get_destination() . '&token='. selection_get_token($node->nid, $i);
+          $links[$i]['title'] = check_plain($choice['label']);
+          $links[$i]['href'] = "decisions_selection/vote/$node->nid/$i/";
+        }
+        
+        if (!empty($links)) {
+          $output = '';
+          $output .= '<div class="decisions_selection_1click">';
+          $output .= theme('links', $links, array('class' => 'decisions_selection_1click'));
+          $output .= '</div>';
+        }
+        $form['choices']['1click'] = array(
+          '#value' => $output,
+        );
+
+        //If asynchronous voting is enabled, add the necessary JS.
+        if (variable_get('decisions_ahah', 0) == 1) {
+          drupal_add_js(drupal_get_path('module', 'selection') . '/selection.js');
+        }
+        //At this point, we can return the form since 1-click uses its own callback for vote submission.
+        return $form;
+      }
+      //Not using 1-click. Use radios.
+      else {
+        foreach ($node->choice as $i => $choice) {
+          if ($choice['label']) {
+            $list[$i] = check_plain($choice['label']);
+          }
+        }
+      }
+      $form['choice'] = array(
+        '#type' => 'radios',
+        '#title' => $page ? '' : check_plain($node->title),
+        '#default_value' => -1,
+        '#options' => $list,
+      );
+    }
+    //Approval/multiple-choice voting.
+    else {
+      foreach ($node->choice as $i => $choice) {
+        if ($choice['label']) {
+          $list[$i] = check_plain($choice['label']);
+        }
+      }
+      $form['choice'] = array(
+        '#type' => 'checkboxes',
+        '#title' => $page ? '' : check_plain($node->title),
+        '#options' => $list,
+      );
+    }
+  }
+  //Add the submit button. 1click has already returned the form by this point.
+  $form['vote'] = array(
+    '#type' => 'submit',
+    '#value' => t('Vote'),
+  );
+  return $form;
+}
+
+/**
+ * Display the selection results.
+ * TODO: implement (http://drupal.org/node/48249)
+ */
+function selection_decisions_view_results($node, $teaser, $page, $new_vote = array()) {
+  global $user;
+  $vote = !empty($new_vote) ? $new_vote : $node->vote;
+  $output = "";
+  $results = votingapi_select_results(array('content_id' => $node->nid, 'content_type' => 'decisions'));
+  // Count the votes for each choice
+  $votes = array();
+
+  foreach ($results as $result) {
+
+    // approval
+    $voteval = $result['tag'];
+
+    if (!array_key_exists($voteval, $votes)) {
+      $votes[$voteval] = 0;
+    }
+    // the value is the position chosen in this case, we just want to increment
+    $votes[$voteval]+=$result['value'];
+  }
+
+  foreach ($node->choice as $i => $ch) {
+    if (!array_key_exists($i, $votes)) {
+      $votes[$i] = 0;
+    }
+  }
+  // sort the votes
+  arsort($votes);
+
+  $total_votes = array_sum($votes);
+  if ($node->choice && $total_votes > 0) {
+    // TODO: Those <div>s and <br />s should be in a theme function. First collect all the data in a structure, then theme it.
+    // display results for each possible choice
+
+    //If AHAH and 1click are enabled, ensure that the fallback behavior shows the same vote confirmation.
+    if (variable_get('decisions_1click', 0) && ($node->maxchoices == 1)) {
+      if (!empty($new_vote)) {
+        //Fallback behavior.
+        $vote = $new_vote;
+      }
+      $vote_label = $node->choice[$vote['tag']]['label'];
+      $output .= '<span class="status">' . t('You voted: @vote_tag', array('@vote_tag' => $vote_label)) . '</span>';
+    }
+    $output .= '<div class="poll">';
+    $max_votes = 0;
+    foreach ($votes as $i => $vote) {
+      $max_votes = ($vote > $max_votes ? $vote : $max_votes);
+    }
+    foreach ($votes as $i => $vote) {
+      $percentage = round(100 * $vote / $total_votes, 0);
+      $output .= theme('decisions_bar', check_plain($node->choice[$i]['label']), $vote, $total_votes, $max_votes);
+    }
+    $output .= '</div>';
+  }
+
+  $output .= '<br />';
+  return $output;
+}
+
+/**
+ * implementation of the format_votes() hook.
+ *
+ * formats how a user's votes should be displayed.
+ *
+ * @returns a formatted string
+ */
+function selection_decisions_format_votes($node, $votes) {
+  $unordered_votes = array();
+  foreach ($votes as $vote) {
+    // Just need one dimensional results
+    if ($vote->value > 0) {
+      $unordered_votes[] = check_plain($node->choice[$vote->tag]['label']);
+    }
+  }
+  return implode(', ', $unordered_votes);
+}
+
+/**
+ * Registers the vote as a key for this node using votingapi_set_vote().
+ */
+function decisions_selection_voting_form_submit($form, &$form_state) {
+  $node = $form_state['values']['node'];
+  $one_click = variable_get('decisions_1click', 0);
+  global $user;
+  $node = $form_state['values']['node'];
+  $votes = array();
+  if ($node->maxchoices == 1) {
+    // plurality voting
+    $vote = array(
+      'value' => 1,
+      'tag' => $form_state['values']['choice'],
+      'value_type' => 'option',
+      'content_type' => 'decisions',
+      'content_id' => $node->nid,
+    );
+    $votes[] = $vote;
+  }
+  else {
+    // approval voting
+    foreach ($node->choice as $key => $choice) {
+      if (isset($form_state['values']['choice'][$key]) && $form_state['values']['choice'][$key]) {
+        $vote = array(
+          'value' => 1,
+          'value_type' => 'option',
+          'tag' => $key,
+          'content_type' => 'decisions',
+          'content_id' => $node->nid,
+        );
+        $votes[] = $vote;
+      }
+    }
+  }
+  votingapi_add_votes($votes);
+  //If this becomes a performance problem, we use votingapi_set_votes and the site-wide recalculation time.
+  votingapi_recalculate_results('decisions', $node->nid);
+// drupal_set_message(t('Your vote was registered.'));
+   if($node->nid=='102991') {
+    $_SESSION['choices'] = serialize($choice);
+    $_SESSION['selected_choice'] = $form_state['values']['choice'];
+  	$form_state['redirect'] = 'node/102992';
+  	if(stristr($node->path,'facebook')) {
+  		$form_state['redirect'] = 'thank-you-facebook';
+  	}
+  }
+}
+
+/**
+ * implementation of the vote_validate() hook
+ *
+ * check if the submitted key exists, just to make sure the form is not bypassed.
+ *
+ * @returns boolean true if the form is valid
+ */
+function decisions_selection_voting_form_validate($form, &$form_state) {
+  $node = $form_state['values']['node'];
+  if ($node->maxchoices == 1) {
+    if (!array_key_exists($form_state['values']['choice'], $node->choice)) {
+      form_set_error('choice', 'At least one choice must be selected.');
+    }
+  }
+  else {
+    //Approval/Multiple-choice voting
+    // array used to check which values are set
+    $setvalues = array();
+    foreach ($node->choice as $key => $choice) {
+      // see if the box is checked
+      if (!empty($form_state['values']['choice'][$key])) {
+        $numchoices++;
+      }
+    }
+
+    // too many choices ranked
+    if ($node->maxchoices != 0 && $numchoices > $node->maxchoices) {
+      form_set_error('choice',
+        t('%num choices were selected but only %max are allowed.',
+          array('%num' => $numchoices, '%max' => $node->maxchoices)
+        )
+      );
+    }
+
+    // not enough choices ranked
+    $minchoices = 1;
+    if ($numchoices < $minchoices) {
+      form_set_error('choice', t('At least one choice must be selected.'));
+    }
+  }
+}
+
+function theme_selection_decisions_view_results($node = NULL, $teaser = FALSE, $page = FALSE, $new_vote = array()) {
+  return selection_decisions_view_results($node, $teaser, $page, $new_vote);
+}

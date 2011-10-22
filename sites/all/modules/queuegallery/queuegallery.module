@@ -1,0 +1,839 @@
+<?php
+// $Id$
+
+
+
+/**
+* Valid Permission for this module
+*/
+
+function queuegallery_perm() {
+	return array('access oxygen gallery content','comment abuse moderation');
+}
+
+function queuegallery_access_counter($nnid, $theme_key) {
+  $theTime = time();
+  if(
+  db_query(
+  "INSERT INTO node_track_hits (nid, timestamp, site_theme) VALUES ($nnid, $theTime, '$theme_key')")) {
+    print drupal_json(TRUE);
+  }    
+  else {
+    print drupal_json(FALSE);
+  }
+  exit();
+}
+
+function queuegallery_menu() {
+
+  $items = array();
+
+
+  // Ahah access counter
+  $items ['photos/access_counter/%/%'] = array (
+    'title' => 'Gallery access counter', 
+    'page callback' => 'queuegallery_access_counter', // hence, we pass array(2) to 'page arguments'
+		'page arguments' => array (2,3), // 1 is the $nid, 2 is the $theme_key  
+		'access arguments' => array ('access oxygen gallery content'), // always use MENU_CALLBACK for ajax requests
+		'type' => MENU_CALLBACK 
+  );
+  
+  // Ahah Forward and Back button for photos pages.
+  $items['photos/sqid/%'] = array(
+    'title' => 'squid',
+    'page callback' => 'queuegallery_queue_to_tid',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2), // where my wildcard is
+    'access arguments' => array('access oxygen gallery content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+
+
+  // Ahah Forward and Back button for photos pages.
+  $items['photos/next/%'] = array(
+    'title' => 'Next',
+    'page callback' => 'queuegallery_display',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2), // where my wildcard is
+    'access arguments' => array('access oxygen gallery content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+  // Ahah Delete Comment for Images, Admin Function
+  $items['photos/comment-delete/%'] = array(
+    'title' => 'report',
+    'page callback' => 'delete_photo_comment',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2), // where my wildcard is
+    'access arguments' => array('comment abuse moderation'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+  // Ahah report button, sends email should alerts crest in function
+  $items['photos/report/%/%'] = array(
+    'title' => 'report-1',
+    'page callback' => 'report_photo_comment',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2,3), // where my wildcard is
+    'access arguments' => array('access oxygen gallery content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+  // Ahah report button, sends email should alerts crest in function
+  $items['photos/report/%/%/%'] = array(
+    'title' => 'report',
+    'page callback' => 'report_photo_comment',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2,3,4), // where my wildcard is
+    'access arguments' => array('access oxygen gallery content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+
+  // Galleries display URL, including pagination.  For http://photos.oxygen.com
+  $items['galleries/%/%'] = array(
+    'title' => 'galleries',
+    'page callback' => 'display_oxygen_galleries',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(1,2), // where my wildcard is
+    'access arguments' => array('access oxygen gallery content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+  
+  // Galleries display URL.  For http://photos.oxygen.com
+  $items['galleries/%'] = array(
+    'title' => 'galleries',
+    'page callback' => 'display_oxygen_galleries',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(1), // where my wildcard is
+    'access arguments' => array('access oxygen gallery content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+
+
+
+  return $items;
+}
+
+
+/**
+* Function to delete an abusive comment
+*/
+
+function delete_photo_comment($nid) {
+	$offensive_node = node_load($nid);
+	nodecomment_nodeapi($offensive_node, "delete");
+	exit();
+}
+
+/**
+* Function to truncate text and replace with ellipsis(...).  Episode 7: Who is this… 22
+*/
+
+
+function truncate($text,$numb,$etc = "...") {
+	$text = html_entity_decode($text, ENT_QUOTES);
+	if (strlen($text) > $numb) {
+	$text = substr($text, 0, $numb);
+	$text = substr($text,0,strrpos($text," "));
+	
+	$punctuation = ".!?:;,-"; //punctuation you want removed
+	
+	$text = (strspn(strrev($text),  $punctuation)!=0)
+		?
+		substr($text, 0, -strspn(strrev($text),  $punctuation))
+		:
+	$text;
+	
+	$text = $text.$etc;
+	}
+	//$text = htmlentities($text, ENT_QUOTES);
+	return $text;
+}
+
+/**
+* Function to report abusive comment
+*/
+
+function report_photo_comment($nid, $report_link, $fragment = "") {
+
+        $threshold = 3; // number of reports before mail  is sent.
+
+        db_query("UPDATE content_type_comment SET content_type_comment.field_report_comment_value = content_type_comment.field_report_comment_value+1 WHERE content_type_comment.nid = %d", $nid);
+
+        $result = db_fetch_object(db_query("SELECT content_type_comment.field_report_comment_value FROM content_type_comment WHERE content_type_comment.nid = %d", $nid));
+        if ($result->field_report_comment_value == 3) {
+
+
+//
+//  Needs to be refactored to dynamically find user.rid is 'abuse' role rather than hard coding 'rid = 7'.
+//
+
+                $comment_node = node_load($nid);
+
+                $report_email_list = db_query("SELECT u.mail
+                FROM users_roles ur
+                LEFT JOIN users u ON ur.uid = u.uid
+                WHERE ur.rid =7
+                AND u.status =1
+                LIMIT 0 , 30");
+
+		$report_link = str_replace("|","/",$report_link);
+		$login_link = "Login here:  http://" . parse_url($report_link, PHP_URL_HOST) . '/user';
+		if ($fragment) {$report_link = $report_link ."#" . $fragment;}
+		$subject = "User Reported Comment";
+
+		$body = $login_link . "\n\n";
+		$body .= 'The reported comment appears on this page: ' . "\n" . $report_link . "\n\n";
+
+		$body .= "This comment was reported " . $result->field_report_comment_value . " times and is node #" . $nid . ".\n\n";
+		$body .= "The comment is:\n\n" . $comment_node->body;
+
+		while ($email_address = db_fetch_object($report_email_list)) {
+			$to = $email_address->mail;
+	
+	
+			mail($to, $subject, $body);
+		}
+
+        }
+
+        exit();
+}
+
+/**
+* Function to return nodequeue_id for a given taxonomy
+*/
+
+function queuegallery_queue_to_tid($tid) {
+	drupal_json(); //change headers to javascript
+	$result = db_fetch_object(db_query("SELECT  sqid 
+	FROM  nodequeue_subqueue 
+	WHERE  reference =" . $tid . "
+	LIMIT 1;"));
+	
+	print $result->sqid;
+	exit;
+}
+
+
+
+/**
+* Function to load comments for the next image.
+*/
+
+function queuegallery_display($nid) {
+    $next_image = node_load($nid);
+
+        $result = db_query("SELECT node_revisions.body, node.created, content_type_comment.field_commentor_name_value, node_comments.cid
+			    FROM node_revisions
+			    LEFT JOIN node ON node_revisions.vid = node.vid
+			    LEFT JOIN node_comments ON node.nid = node_comments.cid
+			    LEFT JOIN content_type_comment ON node.vid = content_type_comment.vid
+			    WHERE node_comments.nid=" . $nid . " AND node.status=1
+			    ORDER BY node.created DESC;");
+
+  $comments = "";
+
+  while ($current_comment = db_fetch_object($result)) {
+	global $user;	
+        $time = time();
+        $post_time = $current_comment->created;
+        $when = oxygen_helpers_distanceOfTimeInWords($post_time, $time);
+        $filtered_body = wordfilter_filter_process($current_comment->body);
+        $filtered_name = wordfilter_filter_process($current_comment->field_commentor_name_value);
+        if ($filtered_name == "") {$filtered_name = "anonymous";}
+	$comment_mod = "";	
+
+
+	// Check to see if $user has the administrator role.
+	if (in_array('abuse moderator', array_values($user->roles))) {
+	$comment_mod = " <a style='color:red;' class='unpublish_comment_photo' href='/photos/comment-delete/" . $current_comment->cid . "'>Delete Comment #" . $current_comment->cid . "</a>";
+	}
+
+
+        $comments .= "<div class='image-comment'>
+        <div class='comment-author'>" . $filtered_name .  $comment_mod . "</div>
+        <div class='comment-body'>" . $filtered_body . "</div>
+
+	<div class='commentsUtil'>	
+		<span class='comment-created'>&gt; posted " . $when . " ago</span>
+		<a title='report this comment' class='report_comment' href='/photos/report/" . $current_comment->cid . "'>Report</a>
+       	<a title='reply to this comment' class='reply_comment' href='#'>Reply</a>
+	</div> <!-- end comments util -->	
+
+        </div>";
+  }
+
+
+
+    $returned_content .= $comments . nodecomment_form_box($next_image);
+    print $returned_content;
+    exit(); // 'exit()' instead of 'return $returned_content' to send ONLY the HTML and not a whole page.
+
+}
+
+
+/************************************************************************************************************************************
+* Function to grab Gallery Term from Gallery Term synonym.
+Grabs term name in Gallery_terms that match the passed synonym.   
+- only looks in gallery terms
+- Only pick root level taxonomies (parent = 0)
+- match the tids have a synonym value defined
+- match synonym name which will be Show ID
+*/
+
+function queuegallery_synonym_to_galleryterm($synonym)
+{
+//	$result = db_fetch_object(db_query("SELECT  term_data.name target_name FROM term_data
+//										LEFT JOIN term_hierarchy ON term_hierarchy.tid = term_data.tid
+//										LEFT JOIN term_synonym ON  term_synonym.tid = term_data.tid
+//										WHERE term_data.vid =6 					
+//										AND  term_hierarchy.parent =0           
+//										AND  term_synonym.tid =term_data.tid    
+//										AND term_synonym.name = '$synonym'"));
+//    $term_value= $result->target_name;
+//	return $term_value;
+  switch (strtoupper($synonym)){
+    case 'ANTM': return 'Americas Next Top Model';
+    case 'ATB' : return 'Addicted to Beauty';
+    case 'BGC' : return 'Bad Girls Club';
+    case 'CELEBS' : return 'Celebrities';
+    case 'DYAO': return 'Dance Your Ass Off';
+    case 'EXTRAS-FOOD': return 'Extras:Food';
+    case 'JDMA': return 'Janice';
+    case 'Movies': return 'Oxygen Movies';
+    case 'Music': return 'Oxygen Music';
+    case 'NK': return 'Naughty Kitchen';
+    case 'PW': return 'Pretty Wicked';
+    case 'SNAPPED': return 'Snapped';
+    case 'TD': return 'Tori and Dean';
+    case 'LOVEGAMES': return 'Love Games';
+    case 'JERSEYCOUTURE': return 'Jersey Couture';
+    case 'HBS': return 'Hair Battle Spectacular';
+    case 'HOG': return 'House of Glam';
+    case 'RUSSELL': return 'Running Russell';
+    case 'GLEE': return 'Glee';
+    case 'GLEEPROJ': return 'The Glee Project';
+    case 'AAA': return 'All About Aubrey';
+    case 'SBW': return 'Tori & Dean: sTORIbook Weddings';
+    case 'PARIS': return 'The World According to Paris';
+    case 'BP': return 'Bachelorette Party';
+  }
+}
+
+
+
+
+/************************************************************************************************************************************
+* Function to display the starting gallery on a photo page.  Called from page-node-photo.tpl.php
+*/
+
+
+function queuegallery_all($nodesubqueue_id, $show_id = "Tori and Dean") {
+
+  global $user;
+  global $theme_key;
+  // For tracking daily or weekly views of photo pages.  Only called from page-node-photo.tpl.php
+//  db_query('INSERT INTO node_track_hits (nid, timestamp, site_theme) VALUES ("' . arg(1) . '", "' . time() . '", "' . $theme_key . '")');
+  
+  $page_content = "";
+  // nodequeue_load_nodes($sqid, $backward = FALSE, $from = 0, $count = 0)  returns node objects list for given nodesubqueue
+  // This is inefficient and needs to be refactored into a simple SQL statement.  The nodeload is too heavy a hit.  We only need one nodeload on this function for the starting node.
+  $nodes = nodequeue_load_nodes($nodesubqueue_id, FALSE, 0, 0);
+  
+  // two things happening here.  One is creating a un-numbered list of links to the rest of the images with the blurbs as the link text,
+  // the second is creating a javascript array called "image_list" which is a list of the nids in the queuegallery
+  
+  $gallery_urls = "<ul class='gallery_urls' style='display:none;'>\n";
+  $page_content .= "<script type=\"text/javascript\" src=\"http://blurts.com/api/js\">\n";
+  $page_content .= "blurts.suspend();\n";
+  $page_content .= "</script>\n";
+  $page_content .= "<style type=\"text/css\">";
+  $page_content .= "#photoCaption {min-height:0px;padding: 16px 10px;}\n";
+  $page_content .= "#photo_share{width:100%;padding-top:10px;}\n";
+  $page_content .= "#gallery_share{height:35px;}\n";
+  $page_content .= "#photo_blurts_img{cursor:pointer;}\n";
+  $page_content .= "</style>";
+  $page_content .= "<script type=\"text/javascript\">var image_list=[";
+  for($i = 0; $i < sizeof($nodes); ++ $i) {
+    $page_content .= $nodes [$i]->nid; // all the nids in the nodequeue, ready for javascipt Ajax'ing
+    if ($i + 1 < sizeof($nodes)) {
+      $page_content .= ',';
+    }
+    $gallery_urls .= "<li><span href='/" . $nodes [$i]->images ["_original"] . "'>" . $nodes [$i]->body . "</span></li>\n";
+  
+  }
+  $gallery_urls .= "</ul>\n";
+  
+  $page_content .= "];p_index=0;";
+  $page_content .= "</script>";
+    
+  $js_nid = arg(1);
+  $page_content .= "
+  <script type=\"text/javascript\">
+  var nid = \"$js_nid\";
+  var theme_key = \"{$GLOBALS['theme_key']}\";
+  </script>
+  ";
+  
+  $page_content .= $gallery_urls; //list of all image URLs
+  
+
+  // Grabbing all show related categories in 'Gallery' term.  Currently it's hard
+  // coded to vid 6 which is for Gallery term.  Matches only primary level tids in term_data table
+  $cat_result = db_fetch_object(db_query("SELECT term_data.vid, term_data.tid, term_hierarchy.parent
+												FROM term_data
+												LEFT JOIN term_hierarchy ON term_hierarchy.tid = term_data.tid
+												WHERE term_data.vid =6
+												AND term_data.name = '" . $show_id . "'
+												AND term_hierarchy.parent =0
+												LIMIT 1;"));
+  
+  $catagories = taxonomy_get_tree($cat_result->vid, $cat_result->tid, - 1, 1);
+  
+  $page_content .= "<div id='galleryMenu' style='display:none;'>";
+  foreach ( $catagories as $category ) {
+    $page_content .= "<div class='menu'>";
+    $page_content .= "<a href='#' class='gallery_list_header'>" . $category->name . "</a>";
+    
+    $result = db_query("SELECT node_revisions.title, node.nid, node.created, node.changed 
+				FROM node_revisions
+				LEFT JOIN term_node ON node_revisions.nid = term_node.nid
+				LEFT JOIN term_data ON term_node.tid = term_data.tid
+				LEFT JOIN node ON node.nid = term_node.nid
+				LEFT JOIN term_hierarchy ON term_hierarchy.tid = term_data.tid
+				WHERE term_hierarchy.parent = " . $category->tid . "
+				AND node.status =  '1'
+				AND node.type = 'photos'
+				ORDER BY term_data.weight;");
+    
+    while ($current_gallery = db_fetch_object($result)) {
+      $current_gallery_title = truncate($current_gallery->title, 25);
+      $page_content .= "<div class='" . get_galleryitem_class($current_gallery->created, $current_gallery->changed) . "'>" . $published_recently . l($current_gallery_title, "node/" . $current_gallery->nid) . "</div>";
+    
+    }
+    $page_content .= "</div>";
+  
+  }
+  $page_content .= "<img src='/" . drupal_get_path('theme', $GLOBALS['theme_key']) . "/images/galleries_list_footer.png?l' id='galleries_list_footer' class='png'  /></div>";
+  
+  $encoded_title = rawurlencode($nodes [0]->title);
+  $social_url = "http://" . $_SERVER ['SERVER_NAME'] . $_SERVER ['REQUEST_URI'];
+  
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $page_content .= " <a id='edit_gallery_image' href='/node/0/edit'>Edit Image</a>\n";
+  }
+	
+	$share_url = array(
+		"twHref" => "http://twitter.com/home?status=Check%20out%20this%20link%20on%20Oxygen.com%3D%20",
+		"fbHref" => "http://www.facebook.com/share.php?u=",
+		"diggHref" => "http://digg.com/submit?url=",
+		"deliciousHref" => "http://del.icio.us/post?title=",
+		"stubleUponHref" => "http://www.stumbleupon.com/submit?url="
+	);
+  	
+	$page_content .= "<div id='next_image'>\n";
+	$page_content .= "	<div id='gallery_image'><img id='largeImage' src='/sites/all/themes/oxygen/images/spinner.gif' /></div>\n";
+	$page_content .= "	<div id='photoCaption'><!-- JAVASCRIPT inserted blurb --></div>\n"; 
+	$page_content .= "	<div id='photoIndex' style='width:433px;padding-right:15px;background-color:#E3E3E3' align='right'><!-- 1 of X here --></div>\n";
+	$page_content .= "	<div id='btns'>\n";
+	$page_content .= "		<span id='btns_left'><a href='#' id='photos_button_left'><!-- placeholder for left click--></a></span>\n";
+	$page_content .= "		<span id='btns_right'><a href='#' id='photos_button_right'><!-- placeholder for right click--></a> </span>\n";
+	$page_content .= "	</div>\n";
+	$page_content .= "	<div id='gallery_share' align=\"center\">\n";
+	$page_content .= "		<div id='photo_blurts_img' style='float:left;position:relative;display:none;'>\n";
+	$page_content .= "			<img src='/sites/all/themes/oxygen/images/photo_hub_blurts_button.jpg' border='0' />";
+	$page_content .= "		</div>\n";
+	$page_content .= "		<div id='photo_share'>\n";
+	$page_content .= "			<span id='photo_share_word'>share </span>\n";
+	$page_content .= "				<a href='" . $share_url['fbHref'] . $social_url . "' target='facebook'>\n";
+	$page_content .= "				<img class='share_icon png' src='/" . drupal_get_path('theme', 'features') . "/images/facebook.png' />\n";
+	$page_content .= "			</a>\n";
+	$page_content .= "			<a href='" . $share_url['twHref'] . $social_url . "' target='twitter'>\n";
+	$page_content .= "				<img class='share_icon' src='/" . drupal_get_path('theme', 'features') . "/images/twitter.png' />\n";
+	$page_content .= "			</a>\n";
+	$page_content .= "			<a href='" . $share_url['diggHref'] . $social_url . "&title=" . $encoded_title . "&bodytext=" . $encoded_title . "&media=image&topic=" . $encoded_title . "' target='digg'>\n";
+	$page_content .= "				<img class='share_icon png' src='/" . drupal_get_path('theme', 'features') . "/images/digg.png' />\n";
+	$page_content .= "			</a>\n";
+
+	$page_content .= "			<a href='http://www.stumbleupon.com/submit?url=" . $social_url . "%26title%3D" . $encoded_title . "' target='stumbeupon'>\n";
+	$page_content .= "				<img class='share_icon png' src='/" . drupal_get_path('theme', 'features') . "/images/stumble.png' />\n";
+	$page_content .= "			</a>\n";
+	$page_content .= "		</div>\n";
+	$page_content .= "		<br/>\n";
+	$page_content .= "		<div id='photoBlurtsPlayer' style='padding-top:35px;'><!-- 1 of X here --></div>\n";
+	$page_content .= "	</div>\n";
+  
+  $related_nodes = similarterms_list(27, arg(1));
+  
+  /*	if (in_array('abuse moderator', array_values($user->roles))) { */
+  $page_content .= "<div id='related_gallery_wrapper'><div id='related_gallery_content'>";
+  
+  for($i = 0; $i <= 5; $i ++) {
+    
+    $queue = db_fetch_object(db_query("SELECT field_nodequeue_id_value, nid FROM content_type_photos WHERE nid=" . $related_nodes [$i]->nid . ";"));
+    
+    $site_id = db_fetch_object(db_query("SELECT name 
+			FROM term_data t
+			INNER JOIN term_node r ON r.tid = t.tid
+			WHERE t.vid = 5
+			AND r.nid =" . $related_nodes [$i]->nid . ";"));
+    
+    /* Set the location for the gallery microsite or set to show on photos.oxygen.com based on site ID of the gallery. NEW SITE UPDATE */
+    
+    $gallery_link = oxygen_helpers_show_id_to_url($site_id->name);
+    $gallery_link = $gallery_link . "/node/" . $queue->nid;
+    
+    $first_nid = nodequeue_load_front($queue->field_nodequeue_id_value);
+    $gallery_name_truncated = truncate($related_nodes [$i]->title, 22);
+    $page_content .= "<div class='related_gallery_item' ><a class='related_gallery_image_bg' href='" . $gallery_link . "'><img src='/" . $first_nid [0]->images [preview] . "' /></a>";
+    //magic happens to make the first image show up.
+    $page_content .= "<a class='related_galleries_gallery_title' href='" . $gallery_link . "'>" . $gallery_name_truncated . "</a></div>";
+  }
+  
+  $page_content .= "</div></div>";
+  /*	} */
+  
+  $current_image = node_load($nodes [0]->nid);
+  $page_content .= "</div>";
+  
+  return $page_content;
+}
+
+/****Functions related to gallery menu***********************/
+function get_galleryitem_class($gallery_created, $gallery_changed)
+{	
+	$galleryClass;
+	$galleryClass= "subMenu";
+	if($gallery_created > (time()-518400))
+	{
+		$galleryClass .= " so_new"; //published within last 7 days
+	}
+	else if($gallery_changed > (time()-518400))
+	{
+		$galleryClass .= " so_fresh"; //edited within last 7 days
+	}
+	return $galleryClass;
+}
+
+/******End Functions reltaed to gallery menu****************/
+
+
+
+/************************************************************************************************************************************
+* Function to display the GALLERIES page.  Called from page.tpl.php in the 'photos' theme.
+*/
+
+
+function display_oxygen_galleries($search_criteria = "popular", $current_page = "1") {
+
+  $galleries_per_page = 12; // number of galleries that show up on a results page, used later for pagination.
+
+  $search_criteria = "'" . preg_replace("/[^a-zA-Z0-9\s]/", "", $search_criteria) . "'";
+  $search_criteria = str_replace("_", " ", $search_criteria);
+  $current_page = preg_replace("/[^0-9]/", "", $current_page);
+  if (is_numeric($current_page)==FALSE) {$current_page = "1";}
+  $current_page_count = (($current_page-1) * $galleries_per_page);
+
+
+ 
+  switch($search_criteria) {
+	case ($search_criteria == "'popular'"):
+
+		$page_title = "most popular galleries";
+		$result_count = db_fetch_object(db_query("SELECT COUNT(*) as gallery_count
+				FROM node_revisions
+				LEFT JOIN node ON node.nid = node_revisions.nid
+				LEFT JOIN votingapi_cache ON votingapi_cache.content_id = node.nid
+				WHERE node.type =  'photos'
+				AND node.status =  '1'
+				AND votingapi_cache.function = 'average';"));
+
+	//	if ($result_count->gallery_count < $current_page_count) {$current_page=1;$current_page_count = ($current_page-1) * $galleries_per_page;}
+		
+		$result = db_query("SELECT node_revisions.title, node.nid
+				FROM node_revisions
+				LEFT JOIN node ON node.nid = node_revisions.nid
+				LEFT JOIN votingapi_cache ON votingapi_cache.content_id = node.nid
+				WHERE node.type =  'photos'
+				AND node.status =  '1'
+				AND votingapi_cache.function = 'average'
+				ORDER BY votingapi_cache.value DESC
+				LIMIT " . $current_page_count . " , 12;");
+	break;
+
+	
+	case ($search_criteria == "'recent'"):  
+		$page_title = "most recent galleries";
+	    
+		$result_count = db_fetch_object(db_query("SELECT COUNT(*) as gallery_count
+				FROM node_revisions
+				LEFT JOIN node ON node.nid = node_revisions.nid
+				WHERE node.type =  'photos'
+				AND node.status =  '1';"));
+		
+
+		$result = db_query("SELECT node_revisions.title, node.nid
+				FROM node_revisions
+				LEFT JOIN node ON node.nid = node_revisions.nid
+				WHERE node.type =  'photos'
+				AND node.status =  '1'
+				ORDER BY node_revisions.timestamp DESC 
+				LIMIT " . $current_page_count . " , 12;");
+
+
+	break; // if we get results from TERM search, break out and show results.  If NOT, show most recent.
+
+
+	default:
+		$page_title = $search_criteria . " galleries";		
+
+		$result_count = db_fetch_object(db_query("SELECT COUNT( DISTINCT node_revisions.title, node.nid ) AS gallery_count
+			        FROM node_revisions
+				LEFT JOIN term_node ON node_revisions.nid = term_node.nid
+				LEFT JOIN term_data ON term_data.tid= term_node.tid
+				LEFT JOIN node ON node.nid = term_node.nid
+				WHERE node.type =  'photos'
+				AND term_data.name = " .  $search_criteria . "
+				AND node.status =  '1';"));
+
+		
+		$result = db_query("SELECT DISTINCT node_revisions.title, node.nid
+			        FROM node_revisions
+				LEFT JOIN term_node ON node_revisions.nid = term_node.nid
+				LEFT JOIN term_data ON term_data.tid= term_node.tid
+				LEFT JOIN node ON node.nid = term_node.nid
+				WHERE node.type =  'photos'
+				AND term_data.name = " .  $search_criteria . "
+				AND node.status =  '1'
+				ORDER BY term_data.weight DESC
+				LIMIT " . $current_page_count . " , 12;");
+	}
+
+			// *** start building page.
+
+
+	$page_content .= '<div id="gallery_sort_selector">sort by <select>
+				<option value="recent">most recent photos</option>
+				<option value="popular">most popular photos</option>
+				<option value="popular">&nbsp;</option>					
+				<option value="popular" SELECTED>--- SHOWS ---</option>					
+				<option value="ANTM">America\'s Next Top Model</option>				
+				<option value="ATB">Addicted to Beauty</option>
+				<option value="BGC">Bad Girl Club</option>
+				<option value="TD">Tori &amp; Dean</option>
+				<option value="Movies">Oxygen Movies</option>
+				<option value="NK">Naughty Kitchen</option>
+				<option value="DYAO">Dance Your Ass Off&nbsp;&nbsp;</option>
+				<option value="Snapped">Snapped</option>
+				<option value="Russell">Running Russell</option>
+				<option value="GLEEProj">The Glee Project</option>
+				<option value="PARIS">The World According to Paris</option>
+				<option value="BP">Bachelorette Party</option>
+
+				
+				<option value="popular">&nbsp;</option>					
+				<option value="popular">--- CATEGORIES ---</option>					
+				<option value="Animals">Animals</option>
+				<option value="Dogs">- Dogs</option>
+				<option value="Behind the Scenes">Behind the Scenes</option>
+				<option value="Competition">Competition</option>				
+				<option value="Dance">Dance</option>					
+				<option value="Disco">- Disco</option>					
+				<option value="Foxtrot">- Foxtrot</option>				
+				<option value="hip hop">- Hip-hop</option>	
+				<option value="jive swing">- Jive/Swing</option>
+				<option value="Latin dance">- Latin Dance</option>
+				<option value="Doctor">Doctor</option>															
+				<option value="Episodes">Episodes</option>																			
+				<option value="Jewlery">Jewlery</option>
+				<option value="Movie Theme">Movie Theme</option>				
+				<option value="Parties">Parties</option>				
+				<option value="Plastic Surgery">Plastic Surgery</option>								
+				<option value="Racing">Racing</option>								
+				<option value="Style">Style</option>												
+				<option value="Weight Loss">Weight Loss</option>
+				<option value="Beauty">Beauty</option>	
+				<option value="Hair">- Hair</option>
+				<option value="Makeovers">- Makeovers</option>
+				<option value="Makeup">- Makeup</option>
+				<option value="Candids">Candids</option>
+				<option value="CariDee">CariDee</option>
+				<option value="Casting">Casting</option>
+				<option value="Celebrities">Celebrities</option>
+				<option value="Tori Spelling">- Tori Spelling</option>
+				<option value="Janice Dickinson">- Janice Dickinson</option>
+				<option value="Kids">Kids</option>
+				<option value="Celebutots">Celebutots</option>
+				<option value="Crime">Crime</option>
+				<option value="Fashion">Fashion</option>
+				<option value="Bikinis">- Bikinis</option>
+				<option value="Costumes">- Costumes</option>
+				<option value="Formal">- Formal</option>
+				<option value="Maternity">- Maternity</option>
+				<option value="Fights">Fights</option>
+				<option value="Hookups">Hookups</option>
+				<option value="Hot Messes">Hot Messes</option>
+				<option value="Home Decor">Home Decor</option>
+				<option value="House Tour">House Tour</option>
+				<option value="Models">Models</option>
+				<option value="Actors">Actors</option>
+				<option value="Actresses">Actresses</option>
+				<option value="Music">Music</option>
+				<option value="Artists">- Artists</option>
+				<option value="Bands">- Bands</option>
+				<option value="Performances">- Performances</option>
+				<option value="Party Photos">Party Photos</option>
+				<option value="Book Signings">Book Signings</option>
+				<option value="Launch Party">Launch Party</option>
+				<option value="Recipes">Recipes</option>
+				<option value="Appetizers">- Appetizers</option>
+				<option value="Desserts">- Desserts</option>
+				<option value="Drinks">- Drinks</option>
+				<option value="Holidays">- Holidays</option>
+				<option value="Main Course">- Main Course</option>
+				<option value="Sexy Girls">Sexy Girls</option>
+				<option value="Sexy Guys">Sexy Guys</option>
+				<option value="Underwear">Underwear</option>
+
+
+			  </select></div>';
+
+        $page_content .= '<script type="text/javascript">
+
+                         $("#gallery_sort_selector").children("select").change(function(){
+
+                              selectedItem = $(this).val();
+
+                              window.location = "/galleries/" + selectedItem; 
+
+                           });
+
+                         </script>';
+
+	if ($result_count->gallery_count) {
+
+	$page_content .= "<div><h2 class='galleries_title'>all " . $page_title . "</h2></div>";
+
+
+	while ($current_gallery = db_fetch_object($result)) {
+		$queue=db_fetch_object(db_query("SELECT field_nodequeue_id_value FROM content_type_photos WHERE nid=". $current_gallery->nid .";"));
+
+		$site_id = db_fetch_object(db_query("SELECT name 
+			FROM term_data t
+			INNER JOIN term_node r ON r.tid = t.tid
+			WHERE t.vid = 5
+			AND r.nid =". $current_gallery->nid .";"));
+
+
+		/* Set the location for the gallery microsite or set to show on photos.oxygen.com based on site ID of the gallery. NEW SITE UPDATE */
+		
+		$gallery_link = oxygen_helpers_show_id_to_url($site_id->name);
+                
+                $path = 'node/'. $current_gallery->nid;
+                $alias = drupal_get_path_alias($path, $language);
+                if ($path != $alias) {
+                $current_gallery->path = $alias;
+                }
+                $gallery_link = $gallery_link . "/" . $alias;
+
+                switch ($site_id->name) {
+                  case 'BGC':
+                    $twitter_site = 'BGConOxygen';
+                    break;
+                  case 'GLEEProj':
+                    $twitter_site = 'TheGleeProject';
+                    break;
+                  case 'Russell':
+                    $twitter_site = 'RunningRussell';
+                    break;
+                  case 'HoG':
+                    $twitter_site = 'house_of_glam';
+                    break;
+                  case 'DYAO':
+                    $twitter_site = 'DanceYourA__Off';
+                    break;
+                  case 'JerseyCouture':
+                    $twitter_site = 'Jersey_Couture';
+                    break;
+                  case 'HBS':
+                    $twitter_site = 'HairBattle';
+                    break;
+                  case 'AAA':
+                    $twitter_site = 'AubreysBack';
+                    break;
+                  case 'LoveGames':
+                    $twitter_site = 'LoveGamesOxygen';
+                    break;
+                  case 'BP':
+                    $twitter_site = 'Bachelorettes';
+                    break;
+                  default:
+                    $twitter_site = 'oxygen';
+              }
+
+		$first_nid=nodequeue_load_front($queue->field_nodequeue_id_value);
+		
+		$gallery_name_truncated = preg_replace("/^Episode\s[0-9]*:\s/i", "", $current_gallery->title);
+		$gallery_name_truncated = truncate($gallery_name_truncated,28);
+		$gallery_body = strip_tags($first_nid[0]->body);
+		$gallery_body = truncate($gallery_body,80);
+		$frame_id_title = mt_rand();
+		
+		$page_content .= "
+		<div class='gallery_item'>
+		<div class='imgHolder'>
+		<img src='/" . $first_nid[0]->images[newpreview] . "' />
+		<div class='overlay'><a href='" . $gallery_link . "'><img src='http://photos.oxygen.com/sites/all/themes/photos/images/round_corners_333333.gif' border='0' /></a>
+		<a class='title' href='" . $gallery_link . "'>" . $gallery_name_truncated . "</a>
+		</div>
+		</div>
+		<div class='blurb'><div style='float:right;margin-left:5px;width:55px;'>
+                <a name='fb_share' type='button' share_url='" . $gallery_link . "' style='margin-bottom:5px;display:block;float:right;'></a>
+                <script src='http://static.ak.fbcdn.net/connect.php/js/FB.Share' type='text/javascript'></script>
+                <br />
+                <iframe id='twitter_item_" . $frame_id_title ."' name='twitter_item_" . $frame_id_title ."' class='twitter-share-button' allowtransparency='true' frameborder='0' role='presentation' scrolling='no' src='http://platform.twitter.com/widgets/tweet_button.html?url=" . urlencode($gallery_link) . "&amp;via=" . $twitter_site . "&amp;text=" . $current_gallery->title . "&amp;count=none' width='55' height='20'></iframe>
+                </div>" . $gallery_body . "</div>
+		</div>
+		";
+
+	}
+
+
+
+
+	//  Pagination	
+	//	
+
+	$total_pages = ceil($result_count->gallery_count/$galleries_per_page);
+
+
+	$page_content .= '<div class="pages">Page:';
+	for ($i = 1; $i <= $total_pages; $i++) {
+		$link = "http://photos.oxygen.com/galleries/" . str_replace("'","",$search_criteria) . "/" . $i;
+	//	if ($current_page == $i) {
+			$page_content .= "<div class='page-index'> " . l($i,$link) . "</div>";
+	}
+	$page_content .= '<div style="clear:both;width:600px;">&nbsp;</div></div>';
+
+	} else {
+	$page_content .= "<div><br /><br /><br /><h2 class='galleries_title'>" . $page_title . ": no results found.</h2></div>";	
+		
+	}
+
+	
+	
+  return $page_content;
+}
+
+

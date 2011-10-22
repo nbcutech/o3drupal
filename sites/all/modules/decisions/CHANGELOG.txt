@@ -1,0 +1,84 @@
+Decisions 6.x branch (HEAD, in progress)
+----------------------------------------
+
+ * 6.x port
+ * VotingAPI 2.x support (DRUPAL-6--2 branch, specifically)
+ * Cleanup of some forms submission processes (no more $_POST!)
+ * This port drops a few functionalities and may still be broken in
+   many ways. In particular, the Javascript is gone from the "More
+   choices" option.
+ * Some voting calculations may also be broken and have not been
+   tested.
+ * Do not rely on REMOTE_ADDR environment, use ip_address() (fixes
+   voting through proxy servers)
+ * Ranking and selection have been tested and work generally well.
+ * Provide better messages to explain why users cannot vote, or see results.
+ * Users who are in the electoral list, but who are not in a role with
+   permissions to vote, are no longer allowed to vote.
+
+Decisions 5.x branch (stalled)
+------------------------------
+
+ * 5.0 port (in progress)
+   * install and deinstall hooks
+   * still has major issues
+   * branch will be created and 0.2 released when port is functional
+ * voting modes are now modules on their own
+ * encapsulation of the modes out of the .module, to ease addition of
+   new modes and allow the deactivation of modes from the module page
+   * added a decisions_hook_node_info() to dynamically generate the decisions_node_info()
+   * added a decisions_format_votes_hook() to format votes from users in
+     the vote tabe
+   * added a decisions_hook_algorithm() to allow modes to list their
+     provided algorithms
+ * changed the hook_submit() to vote_submit() as per documentation and advpoll
+ * changed the decisions_validate_vote_hook() to decisions_hook_validate_vote()
+
+Decisions 0.2 (DRUPAL-4-7 branch) (deprecated)
+----------------------------------------------
+
+ * database changes:
+   * startdate field added (instead of using creation date, still in progress)
+   * renamed opttext and optorder to votes_offset and label, respectively
+   * renamed options to choices
+   * added algorithm active/closed status, runtime, uselist and maxchoices to decisions table
+ * new functionalities:
+   * electoral list can be turned off, per decision, the permission system is used when turned off
+   * votes and electoral lists are now tabs
+   * votes can be canceled when decision is still opened
+   * results can be viewed even if user can't vote
+   * borda count voting algorithm
+   * each voting algorithm (borda vs ivr) is now selectable per decision
+   * each voting method (poll vs ranking) is now a content type (http://drupal.org/cvs?commit=42651)
+   * the results bar is now themable (http://drupal.org/cvs?commit=42136)
+   * maximum number of choices per decision
+   * cron job for closing decisions past their runtime
+   * ranking inputs are now selects instead of text boxes
+   * added "administer decisions" permission
+ * bugfixes
+   * ranking method now gives valid results, random drop on ties
+   * multiple votes with limited counts on poll and ranking now works properly
+ * administrativa
+   * runoff is now named "ranking"
+   * module forked into advpoll.module by Chris Kennedy
+   * added a SYNC.txt file to follow the advpoll.module fork
+
+Beginning of this CHANGELOG - 2006-08-11
+----------------------------------------
+
+Major changes prior to this date were not properly documented.
+
+You can still browse the cvs changelog using drupal.org for previous changes at
+http://drupal.org/project/cvs/48244
+
+Decisions 4.7 tagged - 2006-02-14 23:16
+---------------------------------------
+
+No functional change since 0.1.
+
+Decisions 0.1 - 2006-02-07 14:45EST
+-----------------------------------
+
+ * electoral lists
+ * instant-runoff voting
+ * first drupal module release

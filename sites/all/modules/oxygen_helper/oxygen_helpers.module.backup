@@ -1,0 +1,440 @@
+<?php
+
+
+
+/**
+* Valid Permission for this module
+*/
+
+function oxygen_helpers_perm() 
+{
+        return array('access helper content');
+}
+
+/*cron function */
+function oxygen_helpers_cron() 
+{
+	/********** copy oxygen homepage to a static file *****************/
+	if(db_is_active())
+	{
+		$ch = curl_init("http://features.oxygen.com/oxygencom-homepage");
+		$fp = fopen("/mnt/docroots/oxygen/sites/all/themes/features/homepage/static-oxygen-homepage", "w"); //this path only works in production
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_exec($ch);
+		curl_close($ch);
+		fclose($fp); 
+	}
+}
+
+function oxygen_helpers_menu() 
+{
+
+  $items = array();
+  // Author blog RSS.  
+  $items['dartOmniJSON/%/%'] = array(
+    'title' => 'oxygen_helpers',
+    'page callback' => 'get_dart_omni_json',
+    'page arguments' => array(1,2), // argument 1 is showid, argument 2 is content type
+    'access arguments' => array('access helper content'),
+    'type' => MENU_CALLBACK
+  );
+  
+
+  return $items;
+}
+
+
+function get_dart_omni_json($showID, $contentType) 
+{
+	/****example use with jquery:: shows = $.getScript("/dartOmniJSON/ATB/photo"); ***/
+	 
+	drupal_json(); //change headers to javascript
+
+	
+	//echo "Show ID is" . $showID . " and content type is: " . $contentType; 
+	$photosNodeResults = db_query("SELECT *
+									FROM dart_omni_values
+									WHERE show_code = '$showID'
+									AND content_type = '$contentType'");
+ 
+	while ($currentResult = db_fetch_object($photosNodeResults))
+	{
+		$json_show_code 		= $currentResult->show_code;
+		$json_content_type 		= $currentResult->content_type;
+		$json_DART_show 		= $currentResult->DART_show;
+		$json_DART_sect 		= $currentResult->DART_sect;
+		$json_DART_genre 		= $currentResult->DART_genre;
+		$json_DART_categories 	= $currentResult->DART_categories;
+		$json_DART_daypart 		= $currentResult->DART_daypart ;
+		$json_OMNI_prop10 		= $currentResult->OMNI_prop10;
+		$json_OMNI_prop2 		= $currentResult->OMNI_prop2;
+		$json_OMNI_prop3 		= $currentResult->OMNI_prop3;
+		$json_OMNI_prop4_prefix = $currentResult->OMNI_prop4_prefix;
+		$json_OMNI_prop5 		= $currentResult->OMNI_prop5;
+		$json_OMNI_prop7 		= $currentResult->OMNI_prop7;
+		$json_show_name 		= $currentResult->show_name;
+		
+		
+	}
+
+	print 'var shows = 
+		{
+		"WebpageTitle" : "'.$json_show_name.'",
+		"ShowCode" : "'.$json_show_code.'",
+		"Dart" : {
+					"show" : "'.$json_DART_show.'", 
+					"sect" : "'.$json_DART_sect.'", 
+					"genre": "'.$json_DART_genre.'", 
+					"categories" : "'.$json_DART_categories.'",
+					"daypart" : "'.$json_DART_daypart.'"},
+		
+		"Omniture" : {
+					"prop10" : "'.$json_OMNI_prop10.'", 
+					"prop2" : "'.$json_OMNI_prop2.'", 
+					"prop3" : "'.$json_OMNI_prop3.'", 
+					"prop5" : "'.$json_OMNI_prop5.'", 
+					"prop7" : "'.$json_OMNI_prop7.'", 
+					"prop4Prefix" : 
+					"'.$json_OMNI_prop4_prefix.'"}
+		
+		};';
+}
+
+
+//Oxygen helper functions used by various modules all around the world.
+
+
+// Convert show_id to Show Name for linking (particularly on photo.oxygen.com pages)
+
+function oxygen_helpers_show_id_to_name($site_id) {
+    
+    		switch($site_id) {
+			case 'TD':
+				return "Tori and Dean";
+                                
+			case 'DYAO':
+				return "Dance Your Ass Off";
+
+			case 'NK':
+				return "Naughty Kitchen";
+
+			case 'ATB':
+				return "Addicted to Beauty";
+
+			case 'BGC':
+				return "Bad Girls Club";				
+                            
+			default:
+				return "Oxygen Website";
+							
+		}
+
+}
+
+
+// Convert show_id to URL for linking (particularly on photo.oxygen.com pages)
+
+function oxygen_helpers_show_id_to_url($site_id) {
+    
+    		switch($site_id) {
+			case 'TD':
+				return "http://tori-and-dean.oxygen.com";
+
+			case 'DYAO':
+				return "http://dyao.oxygen.com";
+
+			case 'NK':
+				return "http://naughty-kitchen.oxygen.com";
+
+			case 'ATB':
+				return "http://addicted-to-beauty.oxygen.com";
+
+			case 'BGC':
+				return "http://bad-girls-club.oxygen.com";
+				
+			default:
+				return "http://photos.oxygen.com";
+							
+		}
+
+}
+
+
+//theme name to taxonomy Site_ID
+
+function oxygen_helpers_theme_to_show_id($theme_name) {
+
+        switch ($theme_name) {
+
+                case ($theme_name == 'torianddean'):
+                        $show_id = "TD";
+                        break;
+                case ($theme_name == 'danceyourassoff'):
+                        $show_id = "DYAO";
+                        break;
+                case ($theme_name == 'addictedtobeauty'):
+                        $show_id = "ATB";
+                        break;
+                case ($theme_name == 'naughtykitchen'):
+                        $show_id = "NK";
+                        break;
+						
+				case ($theme_name == 'badgirlsclub'):
+                        $show_id = "BGC";
+                        break;
+						
+                case ($theme_name == 'photos'):
+                        $show_id = "PHOTOS";
+                default:
+                        
+                        break;
+
+
+        }
+
+        return $show_id;
+
+}
+
+
+
+
+//time conversion (used for tweet-O-verse and for comments)
+
+function oxygen_helpers_distanceOfTimeInWords($fromTime, $toTime, $showLessThanAMinute = true) {
+    $distanceInSeconds = round(abs($toTime - $fromTime));
+    $distanceInMinutes = round($distanceInSeconds / 60);
+
+        if ( $distanceInMinutes <= 1 ) {
+            if ( !$showLessThanAMinute ) {
+                return ($distanceInMinutes == 0) ? 'less than a minute' : '1 minute';
+            } else {
+                if ( $distanceInSeconds < 5 ) {
+                    return 'less than 5 seconds';
+                }
+                if ( $distanceInSeconds < 10 ) {
+                    return 'less than 10 seconds';
+                }
+                if ( $distanceInSeconds < 20 ) {
+                    return 'less than 20 seconds';
+                }
+                if ( $distanceInSeconds < 40 ) {
+                    return 'about half a minute';
+                }
+                if ( $distanceInSeconds < 60 ) {
+                    return 'less than a minute';
+                }
+
+                return '1 minute';
+            }
+        }
+        if ( $distanceInMinutes < 45 ) {
+            return $distanceInMinutes . ' minutes';
+        }
+        if ( $distanceInMinutes < 90 ) {
+            return 'about 1 hour';
+        }
+        if ( $distanceInMinutes < 1440 ) {
+            return 'about ' . round(floatval($distanceInMinutes) / 60.0) . ' hours';
+        }
+        if ( $distanceInMinutes < 2880 ) {
+            return '1 day';
+        }
+        if ( $distanceInMinutes < 43200 ) {
+            return 'about ' . round(floatval($distanceInMinutes) / 1440) . ' days';
+        }
+        if ( $distanceInMinutes < 86400 ) {
+            return 'about 1 month';
+        }
+        if ( $distanceInMinutes < 525600 ) {
+            return round(floatval($distanceInMinutes) / 43200) . ' months';
+        }
+        if ( $distanceInMinutes < 1051199 ) {
+            return 'about 1 year';
+        }
+
+        return 'over ' . round(floatval($distanceInMinutes) / 525600) . ' years';
+}
+
+//function to take xml and parse as array ... used for tweet-o-verse and RSS feeds.
+
+function oxygen_helpers_xml2array($url, $get_attributes = 1, $priority = 'tag')
+{
+    $contents = "";
+    if (!function_exists('xml_parser_create'))
+    {
+        print "error:xml_parser_create";
+        return array ();
+    }
+    $parser = xml_parser_create('');
+    if (!($fp = @ fopen($url, 'rb')))
+    {
+        print "error:fopen";
+        return array ();
+    }
+    while (!feof($fp))
+    {
+        $contents .= fread($fp, 8192);
+    }
+    fclose($fp);
+    xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "UTF-8");
+    xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+    xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+    xml_parse_into_struct($parser, trim($contents), $xml_values);
+    xml_parser_free($parser);
+    if (!$xml_values)
+        return; //Hmm...
+    $xml_array = array ();
+    $parents = array ();
+    $opened_tags = array ();
+    $arr = array ();
+    $current = & $xml_array;
+    $repeated_tag_index = array ();
+    foreach ($xml_values as $data)
+    {
+        unset ($attributes, $value);
+        extract($data);
+        $result = array ();
+        $attributes_data = array ();
+        if (isset ($value))
+        {
+            if ($priority == 'tag')
+                $result = $value;
+            else
+                $result['value'] = $value;
+        }
+        if (isset ($attributes) and $get_attributes)
+        {
+            foreach ($attributes as $attr => $val)
+            {
+                if ($priority == 'tag')
+                    $attributes_data[$attr] = $val;
+                else
+                    $result['attr'][$attr] = $val; //Set all the attributes in a array called 'attr'
+            }
+        }
+        if ($type == "open")
+        {
+            $parent[$level -1] = & $current;
+            if (!is_array($current) or (!in_array($tag, array_keys($current))))
+            {
+                $current[$tag] = $result;
+                if ($attributes_data)
+                    $current[$tag . '_attr'] = $attributes_data;
+                $repeated_tag_index[$tag . '_' . $level] = 1;
+                $current = & $current[$tag];
+            }
+            else
+            {
+                if (isset ($current[$tag][0]))
+                {
+                    $current[$tag][$repeated_tag_index[$tag . '_' . $level]] = $result;
+                    $repeated_tag_index[$tag . '_' . $level]++;
+                }
+                else
+                {
+                    $current[$tag] = array (
+                        $current[$tag],
+                        $result
+                    );
+                    $repeated_tag_index[$tag . '_' . $level] = 2;
+                    if (isset ($current[$tag . '_attr']))
+                    {
+                        $current[$tag]['0_attr'] = $current[$tag . '_attr'];
+                        unset ($current[$tag . '_attr']);
+                    }
+                }
+                $last_item_index = $repeated_tag_index[$tag . '_' . $level] - 1;
+                $current = & $current[$tag][$last_item_index];
+            }
+        }
+        elseif ($type == "complete")
+        {
+            if (!isset ($current[$tag]))
+            {
+                $current[$tag] = $result;
+                $repeated_tag_index[$tag . '_' . $level] = 1;
+                if ($priority == 'tag' and $attributes_data)
+                    $current[$tag . '_attr'] = $attributes_data;
+            }
+            else
+            {
+                if (isset ($current[$tag][0]) and is_array($current[$tag]))
+                {
+                    $current[$tag][$repeated_tag_index[$tag . '_' . $level]] = $result;
+                    if ($priority == 'tag' and $get_attributes and $attributes_data)
+                    {
+                        $current[$tag][$repeated_tag_index[$tag . '_' . $level] . '_attr'] = $attributes_data;
+                    }
+                    $repeated_tag_index[$tag . '_' . $level]++;
+                }
+                else
+                {
+                    $current[$tag] = array (
+                        $current[$tag],
+                        $result
+                    );
+                    $repeated_tag_index[$tag . '_' . $level] = 1;
+                    if ($priority == 'tag' and $get_attributes)
+                    {
+                        if (isset ($current[$tag . '_attr']))
+                        {
+                            $current[$tag]['0_attr'] = $current[$tag . '_attr'];
+                            unset ($current[$tag . '_attr']);
+                        }
+                        if ($attributes_data)
+                        {
+                            $current[$tag][$repeated_tag_index[$tag . '_' . $level] . '_attr'] = $attributes_data;
+                        }
+                    }
+                    $repeated_tag_index[$tag . '_' . $level]++; //0 and 1 index is already taken
+                }
+            }
+        }
+        elseif ($type == 'close')
+        {
+            $current = & $parent[$level -1];
+        }
+    }
+    return ($xml_array);
+}
+
+
+
+function oxygen_helpers_truncateText($string, $limit, $break=".", $pad="...") { 
+	// return with no change if string is shorter than $limit  
+	if(strlen($string) <= $limit) return $string; 
+
+	// is $break present between $limit and the end of the string?  
+	if(false !== ($breakpoint = strpos($string, $break, $limit))) { 
+
+		if($breakpoint < strlen($string) - 1) 
+		{ 
+			$string = substr($string, 0, $breakpoint) . $pad;
+		}
+	} 
+	return $string;
+}
+
+
+
+
+/* For a given node, finds selected taxonomy value for given vid.  
+	Defaults to vid 5 for show id. 
+	EXAMPLE USE: oxygen_helpers_get_taxonomy_name_from_node_vid($node, 6)
+*/
+function oxygen_helpers_get_taxonomy_name_from_node_vid($targetNode, $vid = 5)
+{
+	
+	$taxonomyArray = $targetNode->taxonomy;
+	foreach($taxonomyArray AS $currentTaxonomy)
+	{
+		if($currentTaxonomy->vid == $vid)
+		{
+			$targetValue = $targetNode->taxonomy[$currentTaxonomy->tid]->name;
+			return $targetValue;
+
+		}
+	}
+}

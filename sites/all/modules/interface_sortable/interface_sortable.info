@@ -1,0 +1,11 @@
+name = JQuery Interface Sortable
+description = Module that provides a drag-and-drop sortable form element that depends on the JQuery Interface library.
+package = User Interface
+dependencies[] = jquery_interface
+
+; Information added by drupal.org packaging script on 2011-02-25
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "interface_sortable"
+datestamp = "1298619460"
+

@@ -1,0 +1,5 @@
+;$Id:$
+name = Oxygen poll
+description = to be determined
+core = 6.x
+package = Code by P6

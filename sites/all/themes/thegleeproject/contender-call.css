@@ -1,0 +1,142 @@
+/* CSS Document */
+
+div.contender-call-wrapper {
+	background-image:url(/sites/all/themes/thegleeproject/images/contender-call/main-bkg.jpg);
+	background-repeat:repeat-x;
+	
+	}
+	div.contender-call-wrapper div.contender-call-left {
+		width:281px;
+		float:left;
+		background-color:#282828;
+		background-image:url(/sites/all/themes/thegleeproject/images/contender-call/left-bkg.gif);
+		background-repeat:repeat-x;
+		background-repeat:top left;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:11px;
+		color:white;
+		height:650px;
+	}
+	div.contender-call-wrapper div.contender-call-left div.inner {
+		padding:30px 17px;
+	}
+	div.contender-call-wrapper div.contender-call-left div.inner div.rules-link {
+		width:190px;
+		margin:auto;
+	}
+	div.contender-call-wrapper div.contender-call-left div.inner p.clear {
+		clear:left;
+	}
+	div.contender-call-wrapper div.contender-call-left ul{
+		color:black;
+		list-style:inside;
+		font-size:14px;
+		background-color:#6f6f6f;
+		margin:0px;
+		padding:0px;
+		width:190px;
+		}
+		div.contender-call-wrapper div.contender-call-left div.rules-link p {
+			float:left;
+			margin:0px;
+			margin-bottom:5px;
+			width:160px;
+			background-color:#6f6f6f;
+			padding:5px;
+			padding-left:30px;
+			}
+			div.contender-call-wrapper div.contender-call-left div.rules-link p a {
+				color:white;
+				text-decoration:none;
+				width:175px;
+				font-size:14px;
+				background-image:url(/sites/all/themes/thegleeproject/images/contender-call/bullet.gif);
+				background-position:left center;
+				background-repeat:no-repeat;
+				padding-left:13px;
+			}
+			div.contender-call-wrapper div.contender-call-left div.rules-link p a:hover {
+				text-decoration:underline;
+			}
+	div.contender-call-wrapper div.contender-call-right {
+		width:660px;
+		float:left;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:13px;
+		}
+		div.contender-call-wrapper div.contender-call-right h1 {
+			margin:0px;
+			padding:0px;
+			height:95px;
+			background-image:url(/sites/all/themes/thegleeproject/images/contender-call/h1-bkg.jpg);
+			background-repeat:no-repeat;
+			background-position:top left;
+			width:616px;
+			display:block;
+			}
+			div.contender-call-wrapper div.contender-call-right h1 span {
+				display:none;
+				}
+		div.contender-call-wrapper div.contender-call-right div.inner {
+			padding-left:20px;
+			width:500px;
+			}
+			div.contender-call-wrapper div.contender-call-right div.inner a {
+				color:red;
+				font-weight:bold;
+				text-decoration:none;
+			}
+			div.contender-call-wrapper div.contender-call-right div.inner div.share-social {
+				background-image:url(/sites/all/themes/thegleeproject/images/contender-call/share-social.png);
+				background-repeat:no-repeat;
+				width:402px;
+				height:82px;
+				margin-top:45px;
+				}
+				div.contender-call-wrapper div.contender-call-right div.inner div.share-social div.left {
+					float:left;
+					padding-top:47px;
+					width:100px;
+					margin-left:95px;
+					text-align:right;
+				}
+				div.contender-call-wrapper div.contender-call-right div.inner div.share-social div.right {
+					float:right;	
+					padding-top:45px;
+					width:100px;
+					margin-right:100px;				
+				}
+			div.contender-call-wrapper div.contender-call-right div.inner p small {
+				font-size:9px;
+				padding-left:3px;
+			}
+			div.contender-call-wrapper div.contender-call-right div.inner form p label {
+				width:170px;
+				display:block;
+				float:left;
+			}
+			div.contender-call-wrapper div.contender-call-right div.inner form p input.txt_field {
+				background-color:#ccc;
+				font-size:12px;
+				border:0px;
+				color:black;
+				padding:2px;
+				width:175px;
+			}
+			div.contender-call-wrapper div.contender-call-right div.inner form p input.txt_field_small {
+				background-color:#ccc;
+				font-size:12px;
+				border:0px;
+				color:black;
+				padding:2px;
+				width:75px;
+			}
+			div.contender-call-wrapper div.contender-call-right div.inner p.thank-you {
+				font-size:19px;
+			}
+	div.contender-call-wrapper div.clear {
+		clear:both;
+		height:1px;
+		overflow:hidden;
+	}
+

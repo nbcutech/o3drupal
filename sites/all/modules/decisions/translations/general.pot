@@ -1,0 +1,609 @@
+# $Id: general.pot,v 1.1 2009/07/31 16:44:48 anarcat Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  decisions.module,v 1.219 2009/07/30 23:13:45 anarcat
+#  ranking.module,v 1.20 2009/07/30 22:16:32 anarcat
+#  selection.module,v 1.13 2009/07/27 23:25:43 anarcat
+#  decisions.info,v 1.9 2008/11/26 17:28:15 anarcat
+#  ranking.info,v 1.3 2008/11/26 17:22:26 anarcat
+#  selection.info,v 1.3 2008/11/26 17:22:26 anarcat
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-07-31 12:41-0400\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: decisions.module:59;65
+msgid "Decisions - Newest"
+msgstr ""
+
+#: decisions.module:108
+msgid "Allow people to reproduce and surpass the kinds of decision-making instances that exist in face-to-face meetings."
+msgstr ""
+
+#: decisions.module:194;1468
+msgid "Disabled"
+msgstr ""
+
+#: decisions.module:194;1468
+msgid "Enabled"
+msgstr ""
+
+#: decisions.module:198
+msgid "Use electoral list by default"
+msgstr ""
+
+#: decisions.module:199
+msgid "Use an electoral list by default for new decisions."
+msgstr ""
+
+#: decisions.module:205
+msgid "Always"
+msgstr ""
+
+#: decisions.module:206
+msgid "After user has voted"
+msgstr ""
+
+#: decisions.module:207
+msgid "After voting has closed"
+msgstr ""
+
+#: decisions.module:212
+msgid "When should results be displayed"
+msgstr ""
+
+#: decisions.module:213
+msgid "Determines when users may view the results of the decision."
+msgstr ""
+
+#: decisions.module:223
+msgid "Cancel your vote"
+msgstr ""
+
+#: decisions.module:247
+msgid "Your vote has been recorded."
+msgstr ""
+
+#: decisions.module:262
+msgid "Current date: @date"
+msgstr ""
+
+#: decisions.module:263
+msgid "Opening date: @date"
+msgstr ""
+
+#: decisions.module:265
+msgid "No closing date."
+msgstr ""
+
+#: decisions.module:266
+msgid "Closing date: @date"
+msgstr ""
+
+#: decisions.module:273
+msgid "@num-voters out of @num-voters-eligible eligible @voters cast their ballot"
+msgstr ""
+
+#: decisions.module:286
+msgid "Quorum: @d"
+msgstr ""
+
+#: decisions.module:347;391
+msgid "Administer electoral list"
+msgstr ""
+
+#: decisions.module:355;399
+msgid "Add user"
+msgstr ""
+
+#: decisions.module:358;402
+msgid "Add an individual user to the electoral list"
+msgstr ""
+
+#: decisions.module:363;407
+msgid "Modify electoral list"
+msgstr ""
+
+#: decisions.module:368;412;463
+msgid "Reset electoral list"
+msgstr ""
+
+#: decisions.module:418
+msgid "This table lists all the eligible voters for this Decision."
+msgstr ""
+
+#: decisions.module:420
+msgid "Voter"
+msgstr ""
+
+#: decisions.module:428
+msgid "remove"
+msgstr ""
+
+#: decisions.module:450
+msgid "%user removed from the electoral list."
+msgstr ""
+
+#: decisions.module:453
+msgid "No user found with a uid of %uid."
+msgstr ""
+
+#: decisions.module:466
+msgid "Electoral list cleared."
+msgstr ""
+
+#: decisions.module:469
+msgid "Electoral list reset."
+msgstr ""
+
+#: decisions.module:478
+msgid "User %user does not exist."
+msgstr ""
+
+#: decisions.module:483
+msgid "Please enter a user."
+msgstr ""
+
+#: decisions.module:496
+msgid "%user added to electoral list."
+msgstr ""
+
+#: decisions.module:549
+msgid "Your vote was registered."
+msgstr ""
+
+#: decisions.module:592
+msgid "You are not eligible to vote on this decision."
+msgstr ""
+
+#: decisions.module:605
+msgid "Element returned by the call to function @function is not an array, returning dummy value."
+msgstr ""
+
+#: decisions.module:609
+msgid "Array returned by the call to function @function is empty, returning dummy value."
+msgstr ""
+
+#: decisions.module:638
+msgid "Your vote was canceled."
+msgstr ""
+
+#: decisions.module:641
+msgid "You are not allowed to cancel an invalid choice."
+msgstr ""
+
+#: decisions.module:661
+msgid "This table lists all the recorded votes for this Decision. If anonymous users are allowed to vote, they will be identified by the IP address of the computer they used when they voted."
+msgstr ""
+
+#: decisions.module:663
+msgid "Visitor"
+msgstr ""
+
+#: decisions.module:664 modes/ranking.module:113 modes/selection.module:85
+msgid "Vote"
+msgstr ""
+
+#: decisions.module:717
+msgid "Are you sure you want to reset the votes for !title?"
+msgstr ""
+
+#: decisions.module:720
+msgid "This action cannot be undone."
+msgstr ""
+
+#: decisions.module:721;165
+msgid "Reset votes"
+msgstr ""
+
+#: decisions.module:722
+msgid "Cancel"
+msgstr ""
+
+#: decisions.module:803;802
+msgid "Unknown decision mode : @mode in \"@function\"."
+msgstr ""
+
+#: decisions.module:912
+msgid "January"
+msgstr ""
+
+#: decisions.module:912
+msgid "February"
+msgstr ""
+
+#: decisions.module:912
+msgid "March"
+msgstr ""
+
+#: decisions.module:912
+msgid "April"
+msgstr ""
+
+#: decisions.module:912
+msgid "May"
+msgstr ""
+
+#: decisions.module:912
+msgid "June"
+msgstr ""
+
+#: decisions.module:912
+msgid "July"
+msgstr ""
+
+#: decisions.module:912
+msgid "August"
+msgstr ""
+
+#: decisions.module:912
+msgid "September"
+msgstr ""
+
+#: decisions.module:912
+msgid "October"
+msgstr ""
+
+#: decisions.module:912
+msgid "November"
+msgstr ""
+
+#: decisions.module:912
+msgid "December"
+msgstr ""
+
+#: decisions.module:915
+msgid "g"
+msgstr ""
+
+#: decisions.module:917
+msgid "am"
+msgstr ""
+
+#: decisions.module:917
+msgid "pm"
+msgstr ""
+
+#: decisions.module:920
+msgid "H"
+msgstr ""
+
+#: decisions.module:1022
+msgid "No active decisions."
+msgstr ""
+
+#: decisions.module:1106;1174
+msgid "The specified close date is less than the opening date, setting it to the same for now."
+msgstr ""
+
+#: decisions.module:1149
+msgid "You must fill in at least two choices."
+msgstr ""
+
+#: decisions.module:1155
+msgid "The specified close date is less than the opening date."
+msgstr ""
+
+#: decisions.module:1278
+msgid "This decision is not valid. You will not be able to see it until the quorum is met. The quorum is set at @quorum."
+msgstr ""
+
+#: decisions.module:1281
+msgid "This decision is currently closed."
+msgstr ""
+
+#: decisions.module:1286
+msgid "This decision is not yet opened."
+msgstr ""
+
+#: decisions.module:1289
+msgid "This decision is now closed."
+msgstr ""
+
+#: decisions.module:1325
+msgid "Choice @n"
+msgstr ""
+
+#: decisions.module:1362
+msgid "Question"
+msgstr ""
+
+#: decisions.module:1369 modes/ranking.module:40
+msgid "Description"
+msgstr ""
+
+#: decisions.module:1393
+msgid "Add more choices"
+msgstr ""
+
+#: decisions.module:1394
+msgid "Click this button to add more choices to this form."
+msgstr ""
+
+#: decisions.module:1408
+msgid "Decision choices"
+msgstr ""
+
+#: decisions.module:1409
+msgid "Enter all available choices here. Leave text box empty to delete a choice."
+msgstr ""
+
+#: decisions.module:1424
+msgid "Decision settings"
+msgstr ""
+
+#: decisions.module:1432
+msgid "Maximum Choices"
+msgstr ""
+
+#: decisions.module:1435
+msgid "Limits the total number of choices voters may select."
+msgstr ""
+
+#: decisions.module:1449
+msgid "Algorithm"
+msgstr ""
+
+#: decisions.module:1452
+msgid "Voting algorithm to use to calculate the winner."
+msgstr ""
+
+#: decisions.module:1459
+msgid "Active"
+msgstr ""
+
+#: decisions.module:1459
+msgid "Closed"
+msgstr ""
+
+#: decisions.module:1462
+msgid "Decision Status"
+msgstr ""
+
+#: decisions.module:1465
+msgid "When a decision is closed users may no longer vote on it."
+msgstr ""
+
+#: decisions.module:1471
+msgid "Restrict voting to electoral list"
+msgstr ""
+
+#: decisions.module:1472
+msgid "If enabled, a list of eligible voters will be created and only that group will be able to vote in the decision."
+msgstr ""
+
+#: decisions.module:1479
+msgid "Show individual votes"
+msgstr ""
+
+#: decisions.module:1480
+msgid "Users with the appropriate permissions will be able to see how each person voted."
+msgstr ""
+
+#: decisions.module:1487
+msgid "Date options"
+msgstr ""
+
+#: decisions.module:1503
+msgid "Opening date"
+msgstr ""
+
+#: decisions.module:1509
+msgid "No closing date"
+msgstr ""
+
+#: decisions.module:1511
+msgid "Check this box if you do not want the vote to close on a specific date."
+msgstr ""
+
+#: decisions.module:1520
+msgid "Closing date"
+msgstr ""
+
+#: decisions.module:1528
+msgid "Quorum"
+msgstr ""
+
+#: decisions.module:1532
+msgid "These settings allow for a decision to be valid only if a certain number of eligible voters have cast their ballot. It can be configured both with an absolute number and a percentage of eligible voters. For example, a common setting is \"50% + 1\", which would be expressed as \"@percent: 50\" and \"@number: 1\". Note that the quorum has no impact on the winning conditions."
+msgstr ""
+
+#: decisions.module:1532;1547
+msgid "Percentage (%)"
+msgstr ""
+
+#: decisions.module:1532;1538
+msgid "Number"
+msgstr ""
+
+#: decisions.module:1541
+msgid "Minimum number of voters required to cast their ballot for this decision to be valid, in addition to the percentage."
+msgstr ""
+
+#: decisions.module:1550
+msgid "Minimum numbers of voters required for this decision to be valid, expressed as a percentage of the eligible voters rounded up."
+msgstr ""
+
+#: decisions.module:802
+msgid "decisions"
+msgstr ""
+
+#: decisions.module:277
+msgid "voter"
+msgid_plural "voters"
+msgstr[0] ""
+msgstr[1] ""
+
+#: decisions.module:186
+msgid "create decisions"
+msgstr ""
+
+#: decisions.module:186
+msgid "delete decisions"
+msgstr ""
+
+#: decisions.module:186
+msgid "view decisions"
+msgstr ""
+
+#: decisions.module:186
+msgid "vote on decisions"
+msgstr ""
+
+#: decisions.module:186
+msgid "cancel own vote"
+msgstr ""
+
+#: decisions.module:186
+msgid "administer decisions"
+msgstr ""
+
+#: decisions.module:186
+msgid "inspect all votes"
+msgstr ""
+
+#: decisions.module:186
+msgid "view electoral list"
+msgstr ""
+
+#: decisions.module:186
+msgid "remove voters"
+msgstr ""
+
+#: decisions.module:121
+msgid "Configure decisions"
+msgstr ""
+
+#: decisions.module:122
+msgid "Configure Decisions"
+msgstr ""
+
+#: decisions.module:130
+msgid "Votes"
+msgstr ""
+
+#: decisions.module:139
+msgid "Results"
+msgstr ""
+
+#: decisions.module:147
+msgid "Electoral list"
+msgstr ""
+
+#: decisions.info:0
+msgid "Decisions"
+msgstr ""
+
+#: decisions.info:0
+msgid "An advanced voting module that includes plurarity voting, instant-runoff voting, and electoral lists."
+msgstr ""
+
+#: decisions.info:0 modes/ranking.info:0 modes/selection.info:0
+msgid "Voting"
+msgstr ""
+
+#: modes/ranking.module:22
+msgid "Creates a vote where n options are ranked from 1 to n."
+msgstr ""
+
+#: modes/ranking.module:39
+msgid "Ranking decision"
+msgstr ""
+
+#: modes/ranking.module:49
+msgid "Instant run-off voting, also known as IVR or Alternative Voting, is an algorithm by which the candidate having the least ballots gets its votes redistributed to the other candidates. See <a href=\"http://en.wikipedia.org/wiki/Instant-runoff_voting\">Instant runoff voting on Wikipedia</a> for more information."
+msgstr ""
+
+#: modes/ranking.module:50
+msgid "Borda count is an algorithm by which each candidate gets a number of points assigned based on the number of candidates standing. See the <a href=\"http://en.wikipedia.org/wiki/Borda_count\">Borda count article on Wikipedia</a> for more information."
+msgstr ""
+
+#: modes/ranking.module:73
+msgid "1st"
+msgstr ""
+
+#: modes/ranking.module:76
+msgid "2nd"
+msgstr ""
+
+#: modes/ranking.module:79
+msgid "3rd"
+msgstr ""
+
+#: modes/ranking.module:82
+msgid "!{num}th"
+msgstr ""
+
+#: modes/ranking.module:90
+msgid "Choices"
+msgstr ""
+
+#: modes/ranking.module:91
+msgid "Rank the following options in your prefered order, the lower the number the better"
+msgstr ""
+
+#: modes/ranking.module:133
+msgid "Results: "
+msgstr ""
+
+#: modes/ranking.module:263
+msgid "@num choices were selected but only @max are allowed."
+msgstr ""
+
+#: modes/ranking.module:270 modes/selection.module:234
+msgid "At least one choice must be selected."
+msgstr ""
+
+#: modes/ranking.module:277
+msgid "Multiple choices given the rank of @val."
+msgstr ""
+
+#: modes/selection.module:18;26
+msgid "Creates a decision where the user selects one or many options."
+msgstr ""
+
+#: modes/selection.module:26
+msgid "Decisions - selection"
+msgstr ""
+
+#: modes/selection.module:38
+msgid "The plurality algorithm determines the winner based solely on the number of votes received: the one with the larger number of votes wins. See the <a href=\"http://en.wikipedia.org/wiki/Plurality_voting_system\">Plurality voting system on Wikipedia</a> for more information"
+msgstr ""
+
+#: modes/selection.module:226
+msgid "%num choices were selected but only %max are allowed."
+msgstr ""
+
+#: modes/selection.module:125
+msgid "1 vote"
+msgid_plural "@count votes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: modes/ranking.info:0
+msgid "Ranking"
+msgstr ""
+
+#: modes/ranking.info:0
+msgid "A decision mode for the Decisions module that allows voters to rank choices."
+msgstr ""
+
+#: modes/selection.info:0
+msgid "Selection"
+msgstr ""
+
+#: modes/selection.info:0
+msgid "A decision mode for the Decisions module that allows select one or many options."
+msgstr ""
+

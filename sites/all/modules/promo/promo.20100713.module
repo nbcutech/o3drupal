@@ -1,0 +1,1939 @@
+<?php
+// $Id$
+
+
+//function promo_menu() {
+//  $item['admin/settings/promo'] = array(
+//    'title' => 'Promo settings',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('promo_next_show_settings_form'),
+//  	'access arguments' => array('administer promo_ settings'),
+//    'type' => MENU_NORMAL_ITEM,
+//  );
+//  $item['admin/settings/promo/next_show'] = array(
+//    'title' => 'Promo settings: Next show',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('promo_next_show_settings_form'),
+//  	'access arguments' => array('administer promo_ settings'),
+//    'type' => MENU_DEFAULT_LOCAL_TASK,
+//  );
+//  return $item;
+//}
+
+function promo_next_show_settings_form() {
+  promo_cache_clear();
+  $form = array(
+    'promo_show_listing' => array(
+      '#type' => 'textarea',
+      '#title' => 'Show listings',
+      '#description' => 'Add one line per show, separated by commas. Ex: torianddean=Next Episode: Tuesday 10/9c,danceyourassoff=Next Episode: Monday 10/9c',
+      '#rows' => 6,
+      '#default_value' => variable_get('promo_show_listing', array()),
+      '#required' => true,
+    ),
+  );
+  $form['buttons']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration') );
+  $form['buttons']['reset'] = array('#type' => 'submit', '#value' => t('Reset to defaults') );
+
+//  $form['#submit'][] = 'system_settings_form_submit';
+  $form['#theme'] = 'system_settings_form';
+  return $form;
+}
+
+function promo_get_next_show_setting() {
+  STATIC $promo_show_listings;
+  if (!isset($promo_show_listings)) {
+    $show_listings = explode(',', variable_get('promo_show_listing', ''));
+    foreach ($show_listings  as $listing_data) {
+      $listing = explode('=', $listing_data);
+      $promo_show_listings[ltrim(rtrim($listing[0]))] = ltrim(rtrim($listing[1]));
+    }
+  }
+  return $promo_show_listings;
+}
+
+/**
+ * Valid Permission for this module
+ */
+
+function promo_perm() {
+  return array (
+    'access promo_ content', 'administer promo_ settings', 
+  );
+}
+
+// creates the standard promo_ layout
+
+
+function standard_promo($image, $title, $blub, $alt, $link_color, $href, $link_text, $nid, $pot) {
+  global $user;
+  $parsed_url = parse_url($href, PHP_URL_HOST);
+  if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+    $href = $href . '" target="_blank';
+  }
+
+  if ($link_text == "") {
+    $link_text = "View Now";
+  }
+
+  $promo_html .= '<div class="promo_section">';
+
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $promo_html .= " <a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+  }
+
+  $promo_html .= '<div class="promo_individual">
+                                <h3><a class="png promo_img_bkg" title="' . $alt . '" href="' . $href . '" ><img class="promo_img" src="' . $image . '" alt="' . $alt . '" /></a></h3>
+                                <div class="promo_copy"><h4><a class="promoHeader"  title="' . $alt . '" href="' . $href . '">' . $title . '</a></h4><p>' . $blub . '</p><a href="' . $href . '" style="text-decoration:underline;">' . $link_text . '</a></div>
+                        </div>
+                </div>
+        ';
+
+  return $promo_html;
+}
+
+function t_hot_pics($image, $title, $blub, $alt, $link_color, $href, $nid, $pot) {
+  global $user;
+  $promo_html = '
+        <div class="t_hot_pics">';
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $promo_html .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+  }
+
+  $promo_html .= '<h3><img src="/' . $pot . '/images/t_hot_pics_block_BG.png" class="png t_hot_pics_BG" alt="' . $alt . '" /></h3>
+                <h4><a class="png" title="' . $title . '" href="' . $href . '">
+                <img src="' . $image . '" class="t_hot_pics_image"/>
+                </a></h4>
+
+                <div class="t_hot_pics_blurb" style="color:' . $link_color . ';">
+                ' . $blub . '
+                </div>
+        </div>
+';
+
+  return $promo_html;
+}
+
+function t_highlights($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $nid, $pot) {
+  global $user;
+  $parsed_url = parse_url($href, PHP_URL_HOST);
+  if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+    $href = $href . '" target="_blank';
+  }
+
+  if ($link_text == "") {
+    $link_text = "View Now";
+  }
+
+  $promo_html = '
+        <h4><a href="' . $href . '" title="' . $title . '" class="png t_highlights_link' . $i . '"><img src="' . $image . '" class="t_highlights_img" /></a></h4>
+        <div class="t_highlights_blurb' . $i . '">';
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $promo_html .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+  }
+
+  $promo_html .= $blub . ' <a href="' . $href . '" class="t_highlights_anchor">' . $link_text . '</a></div>
+';
+
+  return $promo_html;
+}
+
+function hp_must_watch_video($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $nid, $pot) {
+  global $user;
+  $parsed_url = parse_url($href, PHP_URL_HOST);
+  if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+    $href = $href . '" target="_blank';
+  }
+
+  if ($link_text == "") {
+    $link_text = "Watch Now";
+  }
+
+  $promo_html = '
+        <div class="vid_promo">
+		<a href="' . $href . '" title="' . $title . '" class="png hp_must_watch_video_link' . $i . '"><img src="' . $image . '" class="hp_must_watch_video_img" width="80" height="60" border="0" /></a>
+        <div class="vid_title vid_' . $i . '">' . $title . '</div>';
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $promo_html .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+  }
+
+  $promo_html .= $blub . ' <a href="' . $href . '" class="hp_must_watch_video_anchor">' . $link_text . '</a></div>
+';
+
+  return $promo_html;
+}
+
+function hp_blogs_wide($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $nid, $pot) {
+  global $user;
+  $parsed_url = parse_url($href, PHP_URL_HOST);
+  if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+    $href = $href . '" target="_blank';
+  }
+
+  if ($link_text == "") {
+    $link_text = "Read Now";
+  }
+
+  $promo_html = '
+					
+					<div id="hp_featured_blog">';
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $promo_html .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+  }
+  $promo_html .= '
+						<a href="' . $href . '" title="' . $title . '" class="png hp_blogs_wide_link' . $i . '">
+						<img src="' . $image . '" width="280" height="114" border="0" class="hp_blogs_wide_img" alt="blogs">
+						' . $link_text . '</a>
+					</div>			
+					<div id="hp_more_blogs">
+						more blogs
+						' . $blub . '
+					</div>
+				
+				';
+
+  return $promo_html;
+}
+
+function hp_photos_wide($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $nid, $pot) {
+  global $user;
+  $parsed_url = parse_url($href, PHP_URL_HOST);
+  if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+    $href = $href . '" target="_blank';
+  }
+
+  if ($link_text == "") {
+    $link_text = "View Now";
+  }
+
+  $promo_html = '
+					
+					<div id="hp_featured_photos">';
+  if (in_array('abuse moderator', array_values($user->roles))) {
+    $promo_html .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+  }
+  $promo_html .= '
+						<a href="' . $href . '" title="' . $title . '" class="png hp_photos_wide_link' . $i . '">
+						<img src="' . $image . '" width="280" height="114" border="0" class="hp_photos_wide_img" alt="photos">
+						' . $link_text . '</a>
+					</div>			
+					<div id="hp_more_photos">
+						more galleries
+						' . $blub . '
+					</div>
+				
+				';
+
+  return $promo_html;
+}
+
+function promo_block($op = 'list', $delta = 0) {
+  if ($op == "list") {
+    $block [0] ['info'] = t('Promos2-5');
+    $block [1] ['info'] = t('Promos6-8');
+    $block [2] ['info'] = t('Promo1');
+    $block [3] ['info'] = t('t_get_connected');
+    $block [4] ['info'] = t('t_highlights');
+    $block [5] ['info'] = t('t_hot_pics');
+    $block [6] ['info'] = t('t_meet_cast');
+    $block [7] ['info'] = t('t_more_fun');
+    $block [8] ['info'] = t('t_next_show');
+    $block [9] ['info'] = t('t_quizolicious');
+    $block [10] ['info'] = t('t_shopoholic');
+    $block [11] ['info'] = t('t_top_pics');
+    $block [12] ['info'] = t('t_top_videos');
+    $block [13] ['info'] = t('t_tweetoverse ');
+    $block [14] ['info'] = t('Vote');
+    $block [15] ['info'] = t('Our Picks');
+    $block [16] ['info'] = t('t_top_galleries');
+    $block [20] ['info'] = t('hp_promo1');
+    $block [21] ['info'] = t('hp_must_watch_video');
+    $block [22] ['info'] = t('hp_blogs_photos');
+    $block [23] ['info'] = t('hp_music_movies_more');
+    $block [24] ['info'] = t('hp_dont_miss');
+    $block [25] ['info'] = t('t_fluffme');
+    return $block;
+  }
+  else if ($op == 'view') {
+    $site_id = oxygen_helpers_theme_to_show_id($GLOBALS['theme_key']);
+
+//    $oxygen_block = promo_cache_get('promo'.$site_id.$delta);
+//    if ($oxygen_block) {
+//      return $oxygen_block;
+//    }
+//    else {
+      switch ($delta) {
+        case 0 :
+          $oxygen_block = promo_promos2_5();
+          break;
+  
+        case 1 :
+          $oxygen_block = promo_promos6_8();
+          break;
+  
+          //Promo1
+        case 2 :
+          $oxygen_block = promo_promo1();
+          break;
+  
+        case 3 : // t_get_connected *+*+*+*
+          $oxygen_block = promo_t_get_connected();
+          break;
+  
+        case 4 : // t_highlights *+*+*+*
+          $oxygen_block = promo_t_highlights();
+          break;
+  
+        case 5 : // t_hot_pics *+*+*+*
+          $oxygen_block = promo_t_hot_pics();
+          break;
+  
+        case 8 : // t_next_show
+          $oxygen_block = promo_t_next_show();
+          break;
+  
+        case 16 : //t_top_galleries
+          $oxygen_block = promo_t_top_galleries();
+          break;
+  
+        case 12 : //t_top_videos   @@@@
+          $oxygen_block = promo_t_top_videos();
+          break;
+  
+        case 13 : //t_tweetoverse
+          $oxygen_block = promo_t_tweetoverse();
+          break;
+  
+        case 15 : //our_picks  *+*+*+*+*
+          $oxygen_block = promo_our_picks();
+          break;
+  
+        case 20 : // hp_promo1
+          $oxygen_block = promo_hp_promo1();
+          break;
+  
+        case 21 : // hp_must_watch_video
+          //global $theme_key;
+          $oxygen_block = promo_hp_must_watch_video();
+          break;
+  
+        case 22 : // hp_blogs_photos
+          $oxygen_block = promo_hp_blogs_photos();
+          break;
+  
+        case 23 : // hp_music_movies_more
+          $oxygen_block = promo_hp_music_movies_more();
+          break;
+  
+        case 24 : // hp_dont_miss
+          $oxygen_block = promo_hp_dont_miss();
+          break;
+  
+          /// **** ///
+        case ($delta == 6 || $delta == 7 || $delta == 9 || $delta == 10 || $delta == 25) :
+          $oxygen_block = promo_standard_promo($delta);
+          break;
+      }
+//      promo_cache_set('promo'.$site_id.$delta, $oxygen_block);
+      return $oxygen_block;
+    }
+  }
+//}
+
+function promo_cron() {
+  promo_cache_clear();
+}
+
+function promo_standard_promo($delta) {
+  global $theme_key;
+   
+  $site_id = oxygen_helpers_theme_to_show_id($theme_key);
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+
+
+    //This array needs to be updates if you ever add more promos to this case.  Case => Number of Entries,
+    $case_entries = array (
+      6 => array (
+        'entries' => 3, 'theme' => 't_meet_cast' 
+      ), 
+      7 => array (
+        'entries' => 5, 'theme' => 't_more_fun' 
+      ), 
+      9 => array (
+      	'entries' => 1, 'theme' => 't_quizolicious' 
+      ), 
+      10 => array (
+        'entries' => 1, 'theme' => 't_shopoholic' 
+      ),
+      25 => array (
+        'entries' => 3, 'theme' => 't_fluffme' 
+      )
+    );
+
+    $promo_type = $case_entries [$delta] ['theme'];
+    $number_of_entries = $case_entries [$delta] ['entries'];
+
+    $block_content = "";
+
+    $block_content = '<img class="png promo_section_header" src="/' . $pot . '/images/' . $promo_type . '_block_header.png" />';
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $result_list = db_fetch_object($result);
+
+      $promo_node = node_load($result_list->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+      $block_content .= standard_promo($image, $title, $blub, $alt, $link_color, $href, $link_text, $promo_node->nid, $pot);
+
+    }
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+
+    return $block;
+}
+
+function promo_hp_dont_miss() {
+  global $theme_key;
+  $site_id = O2HP;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "hp_dont_miss";
+    $number_of_entries = 3;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    $block_content .= '
+<div id="hp_dont_miss_box" class="hp_dont_miss" >
+	<h3><span class="hp_caption">DONT MISS</span></h3>';
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $hp_dont_miss = db_fetch_object($result);
+
+      $promo_node = node_load($hp_dont_miss->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      global $user;
+      $parsed_url = parse_url($href, PHP_URL_HOST);
+      if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+        $href = $href . '" target="_blank';
+      }
+      if ($blub == "") {
+        $blub = "Don't miss it!";
+      }
+
+      $block_content .= '<div class="hp_medium_promo">';
+      if (in_array('abuse moderator', array_values($user->roles))) {
+        $block_content .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+      }
+      $block_content .= '
+				<a href="' . $href . '" title="' . $title . '" class="png hp_dont_miss_link' . $i . '">
+				<img src="' . $image . '" class="hp_dont_miss_img" width="205" height="92" border="0" alt="' . $title . '">';
+      $block_content .= $blub . '</a></div>';
+
+    }
+
+    $block_content .= '</div>';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_hp_music_movies_more() {
+  global $theme_key;
+  $site_id = O2HP;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "hp_music_movies_more";
+    $number_of_entries = 6;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    $block_content .= '
+
+<div id="hp_music_movies_games_more_box" class="hp_music_movies_more">
+
+	<h3><span class="hp_caption">music, movies, games, and more</span></h3>';
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $hp_music_movies_more = db_fetch_object($result);
+
+      $promo_node = node_load($hp_music_movies_more->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      global $user;
+      $parsed_url = parse_url($href, PHP_URL_HOST);
+      if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+        $href = $href . '" target="_blank';
+      }
+      if ($blub == "") {
+        $blub = "Check it out!";
+      }
+
+      $block_content .= '<div class="hp_medium_promo">';
+      if (in_array('abuse moderator', array_values($user->roles))) {
+        $block_content .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+      }
+      $block_content .= '
+				<a href="' . $href . '" title="' . $title . '" class="png hp_music_movies_more_link' . $i . '">
+				<img src="' . $image . '" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="' . $title . '">
+				<div class="hp_medium_promo_title medium_promo_' . $i . '">' . $title . '</div></a>';
+      $block_content .= $blub . '</div>';
+
+      //$block_content .= hp_music_movies_more($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $promo_node->nid, $pot);
+
+
+    }
+
+    $block_content .= '</div>';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_hp_blogs_photos() {
+  global $theme_key;
+  $site_id = O2HP;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type1 = "hp_blogs_wide";
+    $promo_type2 = "hp_photos_wide";
+    $number_of_entries1 = 1;
+    $number_of_entries2 = 1;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type1 . "';");
+
+    $result2 = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type2 . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    while ($fetch2 = db_fetch_object($result2)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch2->status == 1) || ($future && $future >= $fetch2->publish_on && ($fetch2->publish_on != NULL || $fetch2->status == 1) && (! $fetch2->unpublish_on || $fetch2->unpublish_on > $future))) {
+        $node_list2 .= $fetch2->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+    $node_list2 = rtrim($node_list2, ",");
+
+    unset($result);
+    unset($result2);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries1);
+    $result2 = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list2 . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries2);
+
+    $block_content .= '
+
+<div id="hp_blogs_and_photos_box" >
+
+	<div id="hp_blogs_box" class="hp_blogs_wide">
+
+	<h3><span class="hp_caption">blogs - reality stars tell all</span></h3>';
+
+    for($i = 1; $i <= $number_of_entries1; $i ++) {
+      $hp_blogs_wide = db_fetch_object($result);
+      $promo_node = node_load($hp_blogs_wide->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      $block_content .= hp_blogs_wide($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $promo_node->nid, $pot);
+    }
+
+    $block_content .= '
+	</div>
+	
+	<div id="hp_photos_box" class="hp_photos_wide">
+
+	<h3><span class="hp_caption">photos - tempting!</span></h3>';
+
+    for($i = 1; $i <= $number_of_entries2; $i ++) {
+      $hp_photos_wide = db_fetch_object($result2);
+
+      $promo_node2 = node_load($hp_photos_wide->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node2->field_promo_url [0] [value]) {
+        $href = $promo_node2->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node2->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node2->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node2->title;
+      $blub = $promo_node2->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node2->field_promo_link_color [0] [value];
+      $link_text = $promo_node2->field_promo_link_text [0] [value];
+
+      $block_content .= hp_photos_wide($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $promo_node2->nid, $pot);
+
+    }
+
+    $block_content .= '
+	</div>
+</div>';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_hp_must_watch_video() {
+  $site_id = O2HP;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "hp_must_watch_video";
+    $number_of_entries = 3;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    $block_content .= '
+	<div id="hp_video_box" >
+	
+		<div id="vbox_player_col">
+			<h3><span class="hp_caption">VIDEO PLAYER</span></h3>	
+			<div id="video_holder">
+				<div id="videoplayer"><!-- Video player placeholder --></div>
+				<div id="nowplaying"> Now playing: <div id="metadataTitle"></div></div>
+			</div>							
+	  	</div>
+	
+	<div id="vbox_watch_col" class="hp_must_watch_video">
+	<h3><span class="hp_caption">MUST WATCH - our fave clips</span></h3>';
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $hp_must_watch_video = db_fetch_object($result);
+
+      $promo_node = node_load($hp_must_watch_video->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      $block_content .= hp_must_watch_video($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $promo_node->nid, $pot);
+
+    }
+
+    $block_content .= '</div><!-- END vbox_watch_col --></div><!-- END hp_video_box -->';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_hp_promo1() {
+  global $theme_key;
+  $site_id = O2HP;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "hp_promo1";
+    $number_of_entries = 4;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    $block_content .= '
+<div id="promoOneSlider">
+		<div id="cycleMeNow">';
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $hp_promo1 = db_fetch_object($result);
+
+      $promo_node = node_load($hp_promo1->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $promo_type = $promo_node->field_promo_one_type [0] [value];
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      global $user;
+      $parsed_url = parse_url($href, PHP_URL_HOST);
+      if ($parsed_url == "shop.oxygen.com" || $parsed_url == "twitter.oxygen.com" || $parsed_url == "quiz.oxygen.com" || (stristr($parsed_url, "oxygen") == FALSE)) {
+        $href = $href . '" target="_blank';
+      }
+      if ($blub == "") {
+        $blub = "Don't miss it!";
+      }
+
+      $block_content .= '
+		<div class="promoOneMain"';
+      if ($i == 1) {
+        $block_content .= 'style="display:block;"';
+      }
+      $block_content .= '>';
+
+      if (in_array('abuse moderator', array_values($user->roles))) {
+        $block_content .= "<a style='position:absolute;z-index:99999;' id='edit_promo' href='/node/" . $nid . "/edit'><img src='/sites/all/themes/oxygen/images/edit.gif' /></a>";
+      }
+
+      $block_content .= '
+				<a href="' . $href . '" class="png promoIMG hp_promo1_image' . $i . '">
+				<img src="' . $image . '" class="hp_promo1_img" thumbnail="" width="569" height="250" alt="' . $title . '" border="0"></a>';
+
+      $block_content .= '
+		<div class="promoOneCopy">
+			<h1 class="promoOneCopyHeader"><span>' . $promo_type . '</span> ' . $title . '</h1>';
+
+      $block_content .= $blub;
+      $block_content .= ' <a href="' . $href . '" >' . $link_text . '</a>';
+
+      $block_content .= '</div><!-- END promoOneCopy --></div><!-- END promoOneMain -->';
+    }
+
+    $block_content .= '</div><!-- END CYCLEME -->
+		<div id="promoOneNav">
+			<!-- DO NOT REMOVE -->
+			<!-- jQuery slider Fills this section in -->
+			<!-- DO NOT REMOVE -->
+		</div>
+	</div><!-- END SLIDER -->
+<script type="text/javascript">
+var flagdrupal = true;
+var slideStart = false;
+onBefore = function(curr, next, opts) {	
+if(!slideStart) {
+var nowNav = $(opts.promoOneNav).children(\'div:eq(\'+opts.currSlide+\')\').addClass(\'activeSlide\');
+slideStart = true;
+return;
+}
+var nextNav = $(opts.promoOneNav).children(\'div:eq(\'+opts.nextSlide+\')\');
+$(opts.promoOneNav).children(\'div:eq(\'+opts.currSlide+\')\').removeClass(\'activeSlide\');
+nextNav.addClass(\'activeSlide\');			
+}
+
+$(\'#cycleMeNow\').cycle({
+fx: \'fade\',
+speed: 1000,
+timeout: 5000,
+pause: 0,
+pager: \'#promoOneNav\',
+startingSlide: 0,
+pagerAnchorBuilder: function(i,o) {
+var src = $(\'img\',o).attr(\'src\'); 
+src = src.replace(\'.jpg\', \'_b.jpg\');
+return $(\'<div id="promo_\'+(i+1)+\'"><a href="#"><span class="arrow">&nbsp;</span><img src="\' + src + \'" width="82" height="46" /></a></div>\');
+},
+before: onBefore
+});
+
+$(\'.promoOneMain\').hover(function(e) {
+	var state = $(\'#cycleMeNow\')[0].cyclePause;
+	if(state == \'1\') {
+		$(\'#cycleMeNow\').cycle(\'resume\');
+	}
+	else {
+		$(\'#cycleMeNow\').cycle(\'pause\');
+	}
+	e.preventDefault();
+},function(e) {
+	var state = $(\'#cycleMeNow\')[0].cyclePause;
+	if(state == \'1\') {
+		$(\'#cycleMeNow\').cycle(\'resume\');
+	}
+	else {
+		$(\'#cycleMeNow\').cycle(\'pause\');
+	}
+	e.preventDefault();
+});	
+
+</script>
+
+
+';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_our_picks() {
+  global $theme_key;
+  $site_id = oxygen_helpers_theme_to_show_id($theme_key);
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "our picks";
+    $number_of_entries = 4;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value, {node}.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    //              $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'our picks' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+
+    $block_content .= "<div id='our_picks' class='png'>";
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $our_picks = db_fetch_object($result);
+
+      $promo_node = node_load($our_picks->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference.  In THIS case it should NEVER be external.
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link image
+      $title = $promo_node->title;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      $block_content .= "<div id='our_picks_image" . $i . "'><a href='" . $href . "' alt='" . $alt . "'><img src='" . $image . "' class='our_picks_image'/></a></div>";
+      $block_content .= "<div id='our_picks_text" . $i . "'><a style='color:" . $link_color . "' href='" . $href . "' alt='" . $alt . "'>" . $title . "</a></div>";
+
+    }
+    $block_content .= "</div>";
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_t_tweetoverse() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "t_tweetoverse";
+    $number_of_entries = 2;
+    $block_content = "";
+
+    $block_content = '<img class="png promo_section_header" src="/' . $pot . '/images/' . $promo_type . '_block_header.png" />
+<div class="tweets">';
+
+    $tweets = db_query("SELECT * FROM {aggregator_item} ORDER BY iid DESC LIMIT 0 , %d;", $number_of_entries);
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $result = db_fetch_object($tweets);
+
+      $text = strip_tags($result->description);
+      $time = time();
+      $post_time = $result->timestamp;
+      $title = oxygen_helpers_distanceOfTimeInWords($post_time, $time);
+      $author = substr($result->title, 0, strpos(strip_tags($result->title), " "));
+      $title .= ' ago by ' . $author;
+      $block_content .= "<span>" . $title . "</span><br />";
+      $block_content .= $text . "<br /><br />";
+
+    }
+
+    $block_content .= "<a href='http://www.tweetoverse.com' target='_blank'>Follow Oxygen on Twitter</a></div>";
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_t_top_videos() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "t_top_videos";
+    $number_of_entries = 5;
+    $block_content = "";
+    $block_content .= "
+        <div id='topFive'>
+        <h2><span>Top Videos</span></h2>
+        <div id='tabs'>
+        <div id='tabHeader'><img src='/" . $pot . "/images/" . $promo_type . "_block_header.jpg' width='300' height='70' alt='' /></div>
+        <div id='allTabs'>
+        <div id='tabs-1'><ul>";
+
+    $rss_feed = "http://o2.oxygen.com/player/feeds/?type=placement&level=35165&results=" . $number_of_entries;
+    $items = oxygen_helpers_xml2array($rss_feed);
+
+    for($i = 0; $i <= $number_of_entries - 1; $i ++) {
+      $count = $i + 1;
+      $block_content .= "
+<li>
+        <a href='" . substr($items [rss] [channel] [item] [$i] [link], 0, strcspn($items [rss] [channel] [item] [$i] [link], '&')) . "'>";
+      $block_content .= "<span class='number'>" . $count . "</span>";
+      $block_content .= "<img src='" . $items [rss] [channel] [item] [$i] ['media:content'] ['media:thumbnail'] . "' width='42' height='32'  />
+                <span class='tabCopyHeader'>" . $items [rss] [channel] [item] [$i] [title] . "</span>
+                <span class='tabCopy'>" . $items [rss] [channel] [item] [$i] [description] . "</span>
+                <div class='clear-block'><!-- clearFix --></div></a></li>";
+
+    }
+
+    $block_content .= "</ul></div>
+</div>
+<div id='tabFooter'>&nbsp;</div>
+</div></div>";
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_t_next_show() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $promo_type = "t_next_show";
+    if ($theme_key == "torianddean") {
+      $next_show = "";
+    }
+    if ($theme_key == "danceyourassoff") {
+      $next_show = "Next Episode: Monday 10/9c";
+    }
+    if ($theme_key == "addictedtobeauty") {
+      $next_show = "Next Episode: Tuesday 10/9c";
+    }
+    if ($theme_key == "naughtykitchen") {
+      $next_show = "Next Episode: Tuesday 10/9c";
+    }
+    if ($theme_key == "badgirlsclub") {
+      $next_show = "Premieres: Tue, August 3 9/8c";
+    }
+    if ($theme_key == "lovegames") {
+      $next_show = "Next Episode: Tuesday 10/9c";
+    }
+    if ($theme_key == "jerseycouture") {
+      $next_show = "Next Episode: Tuesday 10/9c";
+    }
+    if ($theme_key == "hairbattlespectacular") {
+      $next_show = "Premieres: Tue, August 10 10/9c";
+    }
+
+  $block_content = '<div class="t_next_show"><img class="png" src="/' . $pot . '/images/' . $promo_type . '_BG.png" />';
+  $block_content .= '<div class="t_next_show_blurb"><span style="color:white;">SCHEDULE:</span><br />' . $next_show . '</div>';
+  $block_content .= '</div>';
+
+  $block ['subject'] = 'Promo';
+  $block ['content'] = $block_content/* . var_export($promo_show_listings, 1)*/;
+  return $block;
+}
+
+function promo_t_hot_pics() {
+  global $theme_key;
+  $site_id = oxygen_helpers_theme_to_show_id($theme_key);
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "t_hot_pics";
+    $number_of_entries = 1;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $t_hot_pics = db_fetch_object($result);
+
+      $promo_node = node_load($t_hot_pics->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+
+      $block_content .= t_hot_pics($image, $title, $blub, $alt, $link_color, $href, $promo_node->nid, $pot);
+
+    }
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_t_highlights() {
+  global $theme_key;
+  $site_id = oxygen_helpers_theme_to_show_id($theme_key);
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "t_highlights";
+    $number_of_entries = 2;
+    $block_content = "";
+
+    //look for future time
+    if (array_key_exists('future', $_GET)) {
+      $temp_future = $_GET ['future'];
+      $future = strtotime($temp_future);
+    }
+
+    $result = db_query("SELECT node.nid, node.status, scheduler.publish_on, scheduler.unpublish_on
+FROM node
+LEFT JOIN term_node ON node.nid = term_node.nid
+LEFT JOIN term_data ON term_node.tid = term_data.tid
+LEFT JOIN scheduler ON node.nid = scheduler.nid
+WHERE term_data.name =  '" . $promo_type . "';");
+
+    while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+        $node_list .= $fetch->nid . ",";
+      }
+      else {
+        continue;
+      }
+    }
+
+    $node_list = rtrim($node_list, ",");
+
+    unset($result);
+
+    $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+    $block_content .= '<div class="t_highlights">
+
+<h3><img class="png t_highlights_BG" src="/' . $pot . '/images/t_highlights_block_BG.png" class="t_highlights" /></h3>';
+
+    for($i = 1; $i <= $number_of_entries; $i ++) {
+      $t_highlights = db_fetch_object($result);
+
+      $promo_node = node_load($t_highlights->nid); //grab promo_ object
+
+
+      // switch to direct URL if entered, otherwise use drupal node reference
+      if ($promo_node->field_promo_url [0] [value]) {
+        $href = $promo_node->field_promo_url [0] [value];
+      }
+      else {
+        $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+        $href = "/" . $href_node->path;
+      }
+
+      $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+      $title = $promo_node->title;
+      $blub = $promo_node->body;
+      $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+      $link_color = $promo_node->field_promo_link_color [0] [value];
+      $link_text = $promo_node->field_promo_link_text [0] [value];
+
+      $block_content .= t_highlights($image, $title, $blub, $alt, $link_color, $href, $link_text, $i, $promo_node->nid, $pot);
+
+    }
+
+    $block_content .= '</div>';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+
+    return $block;
+
+}
+
+function promo_t_get_connected() {
+  global $theme_key;
+  $site_id = oxygen_helpers_theme_to_show_id($theme_key);
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+  ); //delete characters that would break the alt and title values in tags
+  $promo_type = db_fetch_object(db_query("SELECT tid FROM term_data WHERE name = 't_get_connected'"));
+  $number_of_entries = 1;
+  $block_content = "";
+
+  //look for future time
+  if (array_key_exists('future', $_GET)) {
+    $temp_future = $_GET ['future'];
+    $future = strtotime($temp_future);
+    $result = db_query("SELECT n.nid, n.status, s.publish_on, s.unpublish_on
+                      FROM node n
+                      LEFT JOIN scheduler s ON n.nid = s.nid 
+                      JOIN term_node t ON t.nid = n.nid
+                      WHERE
+                      (t.tid = $promo_type->tid)
+                      AND
+                      (
+                      ((n.status = 1) AND ((s.unpublish_on IS NULL) OR (s.unpublish_on > $future)))
+                      OR
+                      ((s.publish_on <= $future) AND ((s.unpublish_on IS NULL) OR (s.unpublish_on > $future))))
+                      ");
+   }
+   else {
+     $result = db_query("SELECT n.nid, n.status
+  	                    FROM node n
+    	                  JOIN term_node t ON t.nid = n.nid
+      	                WHERE
+        	              (t.tid = $promo_type->tid)");
+   } 
+    
+  while ($fetch = db_fetch_object($result)) {
+      // two scenarios:
+      // if no future date specified in URL and status is promoted
+      // if future date specified and future date is greater than publish_on AND, no unpublish_on date or unpublish date is after future.
+//      if ((! $future && $fetch->status == 1) || ($future && $future >= $fetch->publish_on && ($fetch->publish_on != NULL || $fetch->status == 1) && (! $fetch->unpublish_on || $fetch->unpublish_on > $future))) {
+      $node_list .= $fetch->nid . ",";
+//      }
+//      else {
+//        continue;
+//      }
+  }
+
+  $node_list = rtrim($node_list, ",");
+
+  unset($result);
+
+  $result = db_query("SELECT node.nid FROM node LEFT JOIN term_node ON node.nid = term_node.nid LEFT JOIN term_data ON term_node.tid = term_data.tid LEFT JOIN content_type_promo ON content_type_promo.nid = node.nid WHERE node.nid IN (" . $node_list . ") AND {term_data}.name = '" . $site_id . "' ORDER BY content_type_promo.field_promo_weight_value , node.changed DESC LIMIT 0 , %d;", $number_of_entries);
+
+  $block_content .= '<div class="t_get_connected">';
+
+  $t_get_connected = db_fetch_object($result);
+
+  $promo_node = node_load($t_get_connected->nid); //grab promo_ object
+
+
+  // switch to direct URL if entered, otherwise use drupal node reference
+  if ($promo_node->field_promo_url [0] [value]) {
+    $href = $promo_node->field_promo_url [0] [value];
+  }
+  else {
+    $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+    $href = "/" . $href_node->path;
+  }
+
+  $image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+  $title = $promo_node->title;
+  $blub = $promo_node->body;
+  $alt = str_replace($newline, " ", strip_tags($promo_node->body));
+  $link_color = $promo_node->field_promo_link_color [0] [value];
+  $link_text = $promo_node->field_promo_link_text [0] [value];
+
+  $block_content .= '<img class="png" src="/' . $pot . '/images/t_get_connected_block_BG.png" alt="' . $alt . '"><div class="t_get_connected_blurb">' . $blub . ' <br /><a href="' . $href . '" title="' . $alt . '">' . $link_text . '</a></div>';
+
+  $block_content .= '</div>';
+
+  $block ['subject'] = 'Promo';
+  $block ['content'] = $block_content;
+//  $block ['content'] = $node_list;
+  return $block;
+}
+
+function promo_promo1() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+
+
+    $block_content = '
+<div id="promo1_tout">
+<img id="promo1_bkg" src="' . $pot . '/images/homepageSliderBg.jpg" />
+   <div id="promo1_images">';
+
+    for($i = 1; $i <= 5; $i ++) {
+      $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 1 " . $i . "' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+      $promo_1 = db_fetch_object($result);
+      if ($promo_1->nid) {
+        $promo_node = node_load($promo_1->nid); //grab tout object
+
+
+        if ($promo_node->field_promo_url [0] [value]) {
+          $promo_1_href = $promo_node->field_promo_url [0] [value];
+        }
+        else {
+          $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+          $promo_1_href = "/" . $href_node->path;
+        }
+
+        $promo_1_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+        $promo_1_title = $promo_node->title;
+        $promo_1_blub = $promo_node->body;
+        $promo_1_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+
+        $block_content .= '<a class="promo1" alt="' . $promo_1_alt . '" href="' . $promo_1_href . '"><img src="' . $promo_1_image . '" /></a>
+        ';
+        //<a class="promo1" href="#"><img src="./promo1_test_images/promo1_303B_a.jpg" /></a>
+        //<a class="promo1" href="#333"><img src="./promo1_test_images/MakeoverMatic.jpg" /></a>
+        //<a class="promo1" href="#222"><img src="./promo1_test_images/promo_rewind_v2_a.jpg" /></a>
+      }
+      else {
+        break;
+      }
+    }
+    $block_content .= '</div>
+   <div id="promoNav"></div>
+   <a href="#" id="playpause"></a>
+
+</div>
+<script type="text/javascript" src="' . $pot . '/scripts/slide.js"></script>
+
+
+<script type="text/javascript">
+
+
+
+$(\'#promo1_images\').cycle({
+      fx: \'scrollRight\',
+      speed: 1000,
+      timeout: 5000,
+      pause: 0,
+      pager: \'#promoNav\',
+      startingSlide: 0,
+      copyContainer: \'#copyContainer\',
+      pagerAnchorBuilder: function(i,o) {
+return $(\'<div id="promo_\'+(i+1)+\'"><a href="#"></a></div>\');
+      }
+});
+
+$(\'#playpause\').click(function(e) {
+      var state = $(\'#promo1_images\')[0].cyclePause;
+      if(state == \'1\') {
+$(\'#promo1_images\').cycle(\'resume\');
+$(this).removeClass(\'pause\')
+      }
+      else {
+$(\'#promo1_images\').cycle(\'pause\');
+$(this).addClass(\'pause\');
+      }
+      e.preventDefault();
+});
+
+</script>
+';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_promos6_8() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 6' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_6 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_6->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_6_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_6_href = "/" . $href_node->path;
+    }
+
+    $promo_6_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_6_title = $promo_node->title;
+    $promo_6_blub = $promo_node->body;
+    $promo_6_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_6_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_6_color = "Promo2-4Light";
+    }
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 7' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_7 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_7->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_7_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_7_href = "/" . $href_node->path;
+    }
+
+    $promo_7_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_7_title = $promo_node->title;
+    $promo_7_blub = $promo_node->body;
+    $promo_7_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_7_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_7_color = "Promo2-4Light";
+    }
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 8' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_8 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_8->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_8_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_8_href = "/" . $href_node->path;
+
+    }
+
+    $promo_8_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_8_title = $promo_node->title;
+    $promo_8_blub = $promo_node->body;
+    $promo_8_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_8_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_8_color = "Promo2-4Light";
+    }
+
+    $block_content = '
+<img class="png" src="' . $pot . '/images/blogs_videos_photos_top.png" width="658px" height="80px" />
+<div id="homepage_promo6-8">
+
+<div>
+      <div class="promoFrame" id="homepage_promo6"><img  src="' . $pot . '/images/imgFrame.jpg" id="homepage_promo6_frame" /></div>
+      <a href="' . $promo_6_href . '" id="homepage_promo6_image" class="promoImage"><img src="' . $promo_6_image . '" alt="' . $promo_6_alt . '" /></a>
+      <div class="promoAnchor" id="homepage_promo6_blurb"><a href="' . $promo_6_href . '" id="homepage_anch6">' . $promo_6_title . '</a><br>
+      ' . $promo_6_blub . '</div>
+</div>
+
+<div>
+      <div class="promoFrame" id="homepage_promo7"><img  src="' . $pot . '/images/imgFrame.jpg" id="homepage_promo7_frame" /></div>
+      <a href="' . $promo_7_href . '" id="homepage_promo7_image" class="promoImage"><img src="' . $promo_7_image . '" alt="' . $promo_7_alt . '" /></a>
+      <div class="promoAnchor" id="homepage_promo7_blurb"><a href="' . $promo_7_href . '" id="homepage_anch7">' . $promo_7_title . '</a><br>
+      ' . $promo_7_blub . '</div>
+</div>
+
+<div>
+      <div class="promoFrame" id="homepage_promo8"><img  src="' . $pot . '/images/imgFrame.jpg" id="homepage_promo8_frame" /></div>
+      <a href="' . $promo_8_href . '" id="homepage_promo8_image" class="promoImage"><img src="' . $promo_8_image . '" alt="' . $promo_8_alt . '" /></a>
+      <div class="promoAnchor" id="homepage_promo8_blurb"><a href="' . $promo_8_href . '" id="homepage_anch6">' . $promo_8_title . '</a><br>
+      ' . $promo_8_blub . '</div>
+</div>
+
+
+</div>
+<img class="png" src="' . $pot . '/images/blogs_videos_photos_bottom.png" width="658px" height="33px" />
+
+
+';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+
+    return $block;
+
+}
+
+function promo_promos2_5() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    // fill tout positions
+
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 2' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_2 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_2->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_2_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_2_href = $href_node->path;
+    }
+
+    $promo_2_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_2_blub = $promo_node->body;
+    $promo_2_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_2_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_2_color = "Promo2-4Light";
+    }
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 3' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_3 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_3->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_3_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_3_href = $href_node->path;
+    }
+
+    $promo_3_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_3_blub = $promo_node->body;
+    $promo_3_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_3_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_3_color = "Promo2-4Light";
+    }
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 4' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_4 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_4->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_4_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_4_href = $href_node->path;
+    }
+
+    $promo_4_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_4_blub = $promo_node->body;
+    $promo_4_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_4_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_4_color = "Promo2-4Light";
+    }
+
+    $result = db_query("SELECT {node}.nid FROM {node} LEFT JOIN {term_node} ON {node}.nid = {term_node}.nid LEFT JOIN {term_data} ON {term_node}.tid = {term_data}.tid WHERE {term_data}.name = 'Promo 5' AND {node}.status = '1' ORDER BY {node}.changed DESC LIMIT 0 , 1;");
+
+    $promo_5 = db_fetch_object($result);
+
+    $promo_node = node_load($promo_5->nid); //grab tout object
+
+
+    if ($promo_node->field_promo_url [0] [value]) {
+      $promo_5_href = $promo_node->field_promo_url [0] [value];
+    }
+    else {
+      $href_node = node_load($promo_node->field_promo_link [0] [nid]); //get href node (nid) from tout object
+      $promo_5_href = $href_node->path;
+    }
+
+    $promo_5_image = $promo_node->field_promo_image [0] [imceimage_path]; // put link  image
+    $promo_5_blub = $promo_node->body;
+    $promo_5_alt = str_replace($newline, " ", strip_tags($promo_node->body));
+    if ($promo_node->field_promo_link_color [0] [value] == "Dark Text" or $promo_node->field_promo_link_color [0] [value] == "Default") {
+      $promo_5_color = "Promo2-4Dark";
+    }
+    else {
+      $promo_5_color = "Promo2-4Light";
+    }
+
+    $block_content = '
+<div id="touts">
+  <img class="png" src="' . $pot . '/images/homepagePromoBox.png" width="658px" height="416px" />
+
+  <div onMouseOver="mouseover(\'promo_anch2\');" onmouseout="mouseout(\'promo_anch2\');" id="tout1" >
+   <a href="' . $promo_2_href . '" title="' . $promo_2_alt . '"><img src="' . $promo_2_image . '" style="border-width:0px;" alt="' . $promo_2_alt . '" /></a>
+      <a href="' . $promo_2_href . '"  class="tout_left_copy ' . $promo_2_color . '"  id="promo_anch2" title="' . $promo_2_alt . '">' . $promo_2_blub . '</a>
+  </div>
+
+
+  <div onMouseOver="mouseover(\'promo_anch3\');" onmouseout="mouseout(\'promo_anch3\');" id="tout2" >
+   <a href="' . $promo_3_href . '" title="' . $promo_3_alt . '"><img src="' . $promo_3_image . '" style="border-width:0px;" alt="' . $promo_3_alt . '" /></a>
+      <a href="' . $promo_3_href . '"  class="tout_left_copy ' . $promo_3_color . '"  id="promo_anch3" title="' . $promo_3_alt . '">' . $promo_3_blub . '</a>
+  </div>
+
+
+  <div onMouseOver="mouseover(\'promo_anch4\');" onmouseout="mouseout(\'promo_anch4\');" id="tout3" >
+   <a href="' . $promo_4_href . '" title="' . $promo_4_alt . '"><img src="' . $promo_4_image . '" style="border-width:0px;" alt="' . $promo_4_alt . '" /></a>
+      <a href="' . $promo_4_href . '"  class="tout_left_copy ' . $promo_4_color . '"  id="promo_anch4" title="' . $promo_4_alt . '">' . $promo_4_blub . '</a>
+  </div>
+
+
+  <div onMouseOver="mouseover(\'promo_anch5\');" onmouseout="mouseout(\'promo_anch5\');" id="tout4" >
+   <a href="' . $promo_5_href . '" title="' . $promo_5_alt . '"><img src="' . $promo_5_image . '" style="border-width:0px;" alt="' . $promo_5_alt . '" /></a>
+      <a href="' . $promo_5_href . '"  class="tout_left_copy ' . $promo_5_color . '"  id="promo_anch5" title="' . $promo_5_alt . '">' . $promo_5_blub . '</a>
+  </div>
+
+  <div id="tout_ad">
+  <script type="text/javascript" language="javascript">
+      //<![CDATA[
+      document.write(\'<scr\' + \'ipt language="javascript" type="text/javascript" src="http://iv.doubleclick.net/adj/nbcu.oxygen/oxygen_hp;site=oxygen;sect=home;pageid=hp;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=\' + randDARTNumber + \'?"></scr\' + \'ipt>\');//]]>
+
+</script><noscript><a target="_blank" href="http://iv.doubleclick.net/jump/nbcu.oxygen/oxygen_hp;site=oxygen;sect=home;pageid=hp;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=123456a?"><img src="http://iv.doubleclick.net/ad/nbcu.oxygen/oxygen_hp;site=oxygen;sect=home;pageid=hp;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=123456a?" border="0" alt="" /></a></noscript><!--Oxygen.DotCom.Advertising.DARTAdTag+DARTAdTagControl-->
+  </div>
+</div>
+';
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+
+    return $block;
+}
+
+function promo_t_top_galleries() {
+  global $theme_key;
+  $pot = drupal_get_path('theme', $theme_key);
+  $newline = array (
+    "\n", "\r", "'", "\"", ">", "<" 
+    ); //delete characters that would break the alt and title values in tags
+    $promo_type = "t_top_galleries";
+    $number_of_entries = 5;
+    $block_content = "";
+    $block_content .= "
+        <div id='top_galleries'>
+        <h2><span>Top Photos</span></h2>
+        <div id='top_galleries_tabs'>
+        <div id='top_galleries_tabHeader'><img src='/" . $pot . "/images/" . $promo_type . "_block_header.jpg' width='300' height='70' alt='' /></div>
+        <div id='top_galleries_allTabs'>
+        <div id='top_galleries_tabs-1'><ul>";
+
+    $end_time = ((int)(time()/3600) * 3600); // now, rounded down to the nearest hour
+    $start_time = $end_time  - (1 * 24 * 60 * 60); //1 day (24 hours * 60 mins * 60 secs) before now;
+    
+    // this query will NOT return any access within the current hour. It returns the access for 24 hours ending at the beginning of the current hour 
+    $pics_nids = db_query("SELECT nid, count(nid) as access_count 
+    											FROM node_track_hits 
+    											WHERE timestamp > $start_time AND timestamp < $end_time AND site_theme = '$theme_key'
+    											GROUP BY nid ORDER BY access_count DESC LIMIT 0,5");
+    while ($fetch = db_fetch_object($pics_nids)) {
+      $pic_count [] = $fetch->nid;
+    }
+
+    foreach($pic_count as $pic_nid) {
+      $top_pics = node_load($pic_nid);
+
+      $queue = db_fetch_object(db_query("SELECT field_nodequeue_id_value FROM content_type_photos WHERE nid=" . $pic_nid . ";"));
+      $first_nid = nodequeue_load_front($queue->field_nodequeue_id_value);
+
+      $block_content .= "
+<li>
+<a href='/" . $top_pics->path . "'>";
+      $block_content .= "<span class='number'>" . $count . "</span>";
+
+      //<span class='tabCopy'>". $top_pics->body ."</span>
+      $block_content .= "<img src='/" . $first_nid [0]->images [preview] . "' width='42' height='32'  />
+	<span class='tabCopyHeader'>" . $top_pics->title . "</span>
+	<span class='tabCopy'>" . $top_pics->body . "</span>
+	<div class='clear-block'><!-- clearFix --></div></a></li>";
+
+    }
+
+    $block_content .= "</ul></div>
+</div>
+<div id='top_galleries_tabFooter'>&nbsp;</div>
+</div></div>";
+
+    $block ['subject'] = 'Promo';
+    $block ['content'] = $block_content;
+    return $block;
+}
+
+function promo_cache_set($cid, $data) {
+  $table = 'cache_oxygen_block';
+  $expire = CACHE_PERMANENT;
+  $headers = NULL;
+  $data = serialize($data);
+  $serialized = 1;
+  $created = time();
+  db_query("UPDATE {cache_oxygen_block} SET data = '%s', created = %d, expire = %d, headers = '%s', serialized = %d WHERE cid = '%s'", $data, $created, $expire, $headers, $serialized, $cid);
+  if (!db_affected_rows()) {
+    @db_query("INSERT INTO {cache_oxygen_block} (cid, data, created, expire, headers, serialized) VALUES ('%s', '%s', %d, %d, '%s', %d)", $cid, $data, $created, $expire, $headers, $serialized);
+  }
+}
+
+function promo_cache_get($cid) {
+  $cache = db_fetch_object(db_query("SELECT data, created, headers, expire, serialized FROM {cache_oxygen_block} WHERE cid = '$cid'"));
+  if (isset($cache->data)) {
+    return unserialize($cache->data);
+  }
+}
+
+function promo_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'promo_node_form') {
+    $form['#submit'][] = 'promo_cache_clear_on_submit';
+  }
+}
+
+function promo_next_show_settings_form_submit($form, &$form_state) {
+  promo_cache_clear_on_submit($form, $form_state);
+  $form_values = $form_state['values'];
+
+}
+
+function promo_cache_clear_on_submit($form, &$form_state) {
+  if ($form_state['clicked_button']['#value'] == 'Submit') {
+    promo_cache_clear();
+  }
+}
+
+function promo_cache_clear() {
+  db_query('delete from cache_oxygen_block');
+}

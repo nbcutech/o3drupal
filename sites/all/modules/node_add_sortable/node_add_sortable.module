@@ -1,0 +1,44 @@
+<?php
+// $Id$  node_add_sortable.module July 28, 2011 Randall Goya decibel.places
+// Adds Sortable Fieldsets to node/add form
+
+if (!isset($thenodetype)){
+if ('node' == arg(0)){
+if (arg(2) != "edit") $thenodetype = str_replace('-', '_', arg(2)); // This is the node type
+//if (arg(2) != "edit") $thenodetype = arg(2); // This is the node type
+else if(is_numeric(arg(1))) {
+  $node = node_load(arg(1));
+  $thenodetype = $node->type;
+}
+}
+}
+//$thenodetype = str_replace('_', '-', arg(2));
+//dsm($thenodetype);
+
+/* TODO
+create method to set fieldname in JS in one statement from node type without switches
+*/
+
+
+
+switch($thenodetype) 
+{
+case 'photohub_promo':
+	jquery_interface_add();
+	drupal_add_js('var fieldname = "photohub_promo"; var fieldname_cap = "Photohub_promo"', 'inline');
+	drupal_add_js(drupal_get_path('module', 'node_add_sortable') . '/node_add_sortable.js', 'module');
+	break;
+case 'hotpics_promo':
+	jquery_interface_add();
+	drupal_add_js('var fieldname = "babypromo"; var fieldname_cap = "Promo"', 'inline');
+	drupal_add_js(drupal_get_path('module', 'node_add_sortable') . '/node_add_sortable.js', 'module');
+	break;
+case 'highlights_promo':
+	jquery_interface_add();
+	drupal_add_js('var fieldname = "babypromo"; var fieldname_cap = "Promo"', 'inline');
+	drupal_add_js(drupal_get_path('module', 'node_add_sortable') . '/node_add_sortable.js', 'module');
+	break;
+
+default:
+	break;
+}

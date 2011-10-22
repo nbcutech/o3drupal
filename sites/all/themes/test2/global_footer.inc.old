@@ -1,0 +1,45 @@
+  <div id="footer">
+      <div id="footerNewsletter">
+          <img src="<?php print $pot;?>/images/h3Newsletter.gif" />
+          <span class="description">Sign up to receive special offers and promotions from Oxygen.</span>
+          <form action="http://oxygen.com/newsletter/" method="get" name="form5">
+          <span class="email">
+          <input id="newsletterSignup" type="text" name="email_address" />
+          </span>
+          <span class="join">
+          <button id="newsletterJoin" type="submit">Join</button>
+          </span>
+          </form>
+      </div>
+      <div id="footerNavigation">
+        <img src="<?php print $pot;?>/images/h3Navigation.gif" />
+        <span><a href="http://oxygen.com">Home</a></span>
+        <span><a href="http://oxygen.com/tvshows/">TV Shows</a></span>
+        <span><a href="http://oxygen.com/schedule/">Schedule</a></span>
+        <span><a href="http://oxygen.com/sweepstakes/">Sweepstakes</a></span>
+        <span><a href="http://o2.oxygen.com">Video</a></span>
+        <span><a href="http://oxygen.com/movies/">Movies</a></span>
+        <span><a href="http://oxygen.com/mobile/">Mobile</a></span>
+        <span><a href="http://oxygen.com/games/">Games</a></span>
+        <span><a href="http://forums.oxygen.com/">Community</a></span><br />
+      </div>
+      <div id="footerRight">
+        <a target="_blank" class="nbcUniversal" href="http://www.nbcuni.com/"><img src="<?php print $pot;?>/images/nbcUniversal.gif" alt="NBC Universal" /></a>
+          <div id="nbcuPanel">
+            <a target="_blank" href="http://www2.rresults.com/1809998/default.cfm?id=0&s=64&CFID=4355990&CFTOKEN=24462713">Join the NBCU Panel</a>
+          </div>
+      </div>
+    </div>
+    <div id="globalSubFooter">
+      <span>TM & Copyright &copy; 1998-2008 Oxygen Media. All Rights Reserved</span>
+      <a href="http://oxygen.com/legal/terms.aspx">Terms of Use</a> | <a href="http://oxygen.com/legal/privacyPolicy.aspx">Privacy Policy</a> | <a target="_blank" href="http://www.nbcuni.com/">Corporate Info</a> | <a href="http://oxygen.com/legal/contact.aspx">Contact Us</a>
+    </div>
+  </div>
+</div>
+
+
+<?php print $footer ?>
+<?php print $closure; ?>
+
+</body>
+</html>

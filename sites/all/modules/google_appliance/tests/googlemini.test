@@ -1,0 +1,99 @@
+<?php
+
+
+class GoogleMiniTest extends DrupalTestCase {
+  function get_info() {
+    return array(
+      'name'  => 'Google Search Tests',
+      'desc'  => t('Make sure we get results and erros we expect'),
+      'group' => 'Google Appliance Test',
+    );
+  }
+  
+  function setUp() {    
+    
+    $dir = drupal_get_path('module', 'google_appliance');
+    include_once $dir . '/DrupalGoogleMini.php';
+    $this->stockMini = new DrupalGoogleMini();
+    $this->stockMini->setOutputEncoding('utf8');
+    $this->stockMini->setInputEncoding('utf8');
+    $this->stockMini->setMetaDataRequested('*');    
+  
+    // get configuration from settings page
+    $_tmp_host = variable_get('google_appliance_host_name', false);
+    if (!$_tmp_host) {
+      drupal_set_message(t('No host name has been configured for the search appliance. Please enter it on the <a href="@admin-url">Google Appliance settings page</a>', array("@admin-url" => url("admin/settings/search/google_appliance"))), 'error');
+      return false;
+    }
+    $this->stockMini->baseUrl = $_tmp_host . "/search";
+    $this->stockMini->collection = variable_get('google_appliance_collection', '');
+    $this->stockMini->setQueryPart('client',variable_get('google_appliance_client', ''));    
+  }
+ 
+  function testNoResults() {
+    $g = clone($this->stockMini);
+    
+    try {
+      $query = "sjahdkjsadhsakjdhsakjdlakdjsahdlkjsasdhsad";
+      $g->setKeywords($query);
+      $result = $g->query();            
+    } catch (GoogleMiniCriteriaException $e) {
+      
+    } catch (GoogleMiniResultException $e) {
+      if ($e->getCode() ==1 ) {
+        $this->assertEqual(true,true,"The Query $query fired a no results exception.  (good)");
+      }
+    }
+    /* Test code goes here. Notice you have to have your test method names begin with lowercase 'test'. */
+  }
+  
+  function testSomeResults() {
+    $g = clone($this->stockMini);
+    try {      
+      $query = "human";    
+      $g->setKeywords($query);
+      $result = $g->query();      
+      $this->assertNotEqual($result->totalResults,0,"The Query $query did not return 0 results");
+    } catch (GoogleMiniCriteriaException $e) {
+      
+    } catch (GoogleMiniResultException $e) {
+      
+    }
+  }
+  
+  function testSearchCache() {
+    //not sure exactly how to do this yet... no listener, so it s a bit difficult.
+    
+    
+    return;
+    $this->drupalVariableSet('google_appliance_cache_timeout','10');
+    for ($i = 0; $i < 3; $i++) {
+      $g = clone($this->stockMini);
+      $g->cache = true;
+      cache_clear_all(null,'cache_google_appliance');
+      $g->debug_callback = 'google_appliance_test_cache_check';
+      
+      try {
+        $query = "human";    
+        $g->setKeywords($query);
+        $result = $g->query();
+              
+        $this->assertNotEqual($result->totalResults,0,"The Query $query did not return 0 results");
+      } catch (GoogleMiniCriteriaException $e) {
+        
+      } catch (GoogleMiniResultException $e) {
+        
+      }
+    
+    }
+  }
+  
+  function testLanguageCriteria() {
+    
+  }
+  
+  function testKeyMatches() {    
+    /* Test code goes here. Notice you have to have your test method names begin with lowercase 'test'. */
+  }
+  
+}

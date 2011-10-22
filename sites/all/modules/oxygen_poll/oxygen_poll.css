@@ -1,0 +1,19 @@
+#wideLeft {
+background:#FFFFFF url(../../themes/badgirlsclub/images/one_col_BG_a.jpg) no-repeat scroll 0 0;
+display:inline;
+float:left;
+margin:13px 0 0 11px;
+width:844px;
+}
+
+form h2.oxygen_poll_title {
+ 	font-size: xx-small;
+ 	font-weight: bolder;
+ 	text-shadow: maroon;
+}
+
+ h3.oxygen_poll_title {
+ 	font-size: medium;
+ 	font-weight: bolder;
+ 	text-align: right;
+}

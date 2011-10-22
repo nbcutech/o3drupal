@@ -1,0 +1,5 @@
+; $Id$
+name = OxygenPromos
+description = Creates promos for various locations on Oxygen.com
+core = 6.x
+package = "Oxygen"

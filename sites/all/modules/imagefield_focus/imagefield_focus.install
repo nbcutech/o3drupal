@@ -1,0 +1,38 @@
+<?php
+// $Id: imagefield_focus.install,v 1.2.2.2 2011/01/14 17:10:03 anrikun Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function imagefield_focus_install() {
+  db_query("UPDATE {system} SET weight = %d WHERE name = '%s'", 1, 'imagefield_focus');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function imagefield_focus_uninstall() {
+  db_query("DELETE FROM {variable} WHERE name LIKE 'imagefield_focus_%%'");
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function imagefield_focus_enable() {
+  cache_clear_all('imagecache_actions', 'cache');
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function imagefield_focus_disable() {
+  cache_clear_all('imagecache_actions', 'cache');
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function imagefield_focus_update_6000() {
+  cache_clear_all('imagecache_actions', 'cache');
+  return array();
+}

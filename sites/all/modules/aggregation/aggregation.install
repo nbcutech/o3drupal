@@ -1,0 +1,528 @@
+<?php
+
+// $Id: aggregation.install,v 1.4.4.3 2008/12/27 03:56:17 mistknight Exp $
+
+function aggregation_install()
+{
+	drupal_install_schema('aggregation');
+	
+	$vocab_count = db_query("SELECT COUNT(vid) AS vid_count FROM {vocabulary} ".
+		"WHERE name = '%s'", 'Aggregation Feed Types');
+	
+	$vocab_count = db_fetch_object($vocab_count);
+	$vocab_count = $vocab_count->vid_count;
+	
+	if ($vocab_count == 0)
+	{
+		$vocab = array();
+
+		$vocab['name'] = 'Aggregation Feed Types';
+		$vocab['description'] = 'All Aggregation Feed Types are to be declared as terms under this vocabulary';
+		$vocab['help'] = 'Add terms that represent the feed types. Refer to readme for details.';
+		$vocab['multiple'] = 0;
+		$vocab['required'] = 1;
+		$vocab['module'] = 'aggregation';
+		$vocab['nodes']['aggregation_feed'] = 1;
+		$vocab['tags'] = 0;
+		$vocab['weight'] = 0;
+
+		taxonomy_save_vocabulary($vocab);
+
+		variable_set('aggregation_current_vid', $vocab['vid']);
+
+		$term = array();
+
+		$term['name'] = 'RSS20';
+		$term['description'] = 'This is an RSS 2.0 feed handler';
+		$term['vid'] = $vocab['vid'];
+		$term['weight'] = 0;
+
+		taxonomy_save_term($term);
+
+		unset($term);
+		$term = array();
+
+		$term['name'] = 'ATOM10';
+		$term['description'] = 'This is an ATOM 1.0 feed handler';
+		$term['vid'] = $vocab['vid'];
+		$term['weight'] = 0;
+
+		taxonomy_save_term($term);
+
+		unset($term);
+		$term = array();
+
+		$term['name'] = 'RDF10';
+		$term['description'] = 'This is an RDF 1.0 feed handler';
+		$term['vid'] = $vocab['vid'];
+		$term['weight'] = 0;
+
+		taxonomy_save_term($term);
+	}
+
+	aggregation_update_6();
+}
+
+function aggregation_schema() {
+  $schema['aggregation_feed'] = array(
+      'fields' => array(
+        'nid' => array(
+          'type' => 'int', 
+          'size' => 'normal',
+          'unsigned' => TRUE, 
+          'not null' => TRUE,
+          ),
+        'original_author' => array(
+          'type' => 'varchar', 
+          'length' => 100,
+          'not null'  => TRUE, 
+          'default' => '',
+          ),
+        'url' => array(
+          'type' => 'varchar', 
+          'length' => 250,
+          'not null' => TRUE,
+          ),
+        'username' => array(
+          'type' => 'varchar', 
+          'length' => 50,
+          'not null'  => TRUE, 
+          'default' => '',
+          ),
+        'password' => array(
+          'type' => 'varchar', 
+          'length' => 50,
+          'not null'  => TRUE, 
+          'default' => '',
+          ),
+        'refresh_interval' => array(
+            'type' => 'int', 
+            'size' => 'normal',
+            'unsigned' => TRUE, 
+            'not null' => TRUE,
+            ),
+        'title_as_guid_interval' => array(
+            'type' => 'int', 
+            'size' => 'normal',
+            'unsigned' => TRUE, 
+            'not null' => TRUE,
+            ),
+        'promote_to_frontpage' => array(
+            'type' => 'int', 
+            'size' => 'normal',
+            'not null'  => TRUE, 
+            'default' => 0,
+            ),
+        'time_to_live' => array(
+            'type' => 'int', 
+            'size' => 'normal',
+            'not null'  => TRUE, 
+            'default' => 0,
+            ),
+        'item_categories' => array(
+            'type' => 'text', 
+            'not null'  => TRUE,
+            ),
+        'aggregation_feed_options' => array(
+            'type' => 'text', 
+            'not null'  => TRUE,
+            ),
+        'etag' => array(
+            'type' => 'varchar', 
+            'length' => 255,
+            'not null'  => TRUE, 
+            'default' => '',
+            ),
+        'last_modified' => array(
+            'type' => 'int', 
+            'not null'  => TRUE, 
+            'default' => 0,
+            ),
+        'last_refreshed' => array(
+            'type' => 'int', 
+            'not null'  => TRUE, 
+            'default' => 0,
+            ),
+        ),
+      'primary key' => array('nid'),
+      );
+
+  $schema['aggregation_item'] = array(
+      'fields' => array(
+        'nid' => array(
+          'type' => 'int',
+          'size' => 'normal',
+          'unsigned' => TRUE,
+          'not null'  => TRUE),
+        'url' => array(
+          'type' => 'varchar', 
+          'length' => 250,
+          'not null'  => TRUE,
+          'default' => '',
+          ),
+        'aggregation_item_options' => array(
+          'type' => 'text',
+          'not null'  => TRUE),
+        'original_author' => array(
+          'type' => 'varchar', 
+          'length' => 100,
+          'not null'  => TRUE,
+          'default' => '',
+          ),
+        'original_comments' => array(
+          'type' => 'varchar', 
+          'length' => 250,
+          'not null'  => TRUE,
+          ),
+        'story_guid' => array(
+          'type' => 'int',
+          'size' => 'big',
+          'unsigned' => TRUE,
+          'not null'  => TRUE,
+          'default' => 0,
+          ),
+        'fid' => array(
+          'type' => 'int',
+          'size' => 'normal',
+          'unsigned' => TRUE,
+          'not null'  => TRUE,
+          'default' => 0,
+          ),
+        'image_id' => array(
+            'type' => 'int',
+            'size' => 'normal',
+            'unsigned' => TRUE,
+            'not null'  => TRUE,
+            'default' => 0,
+            ),
+        'image_guid' => array(
+            'type' => 'int',
+            'size' => 'big',
+            'unsigned' => TRUE,
+            'not null'  => TRUE,
+            'default' => 0,
+            ),
+        ),
+      'primary key' => array('nid'),
+      'indexes' => array( 
+        'story_guid' => array('story_guid'),
+        'image_id' => array('image_id'),
+        'fid' => array('fid'),
+        'image_guid' => array('image_guid'),
+        ),
+      );
+  return $schema;
+}
+
+function aggregation_update_3()
+{
+	$current_vid = variable_get('aggregation_current_vid', 0);
+	if ($current_vid)
+	{
+		$term_exists = taxonomy_get_term_by_name('ATOM10');
+		if (count($term_exists) > 0) return array();
+
+		$term = array();
+
+		$term['name'] = 'ATOM10';
+		$term['description'] = 'This is an ATOM 1.0 feed handler';
+		$term['vid'] = $current_vid;
+		$term['weight'] = 0;
+
+		taxonomy_save_term($term);
+	}
+	else
+		drupal_set_message("Something wrong occurred during update! Please report this to module maintainer!");
+
+	return array();
+}
+
+function aggregation_update_4()
+{
+	$ret = array();
+	
+	db_change_field($ret, 'aggregation_item', 'story_guid', 'story_guid', array('type' => 'int', 'size' => 'big', 'not null' => TRUE, 'default' => 0));
+	db_change_field($ret, 'aggregation_item', 'image_guid', 'image_guid', array('type' => 'int', 'size' => 'big', 'not null' => TRUE, 'default' => 0));
+
+	$original_items = db_query("SELECT * FROM {aggregation_item}");
+
+	while ($row = db_fetch_object($original_items))
+	{
+		$update_statement = "";
+
+		$new_story_guid = sprintf('%u', $row->story_guid);
+		$new_image_guid = sprintf('%u', $row->image_guid);
+
+		if ($row->story_guid != $new_story_guid)
+			$update_statement .= "story_guid = $new_story_guid";
+
+		if ($row->image_guid != $new_image_guid)
+			if ($update_statement == '')
+				$update_statement .= "image_guid = $new_image_guid";
+			else
+				$update_statement .= ",image_guid = $new_image_guid";
+
+		if ($update_statement == '') continue;
+
+		db_query("UPDATE {aggregation_item} SET $update_statement WHERE nid = %d", $row->nid);
+	}
+
+	db_change_field($ret, 'aggregation_item', 'story_guid', 'story_guid', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+	db_change_field($ret, 'aggregation_item', 'image_guid', 'image_guid', array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0));
+
+	return $ret;
+}
+
+function aggregation_update_5()
+{
+	$current_vid = variable_get('aggregation_current_vid', 0);
+	if ($current_vid)
+	{
+		$term_exists = taxonomy_get_term_by_name('RDF10');
+		if (count($term_exists) > 0) return array();
+
+		$term = array();
+
+		$term['name'] = 'RDF10';
+		$term['description'] = 'This is an RDF 1.0 feed handler';
+		$term['vid'] = $current_vid;
+		$term['weight'] = 0;
+
+		taxonomy_save_term($term);
+	}
+	else
+		drupal_set_message("Something wrong occurred during update! Please report this to module maintainer!");
+
+	return array();
+}
+
+function aggregation_update_6()
+{
+	$ret = array();
+	
+	if (!db_table_exists('aggregator2_feed')) return $ret;
+	if (!db_table_exists('aggregator2_item')) return $ret;
+	
+	$aggregate_categories = db_fetch_object(db_query("SELECT COUNT(*) AS agg2_tax FROM {system} WHERE name = '%s' AND status = 1", 'aggregator2_autotaxonomy'));
+	$aggregate_categories = $aggregate_categories->agg2_tax;
+
+    if (!ini_get('safe_mode'))
+		set_time_limit(30 * 60);
+
+    db_query("UPDATE {vocabulary_node_types} SET type = '%s' WHERE type = '%s'", 'aggregation_feed', 'aggregator2_feed');
+    db_query("UPDATE {vocabulary_node_types} SET type = '%s' WHERE type = '%s'", 'aggregation_feed', 'aggregator2-feed');
+    db_query("UPDATE {vocabulary_node_types} SET type = '%s' WHERE type = '%s'", 'aggregation_item', 'aggregator2_item');
+    db_query("UPDATE {vocabulary_node_types} SET type = '%s' WHERE type = '%s'", 'aggregation_item', 'aggregator2-item');
+
+    $feeds = db_query("SELECT af.* FROM {aggregator2_feed} af, {node} n WHERE af.nid = n.nid");
+
+    while ($row = db_fetch_object($feeds))
+    {
+        if (db_fetch_object(db_query("SELECT COUNT(nid) AS feed_count FROM {aggregation_feed} WHERE url = '%s'", $row->url))->feed_count > 0) continue;
+
+        db_query("UPDATE {node} SET type = '%s' WHERE nid = %d", 'aggregation_feed', $row->nid);
+
+        $taxonomies_old_style = unserialize($row->item_taxonomy);
+
+        $taxonomies_new_style = array();
+
+        foreach ($taxonomies_old_style AS $key => $value)
+        {
+            $vid_result = db_query("SELECT vid FROM {term_data} WHERE tid = %d", $value);
+            $num_rows = FALSE;
+            $vid = -1;	// simple initialization
+            
+            while ($vid_obj = db_fetch_object($vid_result))
+            {
+            	$num_rows = TRUE;
+            	$vid = $vid_obj->vid;
+            }
+            if (!$num_rows) continue;
+            $taxonomies_new_style[$vid][$value] = $value;
+        }
+
+        $row->item_taxonomy = serialize($taxonomies_new_style);
+        
+        $aggregation_feed_options['enabled'] = $row->freezed ? 0 : 1;
+		$aggregation_feed_options['publish_new_items'] = ($row->item_status ? 1 : 0);
+		$aggregation_feed_options['sticky_items'] = 0;
+		$aggregation_feed_options['aggregate_to_moderation_queue'] = 0;
+		$aggregation_feed_options['enable_comments_on_articles'] = 0;
+		$aggregation_feed_options['enable_comments_on_images'] = 0;
+		$aggregation_feed_options['link_items_to_original_urls'] = ($row->item_show_link == 1 ? 0 : ($row->item_show_link == 2 ? 2 : ($row->item_show_link == 0 ? 3 : 1)));
+		$aggregation_feed_options['aggregate_item_categories'] = $aggregate_categories > 0 ? 1 : 0;
+		$aggregation_feed_options['update_existing_aggregation_items'] = $row->update_items ? 1 : 0;
+		$aggregation_feed_options['link_items_to_original_comments'] = 0;
+
+        db_query("INSERT INTO {aggregation_feed} VALUES ".
+        "(%d, '%s', '%s', '%s', '%s', %d, %d, %d, %d, '%s', '%s', '%s', %d, %d)",
+        $row->nid, $row->author, $row->url, '', '', (int)($row->refresh/60), 0, 0, $row->promoted_items, $row->item_taxonomy, serialize($aggregation_feed_options), $row->etag, $row->modified, $row->checked);
+
+        $items = db_query("SELECT ai.*, n.title FROM {aggregator2_item} ai, {node} n WHERE ai.fid = %d AND ai.nid = n.nid", $row->nid);
+        while ($row2 = db_fetch_object($items))
+        {
+            db_query("UPDATE {node} SET type = '%s' WHERE nid = %d", 'aggregation_item', $row2->nid);
+
+            $row2->guid = sprintf('%u', crc32(trim($row2->guid) == '' ? $row2->title : $row2->guid));
+       
+			$aggregation_item_options['link_to_original_url'] = ($row->item_show_link == 1 ? 0 : ($row->item_show_link == 2 ? 2 : ($row->item_show_link == 0 ? 3 : 1)));
+			$aggregation_item_options['link_to_original_comment'] = 0;
+			
+            db_query("INSERT INTO {aggregation_item} VALUES (%d, '%s', '%s', '%s', '%s', %s, %d, ".
+		"%d, %s)", $row2->nid, $row2->link, serialize($aggregation_item_options), (trim($row2->author) == '' ? (trim($row->author) == '' ? 'unspecified' : $row->author): $row2->author), '', $row2->guid, $row2->fid, 0, 0);
+        }
+    }
+
+    db_drop_table($ret, 'aggregator2_feed');
+    db_drop_table($ret, 'aggregator2_item');
+    
+    return $ret;
+}
+
+//update function for 4.7 & 5 branch
+function aggregation_update_7()
+{
+	$ret = array();
+	
+	db_change_field($ret, 'aggregation_feed', 'url', 'url', array('type' => 'varchar', 'length' => 250, 'not null' => TRUE));
+	db_change_field($ret, 'aggregation_item', 'url', 'url', array('type' => 'varchar', 'length' => 250, 'not null' => TRUE));
+
+	return $ret;
+}
+
+
+function aggregation_update_8()
+{
+  $ret = array();
+  
+  db_add_field($ret, 'aggregation_feed', 'aggregation_feed_options', array('type' => 'text', 'not null' => TRUE));
+  db_add_field($ret, 'aggregation_feed', 'time_to_live', array('type' => 'int', 'size' => 'normal', 'not null' => TRUE, 'default' => 0));
+  db_add_field($ret, 'aggregation_item', 'aggregation_item_options', array('type' => 'text', 'not null' => TRUE));
+  db_add_field($ret, 'aggregation_item', 'original_comments', array('type' => 'varchar', 'length' => 250, 'not null' => TRUE));
+  
+  $old_feed_data = db_query("SELECT * FROM {aggregation_feed}");
+ 
+  while ($row = db_fetch_object($old_feed_data))
+  {
+    $options_array = array();
+    
+    $options_array['aggregate_to_moderation_queue'] = 
+      ($row->aggregate_to_moderation_queue == 'yes' ? 1 : 0);
+    $options_array['enable_comments_on_articles'] = 
+      ($row->enable_comments_on_articles == 'yes' ? 1 : 0);
+    $options_array['enable_comments_on_images'] = 
+      ($row->enable_comments_on_images == 'yes' ? 1 : 0);
+    $options_array['enabled'] = 
+      ($row->enabled == 'yes' ? 1 : 0);
+    $options_array['link_items_to_original_urls'] = 
+      ($row->link_items_to_original_urls == 'yes' ? 1 : 0);
+    $options_array['publish_new_items'] = 
+      ($row->publish_new_items == 'yes' ? 1 : 0);
+    $options_array['sticky_items'] = 
+      ($row->sticky_items == 'yes' ? 1 : 0);
+    
+    $time_to_live = 0;
+    
+    if ($row->delete_old_items == 'yes')
+      $time_to_live = variable_get('aggregation_item_time_to_live', 30);
+    
+    $options_array = serialize($options_array);
+    
+    db_query("UPDATE {aggregation_feed} SET aggregation_feed_options = '%s', time_to_live = %d WHERE nid = %d", $options_array, $time_to_live, $row->nid);
+  }
+  
+  $old_feed_data = db_query("SELECT * FROM {aggregation_item}");
+ 
+  while ($row = db_fetch_object($old_feed_data))
+  {
+    $options_array = array();
+    
+    $options_array['link_to_original_url'] = 
+      ($row->link_to_original_url == 'yes' ? 1 : 0);
+    
+    $options_array = serialize($options_array);
+    
+    db_query("UPDATE {aggregation_item} SET aggregation_item_options = '%s' WHERE nid = %d", $options_array, $row->nid);
+  }
+
+  db_drop_field($ret, 'aggregation_feed', 'aggregate_to_moderation_queue'); 
+  db_drop_field($ret, 'aggregation_feed', 'enable_comments_on_articles');
+  db_drop_field($ret, 'aggregation_feed', 'enable_comments_on_images');
+  db_drop_field($ret, 'aggregation_feed', 'enabled');
+  db_drop_field($ret, 'aggregation_feed', 'link_items_to_original_urls');
+  db_drop_field($ret, 'aggregation_feed', 'publish_new_items');
+  db_drop_field($ret, 'aggregation_feed', 'sticky_items');
+  db_drop_field($ret, 'aggregation_feed', 'delete_old_items');
+  db_drop_field($ret, 'aggregation_item', 'link_to_original_url');
+  
+  variable_del('aggregation_item_time_to_live');
+  
+  return $ret;
+}
+
+function aggregation_update_6100()
+{
+	$ret = array();
+	
+	db_change_field($ret, 'aggregation_feed', 'item_categories', 'item_categories', array('type' => 'text', 'not null' => TRUE));
+	
+	return $ret;
+}
+
+function aggregation_uninstall()
+{
+	// Delete all aggregation items
+	$result = db_query("SELECT ai.nid FROM {aggregation_item} ai, {node} n WHERE ai.nid = n.nid");
+	while ($row = db_fetch_object($result))
+		node_delete($row->nid);
+
+	// Delete all aggregation feeds
+	$result = db_query("SELECT af.nid FROM {aggregation_feed} af, {node} n WHERE af.nid = n.nid");
+	while ($row = db_fetch_object($result))
+		node_delete($row->nid);
+
+	// We'll get -1 if this is not set for some reason
+	$vocabulary_to_delete = variable_get('aggregation_current_vid', -1);
+
+	if ($vocabulary_to_delete >= 0)
+		taxonomy_del_vocabulary($vocabulary_to_delete);
+
+	drupal_uninstall_schema('aggregation_item');
+	drupal_uninstall_schema('aggregation_feed');
+
+	variable_del('aggregation_current_vid');
+	variable_del('aggregation_item_time_to_live');
+	variable_del('aggregation_enable_logging');
+	variable_del('aggregation_image_to_display');
+	variable_del('aggregation_enable_cron');
+	variable_del('aggregation_feeds_to_refresh_per_cron');
+	variable_del('aggregation_feed_refresh_cooldown');
+
+	node_type_delete('aggregation_feed');
+	node_type_delete('aggregation_item');
+}
+
+/**
+ * Implementation of hook_requirements
+ */
+function aggregation_requirements($phase)
+{
+	$requirements = array();
+
+	// Ensure translations don't break at install time
+  	$t = get_t();
+
+	$requirements['CURL'] = array();
+	$requirements['CURL']['title'] = $t('CURL');
+	$requirements['CURL']['value'] = $t('INSTALLED');
+
+	// Test for CURL support
+	if (!function_exists('curl_init'))
+	{
+		$requirements['CURL']['value'] = $t('NOT INSTALLED');
+		$requirements['CURL']['description'] = $t('CURL support not present.');
+		$requirements['CURL']['severity'] = REQUIREMENT_ERROR;
+	}
+
+	return $requirements;
+}

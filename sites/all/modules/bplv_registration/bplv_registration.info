@@ -1,0 +1,5 @@
+; $Id: workflow.info,v 1.4 2008/04/02 16:44:06 jvandyk Exp $
+name = BPLV Registration
+description = Provides a registration from for BPLV Users
+core = 6.x
+package = "Registration"

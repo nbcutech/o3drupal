@@ -1,0 +1,1004 @@
+
+/******************/
+/*  MAIN CONTENT  */
+/******************/
+
+#primary {
+	margin:0 12px 0 0;
+	width:672px;
+	display:inline;
+	float:left;
+}
+
+* html #primary {
+	margin: 0 12px 0 0;
+}
+
+#wideLeft {background-image:url("../images/oxygencom/homepage_background.jpg"); background-repeat: no-repeat}
+
+/* panels */
+.panel-col-first {width: 655px !important; margin-left: -20px; padding-left: 20px;}
+.panel-col-last {width: 330px !important; float: right !important; margin: -1584px -300px 0 0; padding: 0}
+
+.hp_caption {display:none;}
+
+.cta {text-decoration:underline;font-weight:bold;}
+
+#hp_video_box {
+	width:672px;
+	height:300px;
+	background:url(../images/o2_homepage/video_BG.jpg) no-repeat 0 0;
+	margin: 0 0 15px 0;
+}
+
+#hp_video_box #vbox_player_col {
+	width:327px;
+	height:303px;
+	float:left;
+	display:inline;
+}
+
+#hp_video_box #vbox_player_col #video_holder {
+	width:300px;
+	margin: 8px 0 0 8px;
+}
+
+#hp_video_box #vbox_player_col #video_holder #nowplaying {
+	color:#6ebef3;
+	font-size:12px;
+	font-weight:bold;
+	margin: 0 0 0 3px;
+}
+
+#hp_video_box #vbox_player_col #video_holder #nowplaying #metadataTitle {
+	font-size:12px;
+	color:#fff;
+	display:inline;
+}
+
+#hp_video_box #vbox_watch_col {
+	width:277px;
+	height:247px;
+	float:left;
+	display:inline;
+	padding: 56px 0 0 38px;
+}
+
+#hp_video_box #vbox_watch_col a {
+ color:#ccc;
+ }
+
+#hp_video_box #vbox_watch_col .vid_promo {
+	width:260px; /* used to be 296px */
+	height:74px;
+	float:left;
+	display:inline;
+	margin: 0;
+	color:#ccc;
+	font-size: 11px;
+}
+
+#hp_video_box #vbox_watch_col .vid_promo .vid_title {
+ 	color:#e9e9e9;
+	margin: 1px 0 3px 0;
+ }
+
+#hp_video_box #vbox_watch_col .vid_promo img {
+	float:left;
+	border: 1px solid #999;
+	margin: 0 10px 0 0;
+}
+
+#hp_video_box #vbox_watch_col .vid_promo img:hover {
+	border: 1px solid #ccc;
+}
+
+#hp_video_box #vbox_watch_col .vid_promo a {
+	 color:#ffe719;
+	 display:block;
+	 margin: 1px 0 0 0;
+ }
+ 
+#hp_video_box #vbox_watch_col #vid_more {
+	text-align:right;
+}
+ 
+#hp_blogs_and_photos_box {
+	width:672px;
+	height:303px;
+	margin: 0 0 15px 0;
+}
+
+#hp_blogs_and_photos_box #hp_blogs_box {
+	width:309px;
+	height:251px;
+	float:left;
+	display:inline;
+	background:url(../images/o2_homepage/blogs_promo_BG.png) no-repeat 0 0;
+	padding: 49px 0 0 16px; /*padding: 52px 0 0 18px;*/
+	behavior: url(/iepngfix.htc);
+}
+
+#hp_blogs_and_photos_box #hp_photos_box {
+	width:303px;
+	height:251px;
+	float:right;
+	display:inline;
+	background:url(../images/o2_homepage/photos_promo_BG.png) no-repeat 0 0;
+	padding: 48px 0 0 21px; /*padding: 52px 0 0 24px;*/
+	behavior: url(/iepngfix.htc);
+}
+
+#hp_featured_blog, #hp_featured_photos {
+	color:#000;
+	font-size: 12px;
+	width: 280px;
+	height: 169px;
+}
+
+#hp_featured_blog a, #hp_featured_photos a {color:#000;}
+
+#hp_featured_blog img, #hp_featured_photos img {
+	display:block;
+	margin: 0 0 10px 0;
+	border: 3px solid #ccc;
+}
+
+#hp_featured_blog img:hover, #hp_featured_photos img:hover {
+	border:3px solid #FFED85;
+}
+
+#hp_more_blogs, #hp_more_photos {
+	font-size: 13px;
+	color: #850077;
+	font-weight:bold;
+}
+
+#hp_more_blogs ul, #hp_more_photos ul {
+	list-style-type:disc;
+	list-style-position:inside;
+	margin: 2px 0 0 3px;
+}
+
+#hp_more_blogs li, #hp_more_photos li {
+	margin: 2px 0 0 0;
+}
+
+#hp_more_blogs a, #hp_more_photos a {
+	font-size: 12px;
+	color:#333;
+}
+
+#hp_music_movies_games_more_box {
+	width:651px;		/*672*/
+	height:395px;		/*465*/
+	background:url(../images/o2_homepage/music_movies_games_more_BG.png) no-repeat 0 0;
+	margin: 0 0 15px 0;
+	padding: 70px 0 0 21px;
+	behavior: url(/iepngfix.htc);
+}
+
+#hp_music_movies_games_more_box .hp_medium_promo {
+	width:205px;
+	height:182px;
+	float:left;
+	display:inline;
+	margin: 0 8px 0 0;
+	font-size:12px;
+}
+
+#hp_music_movies_games_more_box .hp_medium_promo_title {
+	font-size: 18px;
+	line-height: 35px;
+	font-weight:bold;
+	color:#850077;
+}
+
+#hp_music_movies_games_more_box .hp_medium_promo:hover .hp_medium_promo_title {
+	text-decoration:underline;
+}
+
+#hp_dont_miss_box {
+	width:651px;		/*672*/
+	height:215px;		/*300*/
+	background:url(../images/o2_homepage/dont_miss_BG.png) no-repeat 0 0;
+	margin: 0 0 15px 0;
+	padding: 85px 0 0 21px;
+	behavior: url(/iepngfix.htc);
+}
+
+#hp_dont_miss_box .hp_medium_promo {
+	width:205px;
+	height:182px;
+	float:left;
+	display:inline;
+	margin: 0 8px 0 0;
+	font-size:12px;
+	color:#000;
+}
+
+#hp_dont_miss_box .hp_medium_promo a {
+	font-size:12px;
+	color:#000;
+}
+
+#hp_dont_miss_box .hp_medium_promo img {
+	margin: 0 0 10px 0;
+	display:block;
+}
+
+
+/* Promo One Rotating STYLES*/
+#promo_1, #promo_2, #promo_3, #promo_4, #promo_5, #promo_6, #promo_7 {
+	margin:0 0 2px 2px;
+/*	position:relative; */
+ }
+
+#promoOneSlider {
+	width:672px;
+	height:250px;
+	margin: 12px 0 15px 0;
+}
+
+#cycleMeNow {
+	width:619px;
+	height:312px;
+	float:left;
+	display:inline;
+	position:relative;
+	background-color:#fff;
+}
+
+.promoOneMain {
+	width:619px;
+	height:312px;
+	display:none;
+}
+
+
+.promoOneCopy {
+	width:606px;  /*569px;*/
+	height: 42px; /*52px;*/
+
+	top:260px;
+	font-size:11px;
+	line-height:15px;
+	color:#fff;
+	overflow:hidden;
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	filter:alpha(opacity=85);
+	-moz-opacity:0.85;
+	-khtml-opacity: 0.85;
+	opacity: 0.85;
+	padding: 10px 0 0 22px;
+}
+
+.promoOneCopy h2 {
+	font-weight:bold; color:yellow;
+}
+.promoOneCopy a {text-decoration:none; color: #ffffff;}	
+
+.promoOneCopyHeader {
+	font-size:18px;
+	color:#fff;
+	line-height:17px;
+	font-weight:bold;
+	padding-bottom:5px;
+}
+.promoOneCopy span {
+		color:yellow;
+		text-decoration: none;
+		font-weight:bold;
+}
+.promoOneCopyHeader span {
+	font-size:19px;
+	line-height:17px;
+}
+
+
+
+#promo1,#promo2,#promo3,#promo4, #promo5, #promo6 {position:relative;margin: 0 0 6px 7px;}
+#promo1 a,#promo2 a,#promo3 a,#promo4 a, #promo5 a, #promo6 a{
+	filter:alpha(opacity=50);
+	-moz-opacity:0.5;
+	-khtml-opacity: 0.5;
+	opacity: 0.5;
+}
+#promo1	a.activeSlide, #promo2 a.activeSlide, #promo3 a.activeSlide, #promo4 a.activeSlide, #promo5 a.activeSlide, #promo6 a.activeSlide {
+	filter:alpha(opacity=100);
+	-moz-opacity:1;
+	-khtml-opacity: 1;
+	opacity: 1;
+}
+
+.tuneIn {
+	width:114px;
+	float:left;
+	padding:10px 0 0 20px;
+	display:none;
+}
+
+
+			
+/******************/
+/*   RIGHT RAIL   */
+/******************/
+
+#secondary {
+	padding:13px 0 0;
+	width:300px;
+	float:left;
+	display:inline;
+	background:url(../images/o2_homepage/right_col_header_BG.png) no-repeat 0 0;
+}
+
+#hp_ad_box, #ad300x250 {
+	width: 300px;
+	height: 264px;
+	padding: 0 !important;
+	margin: 500px 0 0 150px;
+	position:absolute;
+}
+
+#companion_300x250 {
+	width: 300px;
+	height: 264px;
+	padding: 0 !important;
+	margin: 378px 0 0 0px;
+	position:relative;
+}
+
+#hp_ad_box #ad, #ad300x250 span {
+	background-color:#f0f0f2;
+	text-align:left;
+	padding:2px 4px;
+	margin: 0 0 2px 0;
+	width:100px;
+	float:left;
+	
+	font-size: 100%;
+}
+
+#x95AdBlock {
+	background-color:#FFF;
+	clear:both;
+	width:300px;
+}
+
+/* WHATS ON */
+
+#whatsOnNow {text-align:center;color:#fff; font-weight:bold; font-size:13px;margin-left:-12px;display:inline; float:right; width:300px; height:49px;position: absolute}
+
+
+/* OBSESSED STYLES*/
+
+#hp_obsessed_box {
+	background: url(../images/oxygencom/obsessed_header.png) no-repeat;
+	display:inline;
+	float:right;
+	margin:32px 26px 0 0px;
+	font-size: 11px;
+	line-height: 13px;
+	width:300px;	
+}
+
+#obsessed_promo_footer {background-image:url(../images/oxygencom/obsessed_footer.jpg) !important; margin: 0px 0 0 0;
+/* inline styles from oxygen_obsessed.module
+width:300px;height:39px;background-repeat:no-repeat;background-position:left top;position:relative;*/
+}
+
+
+			
+/* MOST POPULAR STYLES*/		
+#hp_most_popular { background-color:#fff; padding:10px 0 0 0;}
+#hp_most_popular ul {border-bottom: 4px solid #dcdcdc;}
+#hp_most_popular ul li {height:44px; border-bottom: 4px solid #dcdcdc;}
+#hp_most_popular ul li.videos {background:url(../images/o2_homepage/popular_videos.gif) no-repeat 10px 0;}
+#hp_most_popular ul li.photos {background:url(../images/o2_homepage/popular_photos.gif) no-repeat 10px 0;}
+#hp_most_popular ul li.blogs {background:url(../images/o2_homepage/popular_blogs.gif) no-repeat 10px 0;}
+
+#hp_most_popular ul li a {display:block; height:30px; padding: 5px 5px 4px 64px;font-size:11px;color:#626262; overflow:hidden;} /* height used to be 44px w/no bottom padfing */
+#hp_most_popular ul li a .pop_headline {color:#075e8c;display:block;}
+
+
+
+/* CELEB GOSSIP STYLES*/
+#hp_celeb_gossip_box {
+	width:300px;
+	height:350px;
+	background:url(../images/o2_homepage/celeb_gossip_BG.jpg) no-repeat 0 0;
+	font-size:11px;
+}
+
+#hp_celeb_gossip_box ul {padding:90px 0 0 25px;}
+#hp_celeb_gossip_box ul li {height:40px;margin:0 0 4px 0;}
+#hp_celeb_gossip_box ul li img {float:left; margin: 0 20px 0 0;border: 1px solid #cab52a;}
+#hp_celeb_gossip_box ul li a:hover img {border: 1px solid #ccc;}
+#hp_celeb_gossip_box ul li a {display:block; height:40px;color:#626262;font-size:11px;}
+#hp_celeb_gossip_box ul li .gossipCopy {padding: 8px 0 0 0;display:block;width:170px;overflow:hidden;font-size:11px;}
+		
+/* MOBILE STYLES*/
+.mobileSidebarTout {
+	background-image:url(../images/o2_homepage/mobile_BG.jpg);
+	background-repeat:no-repeat;
+	background-color:#fff;
+	background-position: 0px;
+	height:184px;
+	width:300px;
+}
+
+.mobileSidebarTout .mobileCopy {
+	font-size: 13px;
+	color: #333333;
+	padding:67px 0 0 145px;
+	width:150px;
+}
+
+.mobileCopy h4 {
+	font-size:13x;
+	margin-top:3px;
+	font-weight:bold;
+	color:#850077;
+}
+.mobileCopy h3 a {
+	font-weight:bold;
+	line-height:1.1;
+	margin: 3px 0 0 0;
+	color:#000;
+	font-size:12px;
+	text-decoration:underline;
+}
+
+.mobileCopy .mobiDisclaimer {
+	margin:3px 0 0 0;
+	font-size:10px;
+}
+
+	
+#hp_poll_box {
+	width:300px;
+	height:320px;
+	background-image: url('../images/o2_homepage/poll_BG.jpg');
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-color:#FFFFFF;
+}
+
+#hp_poll_box #pollFrame {
+	width:250px;
+	height:300px;
+	margin:90px 25px 0 25px;
+}
+
+
+
+
+/*************NEW STYLES or OVERRIDES*******************/
+.promoOneCopy{ 
+	background-image:url("../images/oxygencom/promo1_overlay.png");
+	background-color:none;
+}
+#promoOneNav {	
+	 
+	padding: 5px 0 0 0;
+	behavior: url(/iepngfix.htc); 
+	display:block; 
+	clear:both; 
+	height:54px; 
+	width:auto; 
+}
+	
+#promoOneNav a img 
+{
+background-image:url("../images/oxygencom/previewbox_no_arrow.gif");
+background-position:0 6px;
+background-repeat:no-repeat;
+display:inline;
+padding:8px 2px 2px;
+}
+/*#promoOneNav a img:hover {border:2px solid #888;}*/
+#promoOneNav a.activeSlide img {
+background-image:url("../images/oxygencom/previewbox.gif");
+background-position:0 -1px;
+background-repeat:no-repeat;
+}
+#promoOneNav div{display:inline; float:left;}
+#promoOneNav a .arrow {
+	position:absolute;
+	top:-5px;
+	left:26px;
+	display:none;
+	width:0;
+	height:0;
+	line-height:0;
+	border-right:6px solid yellow;
+	border-left:none;
+	border-top:6px solid transparent;
+	border-bottom:6px solid transparent;
+}
+
+#promoOneNav a.activeSlide .arrow {
+	position:absolute;
+	top:-5px;
+	left:26px;
+	display:block;
+	width:0;
+	height:0;
+	line-height:0;
+	border-right:6px solid yellow;
+	border-left:none;
+	border-top:6px solid white;
+	border-bottom:6px solid white;
+}
+
+/*#firstRow*/
+.panel-display
+{
+	width:927px;
+	background-image:url("../images/oxygencom/oxygen_hp_rowOne_background.jpg");
+	background-repeat:no-repeat;
+ 	overflow:hidden;
+	padding:19px 19px 18px 18px;
+	margin: 0 0 27px 10px;
+}
+/*#content*/
+.panel-pane
+{
+	padding-left:10px;
+	padding-right:0px;
+	padding-bottom:20px;
+}
+
+#promoOneSlider
+{
+	display:inline;
+	float:left;
+	width:619px;
+	height:371px;
+	background-color:#000;
+	margin: 0 0 0 -10px;
+}
+
+#secondRow
+{
+	padding-top:28px;
+ 	height:1266px;
+	width:964px;
+}
+#leftSection
+{
+	width:645px;
+	display:inline;
+	float:left;
+}
+
+#rightSection
+{
+	width:300px;
+	display:inline;
+	float:right;
+	margin-left:0px;
+}
+
+/*#outLoudBlog*/
+.pane-lol-blogs
+{
+	display:inline; 
+	float:left;
+	width:295px;
+	height:597px;
+	padding-top:24px;
+	margin: 50px 0 0 -16px;
+ }
+ #videoPlayerColumn
+ {
+	position: absolute;
+	display:inline; 
+	float:right;
+	width:339px;
+	height:617px;
+	margin: 410px 0 0 -330px;
+
+}
+
+#mostPopularBlock
+{
+	display:block;
+	clear:both;
+	padding-top:73px;
+	height:348px;
+}
+#most_popular_videos, #most_popular_photos, #most_popular_blogs
+{
+	height:98px;
+}
+
+#video_holder
+{
+	padding-left:8px;
+	padding-top:30px;
+	height:330px;
+	display: inline;
+	float: left;
+}
+#vbox_watch_col
+{
+	padding-top:11px;
+	padding-left:18px;
+}
+
+.vid_promo {
+	width:260px; /* used to be 296px */
+	height:74px;
+	float:left;
+	display:inline;
+	margin: 0;
+	color:#999999;
+	font-size: 11px;
+}
+.vid_title {
+ 	color:black;
+	margin: 1px 0 3px 0;
+	font-weight:bold;
+ }
+
+.vid_promo img {
+	float:left;
+	border: 1px solid #999;
+	margin: 0 10px 0 0;
+}
+
+ .vid_promo img:hover {
+	border: 1px solid #ccc;
+}
+
+.vid_promo a {
+	 color:#006699;
+	 display:block;
+	 margin: 7px 0 0 0;
+	 font-weight:bold;
+ }
+ 
+ #metadataTitle {
+	font-size:12px;
+	font-weight:bold;
+	color:#000;
+	margin-right:10px;
+	background-color:#ccc;
+	height:24px;
+	text-align:center
+}
+
+.out_loud_promo {
+	width:276px; /* used to be 296px */
+	float:left;
+	display:inline;
+	color:#000;
+	font-size: 11px;
+	padding:10px 0;
+	background-color: #ffffff;
+	border-bottom:1px dashed #CACACA;
+}
+.out_loud_heading
+{
+	font-style: italic;
+	text-transform: uppercase; 
+	font-size:11px;
+	font-weight:bold;
+	color:#990033;
+	padding-bottom:3px;
+}
+.out_loud_title {
+ 	color:#000;
+	margin: 1px 0 3px 0;
+	font-weight:bold;
+	font-size:14px;
+ }
+ 
+ .out_loud_promo img {
+	float:left;
+	border: 1px solid #999;
+	margin: 0 10px 14px 0;
+}
+
+ .out_loud_promo img:hover {
+	border: 1px solid #ccc;
+}
+
+.out_loud_promo a {
+	 color:#006699;
+	 display:block;
+	 margin: 7px 0 0 0;
+	 font-weight:bold;
+ }
+
+ 
+/* Stylesheet for my demo pages for jScrollPane - these styles aren't necessary for using jScrollPane and aren't specific to any particular example */
+
+
+a.jScrollArrowUp {
+	background: url(http://www.kelvinluck.com/assets/jquery/jScrollPane/images/basic_arrow_up.gif) repeat-x 0 0;
+}
+a.jScrollArrowUp:hover {
+	background-position: 0 -15px;
+}
+a.jScrollArrowDown {
+	background: url(http://www.kelvinluck.com/assets/jquery/jScrollPane/images/basic_arrow_down.gif) repeat-x 0 0;
+}
+a.jScrollArrowDown:hover {
+	background-position: 0 -15px;
+}
+a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
+	background-position: 0 -30px;
+}
+
+ 
+ 
+
+	.jScrollPaneContainer {
+	position: relative;
+	overflow: hidden;
+	z-index: 1;
+}
+
+.jScrollPaneTrack {
+	position: absolute;
+	cursor: pointer;
+	right: 0;
+	top: 0;
+	height: 100%;
+	background: #aaa;
+}
+.jScrollPaneDrag {
+	position: absolute;
+	background: #666;
+	cursor: pointer;
+	overflow: hidden;
+}
+.jScrollPaneDragTop {
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+}
+.jScrollPaneDragBottom {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	overflow: hidden;
+}
+a.jScrollArrowUp {
+	display: block;
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	right: 0;
+	text-indent: -2000px;
+	overflow: hidden;
+	/*background-color: #666;*/
+	height: 9px;
+}
+a.jScrollArrowUp:hover {
+	/*background-color: #f60;*/
+}
+
+a.jScrollArrowDown {
+	display: block;
+	position: absolute;
+	z-index: 1;
+	bottom: 0;
+	right: 0;
+	text-indent: -2000px;
+	overflow: hidden;
+	/*background-color: #666;*/
+	height: 9px;
+}
+a.jScrollArrowDown:hover {
+	/*background-color: #f60;*/
+}
+a.jScrollActiveArrowButton, a.jScrollActiveArrowButton:hover {
+	/*background-color: #f00;*/
+}
+
+
+
+
+ 
+#obsessedCarousel {
+	 width: 300px;
+	 height: 204px;
+	 float:left;
+	 display:inline;
+	 background-image:url("../images/oxygencom/obsessed_background.jpg");
+	 overflow: hidden;
+}
+#obsessedCarousel ul {
+	 width: 300px;
+	 height: 164px;
+	 margin:0;
+	 padding:0;
+ 
+}
+#obsessedCarousel ul li {
+	width:285px;
+	height:75px;  /*81*/
+	margin: 0 0 6px 0;
+	padding: 6px  0 0 15px;
+	color:#fff;
+	
+}
+#obsessedCarousel ul li span {display:inline;float:left;}
+#obsessedCarousel ul li img {
+	display:inline;
+	float:left;
+	width:107px;
+	height: 67px;
+	border: 1px solid #ccc;
+	margin: 0 11px 0 11px;
+}
+#obsessedCarousel a
+{
+	color:#fff;
+}
+
+span.obsessedDescription
+{
+	display:block;
+	clear:both;
+}
+.most_popluar_item {
+	width:276px;  
+	padding-right:36px;
+	height:98px;
+	float:left;
+	display:inline;
+	margin: 0;
+	color:#000;
+	font-size: 11px;
+	position: relative;
+}
+.most_popluar_item_title {
+ 	color:#996699;
+	margin: 1px 0 3px 0;
+	font-weight:bold;
+	font-size:14px;
+ }
+.most_popluar_item_title a {
+ 	color:#996699;
+ }
+.most_popluar_item_text {
+	margin-left: 90px;	
+}
+.most_popluar_item img {
+	float:left;
+	border: 1px solid #999;
+	margin: 0 10px 14px 0;
+}
+
+ .most_popluar_item img:hover {
+	border: 1px solid #ccc;
+}
+
+.most_popluar_item a {
+	 color:#006699;
+	 display:block;
+	 margin: 7px 0 0 0;
+	 font-weight:bold;
+ }
+ #most_popular_videos, #most_popular_blogs, #most_popular_photos
+ {
+ 	display:block;
+	margin-left: 0px;
+	clear: both;
+ }
+
+ #twitter_promo
+ {
+ 	height:282px;
+	width:260px;
+	background-image:url("../images/oxygencom/twitter_promo_background.jpg");
+	background-repeat: no-repeat;
+	padding-top:90px;
+	padding-left:20px;
+	padding-right:20px;
+	margin-left: 0px;
+
+ }
+ .twitterInfoBlock
+ {
+
+	height:78px;
+ }
+.twitterShowInfo
+ {
+ 	color:#3399cc;
+	font-size:14px;
+	font-weight:bold;
+	display:inline;
+	float:left;
+	width:185px;
+ }
+.twitterShowInfo span
+{
+	display:block;
+	clear:both;
+	color:#000;
+	font-size:12px;
+	padding-top:3px;
+	
+}
+.twitterShowInfo a
+{
+	font-size:11px;
+	font-weight:bold;
+	color:#990066;
+}
+.twitterShowIcon
+{
+	display:inline;
+	float:left;
+	margin-left:10px;
+}
+
+.channel-finder {margin: -5px 0 0 0px !important}
+
+#facebook_promo
+{
+	margin:100px 0 0 0px;
+}
+
+#photo_poll
+{
+	margin-top:10px;
+	margin-left: 3px;
+}
+
+							.pane-promo-24 {}
+							#bottomPromosBlock{margin-top:50px;color:#000;font-size:12px}
+							#bottomPromosBlock a{color:#663399;font-weight:bold; font-size: 11px;}
+							.bottomPromo{display:inline; float:left; width:139px; padding: 0 39px 0 20px}
+							.bottomPromo .bottomPromoTile{width:136px; height:95px; margin-bottom:8px;}
+							.bottomPromoTitle{font-weight:bold;}
+							#facebook_promo
+							{
+								background-image:url(../images/oxygencom/facebook_promo_background.jpg); 
+								background-repeat:no-repeat;
+								width:300px; 
+								height: 239px;
+								padding-top:78px;
+								margin-top: -20px;
+								color:#fff;
+							}
+							.facebookInfoBlock
+							{
+									height:69px; padding-top:10px; padding-left:10px; padding-right:0px;
+							}
+							.facebookShowIcon
+							{
+							display:inline; float:left;
+							}	
+							
+							.facebookShowInfo
+							{
+								display:inline; float:left; width:200px; padding-left:10px; font-size:12px; font-weight:bold;
+							}
+							
+							.facebookShowInfo span{font-size:12px;}
+														
+							.likeButton {
+								float: left;
+								margin-left: 10px;
+								margin-top: 5px;
+								padding-left: 0px;
+								width: 220px;
+							}
+							
+							
+							.pds-pd-link{display:none !important; padding:;}
+
+
+/* Drupal homepage styles */
+
+#wideLeftContent {}

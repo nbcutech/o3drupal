@@ -1,0 +1,5 @@
+; $Id$ crop_presets.info September 24, 2011 Randall Goya decibel.places
+name = Preset IMCE Crop from Imagecache
+description = Prefills Focus Crop & Resize values from Imagecache settings
+core = 6.x
+package = "Oxygen"

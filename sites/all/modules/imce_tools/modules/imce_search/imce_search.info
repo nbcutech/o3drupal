@@ -1,0 +1,11 @@
+name = IMCE Search
+description = Provides an autocomplete search box for finding files through the IMCE browser
+core = 6.x
+dependencies[] = imce
+
+; Information added by drupal.org packaging script on 2011-03-01
+version = "6.x-1.1"
+core = "6.x"
+project = "imce_tools"
+datestamp = "1299006367"
+

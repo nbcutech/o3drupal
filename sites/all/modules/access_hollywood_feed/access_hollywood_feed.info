@@ -1,0 +1,5 @@
+; $Id$
+name = Access Hollywood Feed
+description = Access Hollywood Feed Aggregator uses the feeds provided by Access Hollywood Feed to populate content on Oxygen site.
+core = 6.x
+package = "Oxygen"

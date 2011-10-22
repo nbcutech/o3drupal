@@ -1,0 +1,190 @@
+/* CSS Document */
+
+div.wrapper {
+	width:648px;
+}
+
+div.assignment-top {
+	height:449px;
+	background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-top.jpg);
+	background-repeat:no-repeat;
+	}
+	div.assignment-top div.weeks-listing {
+		margin-top:144px;
+		margin-left:11px;
+		float:left;
+		height:240px;
+		overflow:auto;
+		width:102px;
+		}
+		div.assignment-top div.weeks-listing a {
+			display:block;
+			height:34px;
+			border-bottom:1px solid #45484C;
+			width:70px;
+			font-family:Arial, Helvetica, sans-serif;
+			font-size:10px;
+			color:#b6f64c;
+			padding-top:14px;
+			padding-left:9px;
+			text-decoration:none;
+			}
+			div.assignment-top div.weeks-listing a span {
+				display:block;
+				color:white;
+			}
+		div.assignment-top div.weeks-listing a:hover, div.assignment-top div.weeks-listing a.on {
+			background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-nav-bkg.jpg);
+			background-repeat:repeat-x;
+			color:#669900;
+			}
+		div.assignment-top div.weeks-listing a:hover span, div.assignment-top div.weeks-listing a.on span{
+			color:#333333;
+			}
+	div.assignment-top div.video-container {
+		margin-top:147px;
+		margin-left:15px;
+		float:left;
+		width:281px;
+		height:240px;
+		overflow:hidden;
+		}
+	div.assignment-top div.share-fb-twitter {
+		float:left;
+		width:215px;
+		margin-top:147px;
+		padding-top:232px;
+		padding-left:15px;
+		}
+		div.assignment-top div.share-fb-twitter div.left {
+			width:100px;
+			float:left;
+			}
+		div.assignment-top div.share-fb-twitter div.right {
+			width:115px;
+			float:right;
+			}
+div.assignment-comments-container {
+	background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-comments-bkg.jpg);
+	background-repeat:no-repeat;
+	height:442px;
+	padding-left:35px;
+	}
+	div.assignment-comments-container div.week-chooser {
+		padding-top:98px;
+		padding-right:35px;
+		text-align:right;
+		height:25px;
+		}
+	div.assignment-comments-container div.comment-form {
+		width:284px;
+		float:left;
+		}
+		div.assignment-comments-container div.comment-form div.comment-buttons {
+			padding-top:98px;
+			height:30px;
+			overflow:hidden;
+			}
+			div.assignment-comments-container div.comment-form div.comment-buttons a {
+				width:83px;
+				height:23px;
+				display:block;
+				float:left;
+				margin-right:3px;
+				background-repeat:no-repeat;
+				}
+				div.assignment-comments-container div.comment-form div.comment-buttons a span {
+					display:none;	
+				}
+			div.assignment-comments-container div.comment-form div.comment-buttons a.facebook {
+				background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-fb-icon.gif);
+			}
+			div.assignment-comments-container div.comment-form div.comment-buttons a.twitter {
+				background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-tw-icon.gif);
+			}
+			div.assignment-comments-container div.comment-form div.comment-buttons a.email {
+				background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-em-icon.gif);
+			}
+		div.assignment-comments-container div.comment-form textarea {
+			width:245px;
+			height:75px;
+			margin-left:2px;
+			background-color:transparent;
+			border:0px solid black;
+			color:white;
+			font-size:11px;
+			}
+		div.assignment-comments-container div.comment-form div.chars-left {
+			font-size:11px;
+			color:white;
+			font-family:Arial, Helvetica, sans-serif;
+			padding-left:3px;
+		}
+		div.assignment-comments-container div.comment-form div.submit-button {
+			text-align:right;
+			padding-top:15px;
+			padding-right:20px;
+		}
+	div.assignment-comments-container div.comment-stream {
+		width:295px;
+		height:250px;
+		float:left;
+		overflow:auto;
+		margin-top:5px;
+		}
+		div.assignment-comments-container div.comment-stream div.comment-entry {
+			margin-top:5px;
+			}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.icon {
+				width:51px;
+				height:51px;
+				float:left;
+				margin-right:5px;
+				}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.comment {
+				font-family:Arial, Helvetica, sans-serif;
+				font-size:12px;
+				width:210px;
+				float:left;
+				}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.comment div.like-share {
+				color:#502b14;
+				font-weight:bold;
+				font-size:10px;
+				}
+				div.assignment-comments-container div.comment-stream div.comment-entry div.comment div.like-share a {
+					color:#502b14;
+					padding-right:7px;
+					}
+				div.assignment-comments-container div.comment-stream div.comment-entry div.comment div.like-share span {
+					float:right;
+					}
+		div.assignment-comments-container div.comment-stream div.comment-entry div.clear {
+			clear:both;
+			height:1px;
+			overflow:hidden;
+			}
+	div.assignment-comments-container div.clear {
+		clear:both;
+		height:1px;
+		overflow:hidden;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

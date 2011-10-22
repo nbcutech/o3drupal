@@ -1,0 +1,1 @@
+<table><tr><td height="663" width="520"><iframe name="shareandtag" id="shareandtag" src="http://bad-girls-club.oxygen.com/share_and_tag" scrolling="no" frameborder="0" height="663" width="520"></iframe></td></tr></table>

@@ -1,0 +1,409 @@
+<?php
+// $Id$
+
+
+
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function cookstr_menu() {
+	global $user;
+	$items = array();
+	
+
+
+
+	// Admin Settings.
+	$items['admin/settings/cookstr'] = array(
+	  'title' => 'Cookstr',
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('cookstr_admin_settings'),
+	  'access arguments' => array('administer site configuration'),
+	  'description' => 'Global configuration of Cookstr functionality.',
+	  'type' => MENU_CALLBACK,
+	);
+
+	$items['recipes'] = array(
+		'title' => 'Recipe Finder',
+		'page callback' => '_cookstr_landing',
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['recipes/search'] = array(
+		'title' => 'Recipe Finder',
+		'page callback' => '_cookstr_search_page',
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+
+
+	$items['recipes/print/%'] = array(
+		'title' => 'Recipe Finder',
+		'page callback' => '_cookstr_recipe_print',
+		'page arguments' => array(2),
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	  );	
+
+	$items['recipes/%'] = array(
+		'title' => 'Recipe Finder',
+		'page callback' => '_cookstr_recipe',
+		'page arguments' => array(1),
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+
+	
+ 	return $items;
+}
+
+/**
+ * Retrieve data from the Cookstr search XML API
+ *
+ * Makes a connection to the given URL and retrieves XML data 
+ * and attempts to format for display.
+ *
+ * Landing page that includes the left rail 'search widget'
+ *
+ * @param $url
+ * URL to Cookstr 
+ *
+ */
+
+
+function _cookstr_landing() {
+
+
+	$query= split('\?',$_SERVER['HTTP_REFERER']);
+
+
+
+
+	// grab cookstr search api and curl it
+	$url = variable_get('search_api',NULL); //added second default variable
+	$response = cookstr_curl_file($url);
+
+	// if we get a 404 from cookstr, display ours
+	if($response==404){ drupal_goto('404'); }
+	
+    $xml = simplexml_load_string($response);
+	if($xml->search_widget_html){
+		$searchbar = $xml->search_widget_html;
+		$title = 'Recipe Finder';
+		drupal_set_title(check_plain($title));	
+	}else{
+		$content = "Sorry -- there's a temporary problem with the Recipe Finder's search results. <br>Please try again in a few minutes, and thanks for your patience.";
+		$searchbar= file_get_contents(drupal_get_path('module', 'cookstr').'/cache/search_widget.inc');
+	}
+
+/* 
+* The content for the cookstr landing (home) page.
+* TWO TEXT AREAS FOR COOKSTR HOME PAGE
+* 
+* $welcome_chef_cookstr
+* $recipe_of_the_week
+*/
+
+$welcome_chef_cookstr = '<p>
+Explore our new recipe engine for the ultimate appetizers, drinks, dinners, desserts, and more.
+</p>';
+
+$recipe_of_the_week = '<p>
+<img src="/sites/all/modules/cookstr/images/feature_recipe_thumb.jpg" width="191" height="111" style="position: absolute; top: 94px; left: 43px;">
+<br/><span style=" color: black; font-weight: bold;" href="/recipes/ribeye-with-mushrooms">steak and mushrooms</span><br/> 
+Get fired up with this simple and tasty grilling recipe for rib eye with mushrooms.
+<br><br>
+<a style="text-decoration: underline; color: black; font-weight: bold;" href="/recipes/ribeye-with-mushrooms">Get the recipe.</a>
+</p>';
+
+        $searchbar = '<LINK REL=StyleSheet HREF="/sites/all/modules/cookstr/css/cookstr.css" TYPE="text/css" MEDIA=screen><div class="recipe-widget span-4" id="left-rail">' . $searchbar . '</div>';
+	
+	$content = $searchbar . '<div id="recipe-sub-header"><img src="/sites/all/modules/cookstr/images/recipe_finder.png" /></div><div id="content" class="recipe-view span-8"><div id="welcome_chef_cookstr">' . $welcome_chef_cookstr . '</div><div id="recipe_of_the_week">' . $recipe_of_the_week . '</div></div>';
+
+	return $content;
+
+}
+
+
+
+
+
+
+
+
+
+
+/**
+ * Retrieve data from the Cookstr search XML API
+ *
+ * Makes a connection to the given URL and retrieves XML data 
+ * and attempts to format for display.
+ *
+ * Individual recipe page that includes the left rail 'search widget'
+ *
+ * @param $url
+ * URL to Cookstr 
+ *
+ */
+function _cookstr_recipe($recipe) {
+
+    $query= split('\?',$_SERVER['HTTP_REFERER']);
+	
+
+	
+	if($recipe){
+		$url = str_replace('%recipe',$recipe,variable_get('recipe_api',NULL)).'/?'.$query[1];//added second default variable
+		$response = cookstr_curl_file($url);
+	    
+		if($response==404){ drupal_goto('404'); }
+	    $xml = simplexml_load_string((string)$response);
+		if($xml->recipe_html){
+			$content = $xml->recipe_html;
+			$searchbar = $xml->search_widget_html;
+			$title=$xml->recipe_title.' - Recipe Finder';
+			drupal_set_title(check_plain($title));
+
+		}else{ 
+			$content = "Sorry -- there's a temporary problem with displaying the recipe you selected. Please try again in a few minutes, and thanks for your patience.";
+			$searchbar = file_get_contents(drupal_get_path('module', 'cookstr').'/cache/search_widget.inc');
+			$title = "Recipe Finder Error";
+			drupal_set_title($title);
+		}
+		
+	}
+	
+
+        $searchbar = '<LINK REL=StyleSheet HREF="/sites/all/modules/cookstr/css/cookstr.css" TYPE="text/css" MEDIA=screen><div class="recipe-widget span-4" id="left-rail">' . $searchbar . '</div>';
+	$content = $searchbar . '<div id="recipe-sub-header"><img src="/sites/all/modules/cookstr/images/recipe_finder.png" /></div><div id="content" class="recipe-view span-8">' . $content . '</div>';
+
+	return $content;
+}
+
+/**
+ * Retrieve data from the Cookstr search XML API
+ *
+ * Makes a connection to the given URL and retrieves XML data 
+ * and attempts to format for display.
+ *
+ * Individual print page
+ *
+ * @param $url
+ * URL to Cookstr 
+ *
+ */
+ function _cookstr_recipe_print($recipe) {
+	
+	if($recipe){
+		$url = str_replace('%recipe',$recipe,variable_get('print_api',NULL));
+		$response = cookstr_curl_file($url);
+		
+		if($response==404){ drupal_goto('404'); }
+	    $xml = simplexml_load_string((string)$response);
+		if($xml->recipe_html){ 
+			$print['content'] = $xml->recipe_html;
+			$print['title'] = 'Print - '.$xml->recipe_title.' - Recipe Finder';
+			drupal_set_title(check_plain($print['title']));
+
+			if($xml->attributes()->source == 'cookstr'){
+				$newadtagvars['site_name'] = 'nbcu.cookstr';
+				$newadtagvars['site_keyval'] = 'cookstr';	
+				global $thissprop5;
+				$thissprop5='cookstr';
+			}			
+			if($xml->attributes()->id){
+				$newadtagvars['section_keyval'] .= ';recipeid='.$xml->attributes()->id;
+			}
+			if($xml->attributes()->isbn){
+				$newadtagvars['section_keyval'] .= ';isbn='.$xml->attributes()->isbn;
+				$thissprop5.=' '.$xml->attributes()->isbn;				
+			}
+			if($xml->courses->course){
+				$newadtagvars['sub'] = preg_replace("/[^a-zA-Z0-9\s]/", "", str_replace(' ','',strtolower($xml->courses->course->attributes()->name)));
+			}elseif($xml->cuisines->cuisine){
+				$newadtagvars['sub'] = preg_replace("/[^a-zA-Z0-9\s]/", "", str_replace(' ','',strtolower($xml->cuisines->cuisine->attributes()->name)));
+			}
+
+		}else{ 
+			$content = "Sorry -- there's a temporary problem with displaying the recipe you selected.<br />Please try again in a few minutes, and thanks for your patience.";
+			$searchbar= file_get_contents(drupal_get_path('module', 'cookstr').'/cache/search_widget.inc');
+			$title="Recipe Finder Error";
+			drupal_set_title($print['title']);
+		}
+
+	}
+
+	if ($print['content']) {
+	
+	print '<html><head><LINK REL=StyleSheet HREF="/sites/all/modules/cookstr/css/print.css" TYPE="text/css" MEDIA=ALL>
+	<script type="text/javascript" src="/misc/jquery.js"></script>
+	<script type="text/javascript">var rand_no = Math.random(); rand_no = rand_no * 10000000000; rand_no = Math.ceil(rand_no);</script>
+	</head><body id="recipe-print">
+	<div class="ad-728x90">
+		<script type="text/javascript">document.write(\'<scr\'+\'ipt language=\'JavaScript1.1\' src="http://iv.doubleclick.net/adj/nbcu.cookstr/recipe_finder_horsdoeuvre;site=cookstr;sect=recipe_finder;recipeid=11514;sub=horsdoeuvre;pageid=recipes;aff=foodies;daypart=primetime;genre=reality;!category=bravo;!category=recipes;dcopt=ist;pos=1;tile=1;sz=728x90;ord=\'+rand_no+\'?;"><\/scr\'+\'ipt>\');</script>
+		<noscript>
+		<a href="http://iv.doubleclick.net/jump/nbcu.cookstr/recipe_finder_horsdoeuvre;site=bravo;sect=recipe_finder;recipeid=11514;sub=horsdoeuvre;pageid=recipes;aff=foodies;daypart=primetime;genre=reality;!category=bravo;!category=recipes;dcopt=ist;pos=1;tile=1;sz=728x90;ord=7929333434?" > <img src="http://iv.doubleclick.net/ad/nbcu.cookstr/recipe_finder_horsdoeuvre;site=cookstr;sect=recipe_finder;recipeid=11514;sub=horsdoeuvre;pageid=recipes;aff=foodies;daypart=primetime;genre=reality;!category=bravo;!category=recipes;dcopt=ist;pos=1;tile=1;sz=728x90;ord=7929333434?" border="0" alt="Click Here!" /></a>
+		</noscript>
+	</div>
+	<div class="ad-300x250">
+		<script type="text/javascript">
+		document.write(\'<scr\'+\'ipt language=\'JavaScript1.1\' src="http://iv.doubleclick.net/adj/nbcu.cookstr/recipe_finder_horsdoeuvre;site=cookstr;sect=recipe_finder;recipeid=11514;sub=horsdoeuvre;pageid=recipes;aff=foodies;daypart=primetime;genre=reality;!category=bravo;!category=recipes;pos=9;tile=9;sz=300x250;ord=\'+rand_no+\'"><\/scr\'+\'ipt>\');</script>
+
+		<noscript>
+		<a href="http://iv.doubleclick.net/jump/nbcu.cookstr/recipe_finder_horsdoeuvre;site=cookstr;sect=recipe_finder;recipeid=11514;sub=horsdoeuvre;pageid=recipes;aff=foodies;daypart=primetime;genre=reality;!category=bravo;!category=recipes;pos=9;tile=9;sz=300x250;ord=7929333434?" > <img src="http://iv.doubleclick.net/ad/nbcu.bravo/recipe_finder_horsdoeuvre;site=bravo;sect=recipe_finder;recipeid=11514;sub=horsdoeuvre;pageid=recipes;aff=foodies;daypart=primetime;genre=reality;!category=bravo;!category=recipes;pos=9;tile=9;sz=300x250;ord=7929333434?" border="0" alt="Click Here!" /></a>
+		</noscript>
+	</div>
+
+	';
+	print $print['title'];
+	print $print['content'];
+	print '</body></html>';
+		
+	}else{
+
+		$searchbar = '<div class="recipe-widget span-4" id="left-rail">' . $searchbar . '</div>';
+		$content = $searchbar . '<div id="content" class="recipe-view span-8">' . $content . '</div>';
+	
+		return $content;
+		}
+}
+
+/**
+ * Retrieve data from the Cookstr search XML API
+ *
+ * Makes a connection to the given URL and retrieves XML data 
+ * and attempts to format for display.
+ *
+ * Search landing page with 'search widget' and search results, including
+ * both Featured (Bravo) and Cookstr, although both won't necessarily be displayed.
+ *
+ * @param $url
+ * URL to Cookstr 
+ *
+ */
+function _cookstr_search_page() {
+
+	if($_SERVER['QUERY_STRING']) {
+		
+		$url = variable_get('search_api',NULL).$_SERVER['QUERY_STRING'];
+		$response = cookstr_curl_file($url);
+		
+		if($response == 404){ drupal_goto('404'); }
+			$xml = simplexml_load_string($response);
+
+		if($xml->search_results_html) {
+			$content = $xml->search_results_html;	
+			$searchbar = $xml->search_widget_html;
+			$title = str_replace('"','','Search Results for "'.$_REQUEST['st'].'" - Recipe Finder');
+			drupal_set_title(check_plain($title));			
+		}else{
+			$content = "Sorry -- there's a temporary problem with the Recipe Finder's search results. <br>Please try again in a few minutes, and thanks for your patience.";
+			$searchbar= file_get_contents(drupal_get_path('module', 'cookstr').'/cache/search_widget.inc');
+
+		}
+	}else{
+		$title="Search Results Error - Recipe Finder";
+		$content = "No search query given";
+		$searchbar= file_get_contents(drupal_get_path('module', 'cookstr').'/cache/search_widget.inc');
+	}
+
+	
+        $searchbar = '<LINK REL=StyleSheet HREF="/sites/all/modules/cookstr/css/cookstr.css" TYPE="text/css" MEDIA=screen><div class="recipe-widget span-4" id="left-rail">' . $searchbar . '</div>';
+	$content = $searchbar . '<div id="recipe-sub-header"><img src="/sites/all/modules/cookstr/images/recipe_finder.png" /></div><div id="content" class="recipe-view span-8">' . $content . '</div>';
+
+	return $content;
+}
+
+/**
+ * Implementation of hook_load().
+ */
+
+
+/**
+ * Implementation of hook_perm().
+ */
+function cookstr_perm() {
+  return array("admin cookstr", "view cookstr");
+}
+
+/**
+ * Cookstr admin settings, including Bravo specific settings
+ */
+function cookstr_admin_settings() {
+	
+	print "cookstr_admin_settings";
+	$form = array();
+
+	$form['api_settings'] = array(
+		'#type' => 'fieldset',
+		'#weight' => 0,
+		'#title' => t('Cookstr API Settings'),
+		'#collapsible' => TRUE,
+		'#collapsed' => FALSE,
+	);
+  	$form['api_settings']['search_api'] = array(
+		'#type' => 'textfield',
+		'#title' => t("Search API"),
+		'#default_value' => variable_get('search_api',NULL),
+		'#description' => t('This is the API URL for the search page.'),
+	); 
+	$form['api_settings']['recipe_api'] = array(
+		'#type' => 'textfield',
+		'#title' => t("Recipe API"),
+		'#default_value' => variable_get('recipe_api',NULL),
+		'#description' => t('This is the API URL for the recipe page.'),
+	); 
+	$form['api_settings']['print_api'] = array(
+		'#type' => 'textfield',
+		'#title' => t("Print API"),
+		'#default_value' => variable_get('print_api',NULL),
+		'#description' => t('This is the API URL for the print recipe page.'),
+	);
+	$form['bravo_settings'] = array(
+		'#type' => 'fieldset',
+		'#weight' => 0,
+		'#title' => t('Bravo Specific Settings'),
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
+	);	
+	$form['bravo_settings']['collection_nid'] = array(
+		'#type' => 'textfield',
+		'#title' => t("Collection Graphic Node ID"),
+		'#default_value' => variable_get('collection_nid',NULL),
+		'#description' => t('Pulls collection graphic onto recipe pages based on its node ID.'),
+	);
+	$form['bravo_settings']['recipe_sponsor'] = array(
+		'#type' => 'textfield',
+		'#title' => t("Recipe Sponsor Dart Keyword"),
+		'#default_value' => variable_get('recipe_sponsor',NULL),
+		'#description' => t('Adds a sponsor logo to the whole recipe finder.'),
+	);  
+  	return system_settings_form($form);
+}
+
+
+
+
+function cookstr_curl_file($url) {
+	$ch=curl_init();
+	curl_setopt($ch,CURLOPT_URL,$url);
+	curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	if($http_proxy!='')	{
+	    curl_setopt($ch,CURLOPT_PROXY,$http_proxy);
+	    curl_setopt($ch,CURLOPT_HTTPPROXYTUNNEL,true);
+	    curl_setopt($ch,CURLOPT_PROXYTYPE,CURLPROXY_HTTP);
+	}
+	$contents=curl_exec($ch);
+	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	curl_close($ch);
+
+	if($httpCode==200) {
+		return $contents;
+	}else {
+		return $httpCode;
+	}
+	return false;
+}

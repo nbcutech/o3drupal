@@ -1,0 +1,116 @@
+<?php
+
+/**
+ * @file
+ * Installation file for building tables for Google Integration
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function google_appliance_install() {
+  $install = drupal_install_schema('google_appliance');
+  
+  if ($install['0']['success'] == 1) {
+    drupal_set_message(t('Google Appliance module installed successfully'));
+  } 
+  else {
+    drupal_set_message(t('Google Appliance module failed to install'), 'error');
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function google_appliance_uninstall() {
+  // Remove tables.
+  $uninstall = drupal_uninstall_schema('google_appliance');
+
+  if ($uninstall['0']['success'] == 1) {
+    drupal_set_message(t('Google Appliance module uninstalled successfully'));
+  } 
+  else {
+    drupal_set_message(t('Google Appliance module failed to uninstall'), 'error');
+  }
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function google_appliance_schema() {
+  $schema['cache_google_appliance'] = array(
+    'fields' => array(
+      'cid' => array(
+        'type' => 'varchar', 
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'data' => array(
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big'
+      ),
+      'expire' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'created' => array(
+        'type' => 'int',
+        'not null' => TRUE, 
+        'default' => 0
+      ),
+      'headers' => array(
+        'type' => 'text'
+      ),
+      'serialized' => array(
+        'type' => 'int',
+        'size' => 'small',
+        'not null' => TRUE,
+        'default' => 0
+      )
+    ),
+    'indexes' => array('expire' => array('expire')),
+    'primary key' => array('cid'),
+  );
+  
+  return $schema;
+}
+
+function google_appliance_update_6000() {
+  $ret = array();
+    db_add_field($ret, 'cache_google', 'serialized',
+      array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'size' => 'small',
+        'default' => 0,
+      )
+    );
+  return $ret;
+}
+
+function google_appliance_update_6201() {
+  $ret = array();
+  $conf = variable_init();
+  $var_names = array(
+    'google_debug' => 'google_appliance_debug',
+    'google_appliance_client' => 'google_appliance_default_client',
+    'google_appliance_collection' => 'google_appliance_default_collection',
+  );
+  foreach ($var_names as $old => $new) {
+    if (array_key_exists($old, $conf)) {
+      variable_set($new, $conf[$old]);
+      variable_del($old);
+      $ret[] = array('success' => TRUE, 'query' => "variable_set($new)");
+      $ret[] = array('success' => TRUE, 'query' => "variable_del($old)");
+    }
+  }
+  if (db_table_exists('cache_google')) {
+    db_add_index($ret, 'cache_google', 'cid', array('cid'));
+    db_rename_table($ret, 'cache_google', 'cache_google_appliance');
+  }
+  
+  return $ret;
+}

@@ -1,0 +1,359 @@
+/* Header Styles */
+ 
+#oxyHeader {
+ position:relative;
+ z-index: 997;
+}
+ 
+#logo {
+ width:162px;
+ position:absolute;
+ left:15px;
+ top:6px;
+ z-index: 998;
+}
+ 
+/* Global Search */
+ 
+.globalSearch {
+ width: 400px;
+ height: 32px;
+ overflow: hidden;
+ position:absolute;
+ top: 55px;
+ right:0px;
+ font-size: 14px;
+ line-height: 32px;
+}
+ 
+.globalSearch form {
+ display: block;
+ overflow: hidden;
+ width:316px;
+ height:20px;
+ padding: 2px;
+ float:right;
+ display:inline;
+}
+ 
+#searchInput {
+ background: none;
+ border: 0;
+ padding: 2px 3px;
+}
+ 
+.globalSearch p {
+ float: left;
+}
+ 
+.globalSearch span{
+	display:none;
+}
+ 
+#searchBtn {
+ margin:0px;padding:0px;float:left;width:35px;height:20px;display:inline;
+}
+ 
+
+#globalNav {
+ height: 30px;
+ background: url(./images/nav-a.jpg) repeat-x;
+ clear:both;
+ padding-left: 158px;
+ margin:0px;
+}
+ 
+/* Global Navigation */
+ 
+#globalNav li, #globalNav li ul li {
+ float: left;
+ display:inline;
+}
+ 
+#globalNav li a {
+ display: block;
+ height: 30px;
+ text-indent: -9999px;
+ /*background-position: top center;*/
+}
+ 
+#globalNav li ul li a {
+ display: block;
+ height: 23px;
+ text-indent: -9999px;
+ /*background-position: top center;*/
+}
+ 
+#globalNav li a:hover {
+ /*background-position: bottom center;*/
+}
+ 
+
+.global_navHome a {
+	width: 60px;
+	background: url(./images/navGlobal.jpg) 0px 0px;
+}
+
+.global_navHome a:hover {
+	background-position: 0px 30px;
+}
+
+#oxygenHome .global_navHome a {
+	background-position: 0px 60px;
+}
+
+.global_navShows a {
+	width: 64px;
+	background: url(./images/navGlobal.jpg) -60px 0px;
+}
+
+.global_navShows a:hover {
+	background-position: -60px 30px;
+}
+
+#oxygenShows .global_navShows a {
+	background-position: -60px 60px;
+}
+
+.global_navMovies a {
+	width: 69px;
+	background: url(./images/navGlobal.jpg) -124px 0px;
+}
+
+.global_navMovies a:hover {
+	background-position: -124px 30px;
+}
+
+#oxygenMovies .global_navMovies a {
+	background-position: -124px 60px;
+}
+
+.global_navSchedule a {
+	width: 80px;
+	background: url(./images/navGlobal.jpg) -193px 0px;
+}
+
+.global_navSchedule a:hover {
+	background-position: -193px 30px;
+}
+
+#oxygenSchedule .global_navSchedule a {
+	background-position: -193px 60px;
+}
+
+
+.global_navVideo a {
+	width: 65px;
+	background: url(./images/navGlobal.jpg) -273px 0px;
+}
+
+.global_navVideo a:hover {
+	background-position: -273px 30px;
+}
+
+#oxygenVideo .global_navVideo a  {
+	background-position: -273px 60px;
+}
+
+.global_navMusic a {
+	width: 60px;
+	background: url(./images/navGlobal.jpg) -338px 0px;
+}
+
+.global_navMusic a:hover {
+	background-position: -338px 30px;
+}
+
+#oxygenMusic .global_navMusic a {
+	background-position: -338px 60px;
+}
+
+.global_navGames a {
+	width: 65px;
+	background: url(./images/navGlobal.jpg) -398px 0px;
+}
+
+.global_navGames a:hover {
+	background-position: -398px 30px;
+}
+
+#oxygenGames .global_navGames a {
+	background-position: -398px 60px;
+}
+
+.global_navOxyLive a {
+	width: 98px;
+	background: url(./images/navGlobal.jpg) -463px 0px;
+}
+
+.global_navOxyLive a:hover {
+	background-position: -463px 30px;
+}
+
+#oxygenLive .global_navOxyLive a {
+	background-position: -463px 60px;
+}
+
+.global_navCommunity a {
+	width: 99px;
+	background: url(./images/navGlobal.jpg) -561px 0px;
+}
+
+.global_navCommunity a:hover {
+	background-position: -561px 30px;
+}
+
+#oxygenCommunity .global_navCommunity a {
+	background-position: -561px 60px;
+}
+
+.global_navShop a {
+	width: 52px;
+	background: url(./images/navGlobal.jpg) -660px 0px;
+}
+
+.global_navShop a:hover {
+	background-position: -660px 30px;
+}
+
+#oxygenShop .global_navShop a {
+	background-position: -660px 60px;
+}
+
+.global_moreOxygen a {
+	width: 108px;
+	background: url(./images/navGlobal.jpg) -712px 0px;
+}
+
+.global_moreOxygen a:hover {
+	background-position: -712px 30px;
+}
+
+.global_moreOxygen {position:relative;width: 112px;}
+.global_moreOxygen ul {
+	position:absolute;
+	top:30PX;
+	left:0;
+	width: 112px;
+	height:130px;
+	display:none;
+	z-index: 2147483647;
+	padding:0px;
+	margin:0px;
+}
+ 
+.global_moreOxygen:hover ul {
+ display:block;
+}
+
+.global_navTweet, .global_navHormones, .global_navMobile, .global_navSweeps, .global_navNewsletter, .global_navWidgets {
+	position:relative;
+	z-index: 2147483647 !important;
+	width: 107px;
+	height:21px;
+}
+
+.global_navTweet a {
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -2px;
+}
+
+.global_navTweet a:hover, #oxygenTweet .global_navTweet a  {
+	background-position: -108px -2px;
+}
+
+.global_navHormones a {
+
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -23px;
+}
+
+.global_navHormones a:hover {
+	background-position: -108px -23px;
+}
+
+.global_navMobile a {
+
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -44px;
+}
+
+.global_navMobile a:hover {
+	background-position: -108px -44px;
+}
+
+.global_navSweeps a {
+
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -65px;
+}
+
+.global_navSweeps a:hover {
+	background-position: -108px -65px;
+}
+
+.global_navNewsletter a {
+
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -86px;
+}
+
+.global_navNewsletter a:hover {
+	background-position: -108px -86px;
+}
+
+.global_navWidgets a {
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -107px;
+}
+
+.global_navWidgets a:hover {
+	background-position: -108px -107px;
+}
+
+.global_navQuizzes a {
+	width: 107px;
+	height:21px;
+	background: url(./images/subnav.jpg) 0px -128px;
+}
+
+.global_navQuizzes a:hover {
+	background-position: -108px -128px;
+}
+
+ 
+#adExpander {
+ text-align:center;
+ width:984px;
+ margin: 10px 0 0 0;
+ padding:3px 0px;
+ filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true,sizingMethod=scale src='http://www.oxygen.com/common/images/_global2009/75p.png');
+}
+#adExpander img{display:inline;}
+#adExpander[id] {
+ background-image:url(./images/75p.png);
+}
+ 
+#block-oxygen_dart-0 {
+ text-align:center !important;
+ margin: 0 auto !important;
+ float:none !important;
+}
+/*
+#topAdBlock > div, #topAdBlock > div > div, #topAdBlock > table, #topAdBlock > object, #topAdBlock > embed {
+ text-align:center !important;
+ margin: 0 auto !important;
+ float:none !important;
+}
+/*
+#block-oxygen_dart-0 > div, #block-oxygen_dart-0 > div > div, #block-oxygen_dart-0 > table, #block-oxygen_dart-0 > object, #block-oxygen_dart-0 > embed, {
+ text-align:center !important;
+ margin: 0 auto !important;
+ float:none !important;
+}

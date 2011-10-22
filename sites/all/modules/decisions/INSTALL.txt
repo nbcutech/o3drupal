@@ -1,0 +1,32 @@
+// $Id: INSTALL.txt,v 1.5 2006/10/22 17:28:32 mathieu Exp $
+
+REQUIREMENTS
+------------
+
+  * Drupal 4.7 or later
+  * VotingAPI
+ 
+
+INSTALLATION
+------------
+
+1. DOWNLOAD AND INSTALL VOTING API 
+
+   VotingAPI can be found at http://drupal.org/project/votingapi/.
+   Follow the installation instructions that comes with the module.
+
+2. INSTALL DECISIONS
+   
+   Unpack the module in your sites module directory. Then browse to 
+   "administer" -> "site building" -> "modules" (or "administer" -> 
+   "modules") and enable the Decisions module.
+   
+3. CONFIGURE DECISIONS
+
+   You probably want to set the permissions for which users who can 
+   vote, see results etc.: Browse to "administer" -> "user management" ->
+   "access control" (or "administer" -> "access control") and set permissions
+   for the Decisions module.
+   
+   Other settings related to Decisions can be found at "administer" -> 
+   "site configuration" (or "settings") -> "decisions".

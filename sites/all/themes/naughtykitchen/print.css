@@ -1,0 +1,16 @@
+/* =print page
+------------------------------------------------------*/
+#recipe-print {font-size: 9pt; width: 728px; margin: 0 auto;}
+#recipe-print img {margin: 0; padding: 0;}
+#recipe-print h3,
+#recipe-print h4,
+#recipe-print h5 {text-transform: uppercase;}
+#recipe-print h4 {border-bottom: 1px dashed #ccc;}
+#recipe-print .ad-728x90 {width: 728px; height: 90px; overflow: hidden;}
+#recipe-print .ad-300x250 {width: 300px; height: 250px; float: right; position: relative; margin: 15px 0; overflow: hidden;}
+#recipe-print .title {margin: 10px 0 0;}
+#recipe-print .subtitle {margin: 0; border: none;}
+#recipe-print .recipe-metadata {margin-right:300px; padding-right:10px;}
+#recipe-print .recipe-metadata p,
+#recipe-print .recipe-metadata h5 {margin: 0;}
+#recipe-print .recipe-body {clear: both; display: block;}

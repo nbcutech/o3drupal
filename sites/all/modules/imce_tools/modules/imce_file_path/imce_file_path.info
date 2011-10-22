@@ -1,0 +1,10 @@
+name = IMCE File Path
+description = Provides a status bar like interface for displaying the file path of the currently selected file
+core = 6.x
+dependencies[] = imce
+; Information added by drupal.org packaging script on 2011-03-01
+version = "6.x-1.1"
+core = "6.x"
+project = "imce_tools"
+datestamp = "1299006367"
+

@@ -1,0 +1,11 @@
+#node-form img.cropbox {
+  display: none;
+}
+
+#node-form div.jcrop-holder img.cropbox {
+  display: block;
+}
+
+.widget-edit {
+  clear: both;
+}

@@ -1,0 +1,10 @@
+name = JQuery Interface Library
+description = An API and central location for modules that use the JQuery Interface library.
+package = User Interface
+core = 6.x
+; Information added by drupal.org packaging script on 2011-06-09
+version = "6.x-1.0-alpha1"
+core = "6.x"
+project = "jquery_interface"
+datestamp = "1307602931"
+

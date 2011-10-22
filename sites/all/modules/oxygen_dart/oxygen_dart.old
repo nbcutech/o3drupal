@@ -1,0 +1,195 @@
+<?php
+
+function oxygen_dart_perm() {
+	return array('access oxygen dart');
+}
+
+
+
+function oxygen_dart_block($op='list', $delta=0) 
+{
+	if ($op == "list") 
+	{
+		$block[0]['info'] = t('Top Ad');
+		$block[1]['info'] = t('Right Column Ad');
+                
+		return $block;
+	} 
+	else if ($op == 'view') 
+	{
+		$block = array();
+
+		switch ($delta) 
+		{
+	 
+			case 0:
+				if ( arg(0) == 'node' && is_numeric(arg(1)) && ! arg(2) ) 
+				{  
+					// if page is a node and not an edit page ie: /node/15 but not node/15/edit
+					$node = node_load(arg(1));
+				}
+
+				// creating DART tag string.
+
+				if ($node->taxonomy)
+				{
+					foreach ($node->taxonomy as $term) 
+					{
+						$dart_name = taxonomy_vocabulary_load($term->vid)->name;
+						switch ($dart_name) 
+						{
+							case "DART url":             
+								$url = $term->name . ";";
+								break;
+							case "DART show":
+								$show = "show=" . $term->name . ";";
+								$show_pagename =  $term->name . "_";
+								break;
+							case "DART sect":
+								$sect = "sect=" . $term->name . ";";
+								$sect_pagename =  $term->name . ";";
+								break;
+							case "DART genre":                
+								$genre = "genre=" . $term->name . ";";
+								break;
+							case "DART sub":
+								$sub = "sub=" . $term->name . ";";
+								break;
+							case "DART daypart":
+								$daypart = "daypart=" . $term->name . ";";
+								break;
+							case "DART !categories":
+								$categories .= "!category=" . $term->name . ";";
+								break;
+							case "DART pageid":
+								$pageid = "pageid=" . $term->name . ";";
+						}
+
+					}
+				}
+
+
+				$site = "site=oxygen;";
+				/* if not show value is defined the pagename is oxygen_[sectvalue] otherwise [show_sect] value */
+				$pagename =  ($show == "") ? "oxygen_" . $sect_pagename : $show_pagename . $sect_pagename;
+				$block_content = "";
+	 
+				// if no DART set for page, use standard version. 
+				if ($url=="" && $show=="" && $sect=="" && $genre=="" && $sub==""  && $categories=="" && $pageid=="") 
+				{
+					$block_content .= "	<script type=\"text/javascript\" language=\"javascript\">
+					//<![CDATA[
+					document.write('<scr' + 'ipt language=\"javascript\" type=\"text/javascript\" src=\"http://iv.doubleclick.net/adj/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;dcopt=ist;!category=oxygen;!category=home;sz=728x90,970x66;tile=1;pos=1;' + (top.__nbcudigitaladops_dtparams||'') + 'ord=' + randDARTNumber + '?\"></scr' + 'ipt>');//]]>
+
+					</script><noscript><a target=\"_blank\" href=\"http://iv.doubleclick.net/jump/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=728x90,970x66;tile=1;pos=1;ord=123456a?\"><img src=\"http://iv.doubleclick.net/ad/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=728x90;tile=1;pos=1;ord=123456a?\" border=\"0\" alt=\"\" /></a></noscript>
+					";
+				} 
+				else 
+				{ 
+					//otherwise use the entered taxonomy even if it breaks the ad so it can be diagnosed.			 
+					$block_content .= '<script type="text/javascript" language="javascript">';
+
+					$block_content .= "//<![CDATA[
+					document.write('<scr' + 'ipt language=\"javascript\" type=\"text/javascript\" src=\"http://iv.doubleclick.net/adj/nbcu.oxygen/". $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . "dcopt=ist;" . $categories . "sz=728x90,970x66;tile=1;pos=1;' + (top.__nbcudigitaladops_dtparams||'') + 'ord=' + randDARTNumber + '?\"></scr' + 'ipt>');//]]>";
+
+					$block_content .= "</script><noscript><a target='_blank' href='http://iv.doubleclick.net/jump/nbcu.oxygen/". $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . "dcopt=ist;" . $categories . "sz=728x90;tile=1;pos=1;ord=123456a?'><img src='http://iv.doubleclick.net/ad/nbcu.oxygen/" .$pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . "dcopt=ist;" . $categories . "sz=728x90,970x66;tile=1;pos=1;ord=123456a?' border='0' alt='' /></a></noscript>";
+
+				}
+
+				$block_content .= "</div></div><div id='dart_string_728x90' style='display:none'>" . $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . "dcopt=ist;" . $categories . "sz=728x90;tile=1;pos=1;ord=</div><div><div>";
+		
+				$block['subject'] = 'Promo';
+				$block['content'] = $block_content;
+				break;
+		
+
+			case 1:
+				if ( arg(0) == 'node' && is_numeric(arg(1)) && ! arg(2) ) {	// if page is a node and not an edit page ie: /node/15 but not node/15/edit
+					$node = node_load(arg(1));
+				}
+
+				// creating DART tag string.
+				if ($node->taxonomy) 
+				{
+
+					foreach ($node->taxonomy as $term) 
+					{
+					  $dart_name = taxonomy_vocabulary_load($term->vid)->name;
+						switch ($dart_name) {
+						   case "DART url":             
+								$url = $term->name . ";";
+								break;
+							case "DART show":
+								$show = "show=" . $term->name . ";";
+						$show_pagename =  $term->name . "_";
+								break;
+							case "DART sect":
+								$sect = "sect=" . $term->name . ";";
+						$sect_pagename =  $term->name . ";";
+								break;
+							case "DART genre":                
+								$genre = "genre=" . $term->name . ";";
+								break;
+							case "DART sub":
+								$sub = "sub=" . $term->name . ";";
+								break;
+							case "DART daypart":
+								$daypart = "daypart=" . $term->name . ";";
+								break;
+							case "DART !categories":
+								$categories .= "!category=" . $term->name . ";";
+								break;
+							case "DART pageid":
+								$pageid = "pageid=" . $term->name . ";";
+						}
+
+					}
+				}
+
+
+				$site = "site=oxygen;";
+				/* if not show value is defined the pagename is oxygen_[sectvalue] otherwise [show_sect] value */
+				$pagename =  ($show == "") ? "oxygen_" . $sect_pagename : $show_pagename . $sect_pagename;
+				$block_content = "";
+				
+				if ($url==""  && $show=="" && $sect=="" && $genre=="" && $sub=="" && $daypart=="" && $categories=="" && $pageid=="") 
+				{
+
+					 $block_content .= "        
+					<div id=\"ad300x250\">
+					<span>Advertisement</span>
+					<div id=\"x95AdBlock\">
+					<script type=\"text/javascript\" language=\"javascript\">
+						//<![CDATA[
+						document.write('<scr' + 'ipt language=\"javascript\" type=\"text/javascript\" src=\"http://iv.doubleclick.net/adj/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;' + (top.__nbcudigitaladops_dtparams||'') + 'ord=' + randDARTNumber + '?\"></scr' + 'ipt>');//]]>
+
+					</script><noscript><a target=\"_blank\" href=\"http://iv.doubleclick.net/jump/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=123456a?\"><img src=\"http://iv.doubleclick.net/ad/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=123456a?\" border=\"0\" alt=\"\" /></a></noscript>
+					</div>
+					</div>";
+						
+				} 
+				else 
+				{
+					$block_content .= '
+					<div id="ad300x250">
+					<span class="adSpan">Advertisement</span>    	                       	
+					<div id="x95AdBlock">
+
+					<script type="text/javascript" language="javascript">';
+					$block_content .= "//<![CDATA[
+					document.write('<scr' + 'ipt language=\"javascript\" type=\"text/javascript\" src=\"http://iv.doubleclick.net/adj/nbcu.oxygen/" . $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . $categories . "sz=300x250;tile=7;pos=7;' + (top.__nbcudigitaladops_dtparams||'') + 'ord=' + randDARTNumber + '?\"></scr' + 'ipt>');//]]>";
+
+					$block_content .= "</script><noscript><a target='_blank' href='http://iv.doubleclick.net/jump/nbcu.oxygen/" . $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . "dcopt=ist;" . $categories . "sz=300x250;tile=7;pos=7;ord=123456a?'><img src='http://iv.doubleclick.net/ad/nbcu.oxygen/" . $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . $categories . "sz=300x250;tile=7;pos=7;ord=123456a?' border='0' alt='' /></a></noscript>";
+
+					$block_content .= "</div></div>";
+				}
+				$block_content .= "<div id='dart_string_300x250' style='display:none'>" . $pagename . $url . $site . $show . $sect  . $sub . $genre . $daypart . $pageid . $categories . "sz=300x250;tile=7;pos=7;ord=</div>";
+
+				$block['subject'] = 'Promo';
+				$block['content'] = $block_content;
+				break;
+		}
+		return $block;
+    }
+}
+

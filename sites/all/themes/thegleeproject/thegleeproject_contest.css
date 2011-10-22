@@ -1,0 +1,95 @@
+/*For background png-fix on IE 6*/
+/*
+img, div { behavior: url('/sites/all/themes/thegleeproject/iepngfix.htc'); }
+*/
+
+.main-content { display:inline; float:left; font-family:helvetica, Arial; background: url('./images/wrapper_bg.jpg') no-repeat top right; text-align:center; padding:0px; margin:0px; padding-top:10px; }
+.main-content .left-panel { display:inline; float:left; width:647px; margin:0px; margin-left:10px; margin-top:0px; overflow:hidden;}
+.main-content .right-panel {overflow:hidden;display:inline; margin-left:10px; float:left; width:310px; text-align:center; padding:0px; }
+.main-content .left-panel .bing-contest-header {margin:0px; padding:0px;height:125px; background:url('/sites/all/themes/thegleeproject/images/contest_images/contest_bing_header.png') no-repeat top left; background-size:100%; width:647px; overflow:hidden;}
+.main-content .left-panel .bing-contest-header .bing-logo{height:77px; width:645px;cursor:pointer;}
+.main-content .left-panel .bing-contest-header .fb-share  {height:16px;background: url("blank.gif") no-repeat top left;background-position: -2px -232px; background-position:-2px -232px; width:58px;margin-top:7px;margin-right:1px;float:right; }
+.main-content .left-panel .bing-contest-header .fb-share span a{ width:58px; height:16px; display:block; }
+.main-content .left-panel .bing-contest-header .fb-share span span{ display:none; }
+.main-content .left-panel .bing-contest-header .twitter-share  {display:inline;height:16px;width:58px;margin-top:5px;margin-right:13px;float:right; }
+.fb-share a {background:none;cursor:pointer; line-height:10px; text-decoration:none;padding:0 5px 0 2px;margin:1px 1px 0 0;text-shadow;none;font-size:10px; font-weight:bold; color:white;}
+.main-content .left-panel .contest-content { border:1px RGB(255,226,38) solid; margin:0px; padding:0px; padding-top:0px; background-color:RGB(255,226,38); width:647px; padding-bottom:5px;}
+.main-content .left-panel .description {display:inline;text-align:left; float:left; height:50px;overflow:hidden; padding:0px; padding-top:8px;width:500px;  margin:0px; 
+font-size:12px; font-weight:bold; }
+.main-content .left-panel .description a { color:RGB(22,122,182); text-decoration:underline;}
+.main-content .left-panel .description .desc-wrapper{padding-left:2px;float:left;}
+.main-content .left-panel .description .desc-wrapper p {text-indent:0;margin:0;padding:0; }
+.contest-content .choices {color:white; text-align:center; background-color:RGB(255,226,38);}
+.contest-content .choices .option {  width: 211px; float:left; height:215px;  }
+.contest-content .choices .option .option-text { height:87px; }
+.contest-content .choices .option .fblike { z-index:-1; height:30px; overflow:hidden; float:left;width:91px; max-width:91px; overflow:hidden;}
+.contest-content .choices .option .share-options { margin-top:10px; height:30px; margin-left:34px;}
+.contest-content .choices .option .twitter-follow {z-index:1;  float:left; width:60px; overflow:hidden; }
+.contest-content .choices .option .voteoff {clear:both;margin-left:auto;margin-right:auto;width:57px;}
+.contest-content .choices .option .picture { height:105px; }
+.contest-content .choices .option .label { font-size:14px; font-weight:bold; height:20px; padding-top:5px; }
+.contest-content .choices .option .desc { padding:2px 10px; height:30px;}
+.contest-content .choices .option .vote { cursor:pointer; margin-left:auto; margin-right:auto; width:57px; padding-top:5px; }
+.right-panel .bing-decide {  } 
+.right-panel .bing-logo {  }
+.right-panel .follow-glee {display:none; margin:5px 0px; width:300px; height:130px; background:url('./images/contest_images/follow_glee.png'); }
+.right-panel .ad-unit-display {border:0px; margin:5px 0px; height: 250px; width:300px; padding:0px 0px; }
+.right-panel .ad-unit-display p { padding-top:120px; }
+.left-panel .contest-results {background:url('images/contest_images/leaderboard_background.png') no-repeat; height:390px; background-color:RGB(255,226,38); }
+.left-panel .results-panel {float:left; padding:10px 0px; padding-top:20px; width:500px; overflow:hidden;}
+.left-panel .leader { float:right; height:300px; width:130px; overflow:hidden;}
+.left-panel .leaderboard {color:RGB(226,171,42); margin-right:10px;  width:126px; }
+.left-panel .leaderboard .leader-results {  text-align:left;}
+.left-panel .leaderboard .leader-results .leader-header{ font-size:20px; }
+.left-panel .leaderboard .leader-results .leader-top-text{ font-size:20px; width:100px;}
+.left-panel .leaderboard .leader-results .leader-top-text .text{ float:left; width:40px; height:50px; font-size:20px; margin-top:18px;  }
+.left-panel .leaderboard .leader-results .leader-top-text .num{ float:right; width:50px; height:50px; font-size:50px; font-weight:bold; margin-right:10px; }
+.left-panel .leaderboard .leader-results .leader-label{ padding-top:140px; font-size:15px;color:white; clear:both;}
+.left-panel .leaderboard .leader-results .leader-label ol{margin: 0px; padding:0px; margin-left:25px;margin-top:10px;}
+.left-panel .leaderboard .leader-results { height:200px; }
+.left-panel .social-sharing {display:none; overflow:hidden; margin-right:10px;float:right; width:126px; height:82px; background:url('./images/contest_images/fshare.png'); }
+.left-panel .poll-result { clear:both;height:30px;overflow:hidden; }
+.left-panel .poll-bar { float:left; text-align:left; max-width:500px; }
+.left-panel .poll-bar .foreground { display:inline; float:left; z-index:1; margin:0px; position:relative; left:-90px; background-color:yellow; height:30px;padding:0px; }
+.left-panel .poll-bar .poll-label {padding-top:5px; height:20px; position:relative; z-index:200;width:80px; float:left; padding-left:10px;font-style:italic;font-weight:bold;font-size:14px; }
+.left-panel .poll-bar .poll-count {position:relative; font-style:italic; margin-left: 20px; float:left;color:RGB(249,245,246);font-size:15px;padding-top:5px;font-weight:600; }
+.left-panel .poll-bar .poll-count span {  color:RGB(233,168,71); font-size:11px;font-weight:normal;}
+ .hidden { display: none; } 
+
+
+
+/*Dialog Box */
+#dialog {position:fixed; width:525px; padding:0px; z-index:200; background:#fff; font-family:Verdana, Arial, Helvetica; font-size:14px; }
+#dialog-header {display:block; position:relative; padding:3px 6px 7px; height:14px; font-size:14px; font-weight:bold}
+#dialog-title {float:left}
+#dialog-close {float:right; cursor:pointer; margin:3px 3px 0 0; height:11px; width:11px; background:url(../img/jquery.modaldialog/close.gif) no-repeat}
+#dialog-content {display:block; padding:6px; min-height:160px; color:#666666; font-size:13px;}
+#dialog-content-inner { min-height:128px; }
+#dialog-mask {position:fixed; top:0; left:0; height:100%; width:100%; background:#FFF; opacity:.75; filter:alpha(opacity=75); z-index:100}
+#dialog-button-container { text-align:center; margin:2px 6px 6px 2px; }
+#dialog-button { font-weight:bold; font-size:1.1em; font-family:Arial, sans-serif; padding:2px 5px 2px 5px; }
+.error {background:#fff url(../img/jquery.modaldialog/e_bg.jpg) bottom right no-repeat; border:1px solid #924949; border-top:none}
+.errorheader {background:url(../img/jquery.modaldialog/e_hd.gif) repeat-x; color:#6f2c2c; border:1px solid #924949; border-bottom:none}
+.errorbutton { background-color:#9F4C4C; border:1px solid #924949; color:#fff; }
+.warning {background:#fff url(../img/jquery.modaldialog/w_bg.jpg) bottom right no-repeat; border:1px solid #c5a524; border-top:none}
+.warningheader {background:url(../img/jquery.modaldialog/w_hd.gif) repeat-x; color:#957c17; border:1px solid #c5a524; border-bottom:none}
+.warningbutton { background-color:#eFcC47; border:1px solid #957C17; color:#957C17; }
+.success {background:#fff url(../img/jquery.modaldialog/s_bg.jpg) bottom right no-repeat; border:1px solid #60a174; border-top:none}
+.successheader {background:url(../img/jquery.modaldialog/s_hd.gif) repeat-x; color:#3c7f51; border:1px solid #60a174; border-bottom:none}
+.successbutton { background-color:#3c7f51; border:1px solid #fff; color:#fff; }
+.prompt {background:#fff url(../img/jquery.modaldialog/p_bg.jpg) bottom right no-repeat; border:1px solid #4f6d81; border-top:none}
+.promptheader {background:url(../img/jquery.modaldialog/p_hd.gif) repeat-x; color:#355468; border:1px solid #4f6d81; border-bottom:none}
+.promptbutton { background-color:#4F6D81; border:1px solid #fff; color:#fff; }
+
+
+.left-panel .videoPanel {background-position:0px -50px;  margin-left:auto; margin-right:auto; height: 739px; width:648px; background-image:url('./images/contest_images/glee_showsite_bingpage_video_final.jpg'); }
+.left-panel .videoPanel .videoHolder { height:auto;  margin-top: 129px; margin-left: 195px; float:left; }
+#videoplayer {float: left;
+height: 270px;
+margin-left: 183px;
+margin-top: 129px;
+overflow: hidden;
+width:312px;
+} 
+#container #wrapper { width:630px; background:none;}
+#wideLeft { background:none; } 

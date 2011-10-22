@@ -1,0 +1,5 @@
+; $Id$
+name = queue_rss
+description = RSS feeds replacing Plogger feed.
+core = 6.x
+package = "Oxygen"

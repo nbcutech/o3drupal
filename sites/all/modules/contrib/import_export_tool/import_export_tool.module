@@ -1,0 +1,378 @@
+<?php
+
+/**
+ * @file
+ * Allows administrators to import/export content types and views.
+ */
+
+
+function import_export_tool_menu() {
+  $items = array();
+    
+  $items['admin/settings/import_export_tool'] = array(
+  'title' => 'Import/Export settings',
+  'description' => 'Import/Export settings allows user to configure paths etc.',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('import_export_tool_settings'),
+  'access callback' => 'user_access',
+  'access arguments' => array('administer permissions'),
+  'type' => MENU_NORMAL_ITEM);
+  $items['admin/build/export'] = array(
+  'title' => 'Export CCK types and views',
+  'description' => 'Export types and views into text files.',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('import_export_tool_types_views_export'),
+  'access callback' => 'user_access',
+  'access arguments' => array('administer permissions'),
+  'type' => MENU_NORMAL_ITEM);
+  $items['admin/build/import'] = array(
+  'title' => 'Import CCK types and views',
+  'description' => 'Import types and views into text files.',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('import_export_tool_types_views_import'),
+  'access callback' => 'user_access',
+  'access arguments' => array('administer permissions'),
+  'type' => MENU_NORMAL_ITEM);
+  return $items;
+}
+
+
+function import_export_tool_settings() {
+
+  $form['import_export_tool_path'] = array(
+  '#type' => 'textfield',
+  '#title' => t('Specify path for export_import'),
+  '#default_value' => variable_get('import_export_tool_path', file_directory_temp() .'/store'),
+  '#description' => t('Enter the path to store files with cck types and views.')
+  );
+  
+  return system_settings_form($form);
+}
+
+function import_export_tool_theme() {
+  return array(
+  'import_export_tool_types_views_export' => array(
+  'arguments' => array('form' => array())), 
+  'import_export_tool_types_views_import' => array(
+  'arguments' => array('form' => array())));
+}
+
+function import_export_tool_types_views_import() {
+  
+  $dir = variable_get('import_export_tool_path', file_directory_temp() .'/store');
+  $files = array();
+  if ($handle = opendir($dir)) {
+    while (false !== ($file = readdir($handle))) {
+      $files[] = $file;
+    }
+    closedir($handle);
+  }
+  
+  $views = array();
+  $types = array();
+  
+  foreach ($files as $file_name) {
+    if (strstr($file_name, '.view')) {
+      $view_temp = explode(".", $file_name);
+      $views[$view_temp[0]] = $view_temp[0];
+    } 
+    elseif (strstr($file_name, '.cck')) {
+      $cck_temp = explode(".", $file_name);
+      $types[$cck_temp[0]] = $cck_temp[0];
+    }
+  }
+  
+  if (count ($types) > 0) {
+    foreach ($types as $type_k => $type_v) {
+      $form['types'][$type_k]['value'] = array('#type' => 'checkbox', '#name' => $type_k .'_cck_', '#value' => $type_k, '#width' => 10000);
+      $form['types'][$type_k]['title'] = array('#type' => 'item', '#value' => $type_v);
+    }
+  }
+  
+  $form['header_cck'] = array('#type' => 'value', '#value' => array(
+  theme('table_select_header_cell'),
+  array('data' => t('CCK type Name'), 'field' => 'title')));
+  
+  if (count ($views) > 0) {
+    foreach ($views as $view_k => $view_v) {
+      $form['views'][$view_k]['value'] = array('#type' => 'checkbox', '#name' => $view_k .'_vw_', '#value' => $view_k);
+      $form['views'][$view_k]['title'] = array('#type' => 'item', '#value' => $view_v);
+    }
+  }
+  
+  $form['header_views'] = array('#type' => 'value', '#value' => array(
+      theme('table_select_header_cell'),   
+      array('data' => t('View Name'), 'field' => 'title'),
+   ));
+  
+  if (count ($views) > 0 || count ($types)) {
+    $form['import'] = array(
+    '#type' => 'submit',
+    '#value' => 'Import',
+    '#validate' => array('import_export_tool_types_views_import_validate'));
+  }
+  
+  return $form;
+}
+
+function import_export_tool_types_views_export() {
+  foreach (module_implements ('views_exportables') as $module) {
+    $function = $module .'_views_exportables';
+    $exportables[$module] = $function ('list');
+  }
+  
+  foreach ($exportables['views'] as $view) {
+    $views[$view['name']] = $view['name'];
+  }
+  
+  $types = content_copy_types();
+  
+  foreach ($types as $type_k => $type_v) {
+    $form['types'][$type_k]['value'] = array('#type' => 'checkbox', '#name' => $type_k .'_cck_', '#value' => $type_k, '#width' => 10000);
+    $form['types'][$type_k]['title'] = array('#type' => 'item', '#value' => $type_v);
+  }
+  
+  $form['header_cck'] = array('#type' => 'value', '#value' => array(
+  theme('table_select_header_cell'),
+  array('data' => t('CCK type Name'), 'field' => 'title')));
+  
+  foreach ($views as $view_k => $view_v) {
+    $form['views'][$view_k]['value'] = array('#type' => 'checkbox', '#name' => $view_k .'_vw_', '#value' => $view_k);
+    $form['views'][$view_k]['title'] = array('#type' => 'item', '#value' => $view_v);
+  }
+  
+  $form['header_views'] = array('#type' => 'value', '#value' => array(
+  theme('table_select_header_cell'),   
+  array('data' => t('View Name'), 'field' => 'title')));
+  
+  $form['export'] = array(
+  '#type' => 'submit',
+  '#value' => 'Export',
+  '#validate' => array('import_export_tool_types_views_export_validate'),
+  '#weight' => 5);
+  
+  return $form;
+}
+
+function theme_import_export_tool_types_views_import($form) {
+  $rows_type = array();
+  
+  foreach ($form['types'] as $key => $value) {
+    if ($key[0] == "#") continue;
+    $rows_type[] = array(
+    array('data' => drupal_render($form['types'][$key]['value'])),
+    array('data' => drupal_render($form['types'][$key]['title']))
+    ); 
+  }
+  
+  foreach ($form['views'] as $key => $value) {
+  if ($key[0] == "#") continue;
+    $rows_view[] = array(
+    array('data' => drupal_render($form['views'][$key]['value'])),
+    array('data' => drupal_render($form['views'][$key]['title']))
+    ); 
+  }
+  
+  $output .= theme('table', $form['header_cck']['#value'], $rows_type);
+  $output .= theme('table', $form['header_views']['#value'], $rows_view);
+  $output .= drupal_render($form);
+  return $output;
+}
+
+function theme_import_export_tool_types_views_export($form) {
+  $rows_type = array();
+  
+  foreach ($form['types'] as $key => $value) {
+    if ($key[0] == "#") continue;
+      $rows_type[] = array(
+      array('data' => drupal_render($form['types'][$key]['value'])),
+      array('data' => drupal_render($form['types'][$key]['title']))
+    ); 
+  }
+  
+  foreach ($form['views'] as $key => $value) {
+    if ($key[0] == "#") continue;
+    $rows_view[] = array(
+    array('data' => drupal_render($form['views'][$key]['value'])),
+    array('data' => drupal_render($form['views'][$key]['title']))
+    ); 
+  }
+  
+  $output .= theme('table', $form['header_cck']['#value'], $rows_type);
+  $output .= theme('table', $form['header_views']['#value'], $rows_view);
+  $output .= drupal_render($form);
+  return $output;
+}
+
+function import_export_tool_types_views_import_validate($form, $form_state) {
+  $selected = $form_state['clicked_button']['#post'];
+  $types = array();
+  $views = array();
+  
+  foreach ($selected as $key => $value) {
+    if (strstr($key, '_vw_')) {
+      $view_temp = str_replace('_vw_', '', $key);
+      $views[$view_temp] = $view_temp;
+    }
+    elseif (strstr($key, '_cck_')) {
+      $type_temp = str_replace('_cck_', '', $key);
+      $types[$type_temp] = $type_temp;
+    }
+  }
+  
+  $total_checked = count($types) + count($views);
+  
+  if ($total_checked == 0) {
+    drupal_set_message('Please select at least 1 value', 'error');
+  }
+}
+
+function import_export_tool_types_views_export_validate($form, $form_state) {
+  $selected = $form_state['clicked_button']['#post'];
+  $types = array();
+  $views = array();
+  
+  foreach ($selected as $key => $value) {
+    if (strstr($key, '_vw_')) {
+      $view_temp = str_replace('_vw_', '', $key);
+      $views[$view_temp] = $view_temp;
+    }
+    elseif (strstr($key, '_cck_')) {
+      $type_temp = str_replace('_cck_', '', $key);
+      $types[$type_temp] = $type_temp;
+    }
+  }
+  
+  $total_checked = count($types) + count($views);
+  if ($total_checked == 0) {
+    drupal_set_message('Please select at least 1 value', 'error');
+  }
+}
+
+function import_export_tool_types_views_import_submit($form, &$form_state) {
+  $selected = $form_state['clicked_button']['#post'];
+  $types = array();
+  $views = array();
+  
+  foreach ($selected as $key => $value) {
+    if (strstr($key, '_vw_')) {
+      $view_temp = str_replace('_vw_', '', $key);
+      $views[$view_temp] = $view_temp;
+    }
+    elseif (strstr($key, '_cck_')) {
+      $type_temp = str_replace('_cck_', '', $key);
+      $types[$type_temp] = $type_temp;
+    }
+  }
+  
+  $dir = variable_get('import_export_tool_path', file_directory_temp() .'/store');
+  
+  if (count ($types) > 0) {
+    foreach ($types as $type_name) {
+      $dump = file_get_contents($dir .'/'. $type_name .'.cck');
+      $import_dump = '<?php  '. $dump;
+      $tmp_file = $dir .'/'. $type_name .'.tmp';
+      file_put_contents($tmp_file, $import_dump);
+      install_content_copy_import_from_file($tmp_file);
+      unlink($tmp_file);
+    }
+  }
+  
+  if (count($views) > 0) {
+    views_include('view');
+    foreach ($views as $view_name) {
+      $dump = file_get_contents($dir .'/'. $view_name .'.view');
+      ob_start();
+      eval($dump);
+      ob_end_clean();
+      $view->save();
+      $message = "View : ". $view->name ." has been imported";
+      drupal_set_message($message, 'status');
+    }
+  }
+}
+
+function import_export_tool_types_views_export_submit($form, &$form_state) {
+  $selected = $form_state['clicked_button']['#post'];
+  $types = array();
+  $views = array();
+  
+  foreach ($selected as $key => $value) {
+    if (strstr($key, '_vw_')) {
+      $view_temp = str_replace('_vw_', '', $key);
+      $views[$view_temp] = $view_temp;
+    }
+    elseif (strstr($key, '_cck_')) {
+      $type_temp = str_replace('_cck_', '', $key);
+      $types[$type_temp] = $type_temp;
+    }
+  }
+  
+  if (count($types) > 0 || count($views) > 0) {
+    $path = variable_get('import_export_tool_path', file_directory_temp() .'/store');
+    if (!is_dir($path)) {
+      mkdir($path, 0777);
+    }
+  }
+  
+  if (count($types) > 0) {
+    foreach ($types as $type_index => $type_name) {
+      $fields = array_keys(content_copy_fields($type_name));
+      if (module_exists('fieldgroup')) {
+        $groups = content_copy_groups($type_name);
+      }
+      $frm['type_name'] = $type_name;
+      foreach ($groups as $group_index => $group_name) {
+        $frm['groups'][] = $group_name;
+      } 
+      foreach ($fields as $field_index => $field_name) {
+        $frm['fields'][] = $field_name;
+      }
+      $dump = content_copy_export($frm);
+      $filename = $type_name .'.cck';
+      if (!$handle = fopen($path .'/'. $filename, 'a')) {
+        drupal_set_message("Cannot open file ($filename)", 'error', TRUE);
+      }
+      if (fwrite($handle, $dump) === FALSE) {
+        drupal_set_message("Cannot write to file ($filename)", 'error', TRUE);
+      }
+      else{
+        $message = 'CCK Export Complete';
+        drupal_set_message($message, 'status', TRUE);
+      }
+      fclose($handle);
+    }
+  }
+  
+  $tmp_views = $form_state['values']['views'];
+  $all_views = views_get_all_views();
+  
+  if (count($views) > 0) {
+    foreach ($views as $view_name) {
+      $export_dump = $all_views[$view_name]->export();
+      $filename = $view_name .'.view';
+      if (!$handle = fopen($path .'/'. $filename, 'a')) {
+        drupal_set_message("Cannot open file ($filename)", 'error', TRUE);
+      }
+      if (fwrite($handle, $export_dump) === FALSE) {
+        drupal_set_message("Cannot write to file ($filename)", 'error', TRUE);
+      }
+      else{
+        $message = 'VIEWS Export Complete';
+        drupal_set_message($message, 'status', TRUE);
+      }
+      fclose($handle);
+    }
+  }
+  
+}
+  
+function install_content_copy_import_from_file($file) {
+  ob_start();
+  include $file;
+  ob_end_clean();
+  $form_state['values']['type_name'] = '<create>';
+  $form_state['values']['macro'] = '$content = '. var_export($content, 1) .';';
+  $form_state['values']['op'] = t('Import');
+  drupal_execute('content_copy_import_form', $form_state);  
+}

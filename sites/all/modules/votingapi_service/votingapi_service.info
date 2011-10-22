@@ -1,0 +1,7 @@
+; $Id$
+name = Voting API Services
+description = Service methods for Voting API.
+dependencies[] = votingapi
+dependencies[] = services
+package = Voting API
+core = 6.x

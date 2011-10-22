@@ -1,0 +1,67 @@
+<?php
+// $Id$  crop_presets.module September 24, 2011 Randall Goya decibel.places
+// Prefills Focus Crop & Resize values from Imagecache settings
+
+/* get the node type */
+if (!isset($thenodetype)){
+	if ('node' == arg(0)){
+		if (arg(2) != "edit") $thenodetype = arg(2);
+		else if(is_numeric(arg(1))) {
+		  $node = node_load(arg(1));
+		  $thenodetype = $node->type;
+		}
+	}
+}
+
+//dsm($thenodetype);
+
+/* if the node type is a promo */
+if (strpos($thenodetype, 'promo') > 0)
+{
+$thenodetype = str_replace('-', '_', $thenodetype); // need to convert hyphen in content type to underscore in imagecache_preset.presetid 
+/*$query = "SELECT imagecache_action.data FROM imagecache_action INNER JOIN imagecache_preset ON imagecache_preset.presetid = imagecache_action.presetid WHERE imagecache_preset.presetname = '$thenodetype'";
+$result = db_query($query);
+while($row = db_fetch_object($result)){
+	$data_array = explode('"',$row->data);
+	$thiswidth = $data_array[3];
+	$thisheight = $data_array[7];
+}
+*/
+$presets = imagecache_presets();
+$thiswidth = $presets[$thenodetype]['actions'][0]['data']['width'];
+$thisheight = $presets[$thenodetype]['actions'][0]['data']['height'];
+//dsm($thiswidth);
+drupal_add_js('var cropw = ' . $thiswidth . '; var croph = ' . $thisheight . ';', 'inline');
+	
+//load script to run on node/add form
+drupal_add_js(drupal_get_path('module', 'crop_presets') . '/crop_presets.js', 'module');
+
+//load stylesheet on node/add form
+drupal_add_css(drupal_get_path('module', 'crop_presets') . '/crop_presets.css', 'module');
+}
+
+/**
+ * Add JS to the IMCE popup dialog
+ *
+ * Implementation of hook_form_formID_alter().
+ */
+function crop_presets_form_imce_fileop_form_alter(&$form, &$form_state) {
+    drupal_add_js(drupal_get_path('module', 'crop_presets') . '/crop_presets_imce_form.js', 'module');
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function crop_presets_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+ $item['data']['crop_rect'] = "0,0," . $thiswidth . "," . $thisheight;
+}
+
+
+/**
+ * Implementation of hook_file_references().
+ * see http://drupal.org/node/441280#comment-3095634
+ */
+
+function crop_presets_filefield_file_references($file) {
+  return array('crop_presets_filefield' => 1);
+}

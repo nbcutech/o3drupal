@@ -1,0 +1,5 @@
+; $Id$ promo_title_alt_copy.info August 8, 2011 Randall Goya decibel.places
+name = Promo Image Title and ALT Copy
+description = Adds links to copy Blurb and Link Text fields to image title and alt
+core = 6.x
+package = "Oxygen"

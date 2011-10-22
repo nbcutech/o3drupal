@@ -1,0 +1,12 @@
+name = Node Forum
+description = Enables threaded discussions about general topics with the nodecomment module.
+core = 6.x
+dependencies[] = taxonomy
+dependencies[] = nodecomment
+
+; Information added by drupal.org packaging script on 2008-10-04
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "nodeforum"
+datestamp = "1223078901"
+

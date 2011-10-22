@@ -1,0 +1,86 @@
+<?php
+function bplv_registration_schema() {
+$schema['bplv_reg'] = array(
+    'fields' => array(
+      'id' => array(
+        'description' => t('The primary identifier for the table.'),
+        'type' => 'int',
+        'length' => 11,
+        'not null' => TRUE),
+      'firstname' => array(
+        'description' => t('first name of the person'),
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'default' => 0),
+      'lastname' => array(
+        'description' => t('last name of the person'),
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'default' => 0),
+      'address' => array(
+        'description' => t('address of the person'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 0),
+      'city' => array(
+        'description' => t('address of the person'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => 0),
+      'state' => array(
+        'description' => t('state'),
+        'type' => 'int',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 0),
+      'zipcode' => array(
+        'description' => t('zipcode of the person'),
+        'type' => 'varchar',
+        'length' => 11,
+        'not null' => TRUE,
+        'default' => 0),
+      'email' => array(
+        'description' => t('email of the person'),
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'default' => 0),  
+      'phone' => array(
+        'description' => t('mobile number of the person'),
+        'type' => 'int',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 0),  
+      'age' => array(
+        'description' => t('age of the person'),
+        'type' => 'int',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => 0),
+      'newsletter' => array(
+        'description' => t('Whether the user subscribed to the news letter'),
+        'type' => 'int',
+        'length' => 1,
+        'not null' => TRUE,
+        'default' => 0),
+      'ip_address' => array(
+        'description' => t('ip address of the person'),
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => 0),
+      'fb_user_id' => array(
+        'description' => t('Fb user id of the person'),
+        'type' => 'int',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 0),
+    ),
+   );
+   return $schema;
+}
+?>

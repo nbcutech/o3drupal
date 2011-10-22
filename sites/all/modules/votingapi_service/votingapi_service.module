@@ -1,0 +1,258 @@
+<?php
+// $Id$
+
+/**
+ * votingapi_service
+ * Service methods for Voting API
+ *
+ * votingapi methods:
+ *  - setVote
+ *  - unsetVote
+ *  - getUserVotes
+ *  - getContentVotes
+ *  - getVotingResults
+ *
+ */
+
+/**
+ * Implementation of hook_perm()
+ */
+function votingapi_service_perm() {
+  return array('access votes', 'edit votes');
+}
+
+/**
+ * Implementation of hook_service()
+ */
+function votingapi_service_service() {
+  return array(
+
+    // votingapi.setVote
+    array(
+      '#method' => 'votingapi.setVote',
+      '#callback' => 'votingapi_service_set_vote',
+      '#access callback'  => 'votingapi_service_get_access',
+      '#args' => array(
+        array(
+          '#name' => 'content_type',
+          '#type' => 'string',
+          '#description' => t('Content type'),
+        ),
+        array(
+          '#name' => 'content_id',
+          '#type' => 'string',
+          '#description' => t('Content id'),
+        ),
+        array(
+          '#name' => 'vote',
+          '#type' => 'string',
+          '#description' => t('Vote'),
+        ),
+        array(
+          '#name' => 'uid',
+          '#type' => 'string',
+          '#optional' => TRUE,
+          '#description' => t('User id'),
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => t('Sets vote'),
+    ),
+
+    // votingapi.unsetVote
+    array(
+      '#method' => 'votingapi.unsetVote',
+      '#callback' => 'votingapi_service_unset_vote',
+      '#access callback'  => 'votingapi_service_get_access',
+      '#args' => array(
+        array(
+          '#name' => 'content_type',
+          '#type' => 'string',
+          '#description' => t('Content type'),
+        ),
+        array(
+          '#name' => 'content_id',
+          '#type' => 'string',
+          '#description' => t('Content id'),
+        ),
+        array(
+          '#name' => 'uid',
+          '#type' => 'string',
+          '#optional' => TRUE,
+          '#description' => t('User id'),
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => t('Sets vote'),
+    ),
+
+    // votingapi.getUserVotes
+    array(
+      '#method' => 'votingapi.getUserVotes',
+      '#callback' => 'votingapi_service_get_user_votes',
+      '#access callback'  => 'votingapi_service_get_access',
+      '#args' => array(
+        array(
+          '#name' => 'content_type',
+          '#type' => 'string',
+          '#description' => t('Content type'),
+        ),
+        array(
+          '#name' => 'content_id',
+          '#type' => 'string',
+          '#description' => t('Content id'),
+        ),
+        array(
+          '#name' => 'uid',
+          '#type' => 'string',
+          '#optional' => TRUE,
+          '#description' => t('User id'),
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => t('Returns all votes cast by a given user for a piece of content.'),
+    ),
+
+    // votingapi.getContentVotes
+    array(
+      '#method' => 'votingapi.getContentVotes',
+      '#callback' => 'votingapi_service_get_content_votes',
+      '#access callback'  => 'votingapi_service_get_access',
+      '#args' => array(
+        array(
+          '#name' => 'content_type',
+          '#type' => 'string',
+          '#description' => t('Content type'),
+        ),
+        array(
+          '#name' => 'content_id',
+          '#type' => 'string',
+          '#description' => t('Content id'),
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => t('Returns all votes cast for a given piece of content.'),
+    ),
+
+    // votingapi.getVotingResults
+    array(
+      '#method' => 'votingapi.getVotingResults',
+      '#callback' => 'votingapi_service_get_voting_results',
+      '#access callback'  => 'votingapi_service_get_access',
+      '#args' => array(
+        array(
+          '#name' => 'content_type',
+          '#type' => 'string',
+          '#description' => t('Content type'),
+        ),
+        array(
+          '#name' => 'content_id',
+          '#type' => 'string',
+          '#description' => t('Content id'),
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => t('Returns the cached voting results for a given piece of content.'),
+    ),
+  );
+}
+
+function votingapi_service_get_access($view_name) {
+    return TRUE;
+}
+
+/**
+ * Callback for votingapi.setVote
+ */
+function votingapi_service_set_vote($content_type, $content_id, $vote, $uid = NULL, $recursion = FALSE) {
+  if (user_access('edit votes')) {
+      // Sanity-check the incoming values.
+        if (is_numeric($content_id) && is_numeric($vote)) {
+            if ($vote > 100) {
+            $vote = 100;
+        }
+
+        
+         $new_vote = array(
+           'value' => 1,
+           'tag' => $vote,
+           'value_type' => 'option',
+           'content_type' => $content_type,
+           'content_id' => $content_id,
+          );
+       $votes[] = $new_vote;
+       votingapi_add_votes($votes);
+       return votingapi_recalculate_results('decisions', $content_id);
+    }
+  }
+  else {
+    return services_error(t('User not authorized to edit votes.'));
+  }
+}
+
+/**
+ * Callback for votingapi.unsetVote
+ */
+function votingapi_service_unset_vote($content_type, $content_id, $uid = NULL) {
+  if (user_access('edit votes')) {
+      // get the user's current vote
+      $criteria = array('content_type' => $content_type, 'content_id' => $content_id, 'uid' => $uid);
+
+      $user_criteria = votingapi_current_user_identifier();
+      $user_votes = votingapi_select_votes($criteria + $user_criteria);
+
+      votingapi_delete_votes($user_votes);
+      votingapi_recalculate_results($content_type, $content_id);
+      return $user_votes[0];
+  }
+  else {
+    return services_error(t('User not authorized to edit votes.'));
+  }
+}
+
+/**
+ * Callback for votingapi.getUserVotes
+ */
+function votingapi_service_get_user_votes($content_type, $content_id, $uid = NULL) {
+    if (user_access('access votes')) {
+      // get the user's current vote
+      $criteria = array('content_type' => $content_type, 'content_id' => $content_id, 'uid' => $uid);
+
+      $user_criteria = votingapi_current_user_identifier();
+      $user_votes = votingapi_select_votes($criteria + $user_criteria);
+
+      return $user_votes[0];
+  }
+  else {
+    return services_error(t('User not authorized to access votes.'));
+  }
+}
+
+/**
+ * Callback for votingapi.getContentVotes
+ */
+function votingapi_service_get_content_votes($content_type, $content_id) {
+  if (user_access('access votes')) {
+      $criteria = array('content_type' => $content_type, 'content_id' => $content_id);
+      $votes = votingapi_select_results($criteria);
+      return $votes;
+  }
+  else {
+    return services_error(t('User not authorized to access votes.'));
+  }
+}
+
+/**
+ * Callback for votingapi.getVotingResults
+ */
+function votingapi_service_get_voting_results($content_type, $content_id) {
+  if (user_access('access votes')) {
+      $criteria = array('content_type' => $content_type, 'content_id' => $content_id);
+      $votes = votingapi_select_results($criteria);
+      return $votes;
+  }
+  else {
+    return services_error(t('User not authorized to access votes.'));
+  }
+}
+

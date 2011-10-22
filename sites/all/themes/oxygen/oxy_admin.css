@@ -1,0 +1,63 @@
+ul.secondary a {
+background-color:#fff;
+padding: 0px 3px;
+}
+
+ul.secondary a.active {
+background-color:#bbf;
+padding: 0px 3px;
+font-weight:bold;
+}
+
+
+#tabs-wrapper {
+  background:#3892dc;
+/*  height:47px; */
+  margin-top:0;
+
+}
+ul.primary {
+border-bottom:8px solid #FFFFFF;
+border-collapse:collapse;
+height:auto;
+line-height:normal;
+list-style-image:none;
+list-style-position:outside;
+list-style-type:none;
+margin:0;
+padding:20px 0 0 10px;
+white-space:nowrap;
+}
+
+.tabs .primary {
+
+}
+ul.primary li {
+  padding-top: 5px;
+}
+
+
+ul.primary li.active a {
+  clear:both;
+  background: url(./images/admin/update-buttons-active.jpg) no-repeat;
+  background-color:#3892dc;
+  border:#2981d8 2px solid;
+  border-bottom: none;
+  padding:8px 17px 0 17px;
+  margin-bottom:10px;
+  font-size:14px;
+}
+
+ul.primary li a {
+  clear:both;
+  background: url(./images/admin/update-buttons.jpg) no-repeat;
+  background-color:#3892dc;
+  border:#2981d8 2px solid;
+  border-bottom: none;
+  padding:8px 17px 0 17px;
+  margin-bottom:10px;
+  font-size:14px;
+}
+ul.primary li a:hover {
+  background: url(./images/admin/update-buttons-active.jpg) no-repeat;
+}

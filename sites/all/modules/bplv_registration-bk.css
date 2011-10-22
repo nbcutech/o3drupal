@@ -1,0 +1,106 @@
+body.fb-body { width:520px; overflow-x:hidden; overflow-y:hidden;}
+div.fb-content { width:520px; overflow-x:hidden;overflow-y:hidden; }
+.fb-content .form-item { display:block; }
+.hide { display:none; }
+
+/* Styles specific to fb page */
+
+.fb-content .reg-content .reg-content-details .content-info {font-weight:bold; font-size:13px; text-align:justify; float:left; height:152px;width:229px; }
+.fb-content div.status {  }
+.fb-content div.success{ float:right; margin-right:59px; 	width:20px;}
+.fb-content div.error{ float:none;background:none; border:0px; }
+.fb-content .reg-content .reg-content-details  { margin-left:0px;}
+.fb-content .reg-content .reg-form .step3 .step3-buttons .twitter-button { margin-left:50px;}
+.fb-content .reg-content .reg-rules .rules-tabs { margin-left:0px; width:168px;}
+.fb-content .reg-content .reg-rules .rules-details  { width:320px; }
+.fb-content .reg-content .reg-rules { margin-left:0px; }
+.fb-content .reg-content .reg-header { background-position: -35px 0; }
+.reg-content {}
+/* 
+.reg-content div {border: 1px black solid; }
+*/
+.reg-content .reg-header{margin-left:0px; width:650px;height:166px; background-image:url('../images/bplv_images/bplv_sweeps_header.jpg');}
+.reg-content .reg-content-details { margin-left:20px;margin-top:10px; height:170px; }
+.reg-content .reg-content-details .content-info {font-weight:bold; font-size:13px; text-align:justify; float:left; height:152px;width:290px; }
+.reg-content .reg-content-details .content-picture {margin-right:20px; width:259px; height:152px; float:right; background-image:url('../images/bplv_images/bplv_sweeps_dresses.jpg');}
+
+.reg-content .reg-text { margin-left:20px; color:RGB(219,84,170); }
+.reg-content .header-font { font-size:15px; font-weight:bold;  }
+/* Reg form */
+.reg-content .reg-form { margin-left:20px;}
+.reg-content .reg-form .step1{}
+.reg-content .reg-form .step2{}
+.reg-content .reg-form .step2 .step2-content {margin-left:20px; }
+
+.reg-content .reg-form .step3{}
+.reg-content .reg-form .header span { background-size:20px 20px; background-repeat:no-repeat; margin-right:5px;width:20px;height:25px;  display:inline-block;float:left;}
+.reg-content .reg-form .step1 .header span {   background-image:url('../images/bplv_images/bplv_sweeps_1.jpg');}
+.reg-content .reg-form .header div.text { float:left; margin-top:2px;} 
+.reg-content .reg-form .step1 .header a {text-decoration:none; color:RGB(6,226,254);cursor:pointer;}
+.reg-content .reg-form .step1 .header .fb-like { margin-left:10px; display:inline-block; width:100px; height:20px; margin-right:auto; }
+.reg-content .reg-form .step3 .header span { background-image:url('../images/bplv_images/bplv_sweeps_3.jpg');}
+.reg-content .reg-form .step2 .header span {   background-image:url('../images/bplv_images/bplv_sweeps_2.jpg');}
+.reg-content .reg-form .header {height:25px; margin:5px 0px; color:RGB(30,100,196); }
+
+.reg-content .reg-form .step3 .step3-content{ font-size:11px; margin-left:20px; }
+.reg-content .reg-form .step3 .step3-content span{ color:RGB(254,81,91); }
+.reg-content .reg-form .step3 .step3-buttons  { height:35px; background-repeat:no-repeat; margin-top: 20px; }
+.reg-content .reg-form .step3 .step3-buttons .submit-button {cursor:pointer; height:29px; float:left; background-repeat:no-repeat; }
+.reg-content .reg-form .step3 .step3-buttons .submit-button input {cursor:pointer; color:white; border:0px;background-color:RGB(241,104,191);height:29px;width:90px;}
+
+.reg-content .reg-form .step3 .step3-buttons .fb-share-button-friends {
+	cursor:pointer; background-image:url('../images/bplv_images/bplv_fb.jpg'); width:151px; height:29px;
+	 float:left; }
+
+/* FB SHARE BUTTON CUSTOMIZATION */
+.fb_button_simple, .fb_button_simple_rtl a  { background-image:url('../images/bplv_images/bplv_fb.jpg'); width:151px; height:27px; float:left; }
+.fb-share-button span a span { display:none; }
+.fb-share-button span a {background-image:url('../images/bplv_images/bplv_fb.jpg'); 	 }
+.fb-not-logged, .fb-not-authorized, .fb-welcome-text, .fb-not-liked {
+	 margin-lefT:20px; font-size:14px; margin-bottom:10px;
+	 color:red;font-weight:bold;
+}
+.fb-not-authorized a { text-decoration:underline; cursor:pointer; color:blue; }
+.reg-content .fb-login-button { width:100px; margin-left:100px;height:40px;}
+
+/* TWEET BUTTON CUSTOMIZATION */
+.reg-content .reg-form .step3 .step3-buttons .twitter-button{background-image:url('../images/bplv_images/bplv_twitter.jpg');  margin-left:100px; margin-right:20px; width:136px; height:29px; float:left; }
+.twitter-button a {width:136px; height:29px; display:block; }
+
+.reg-content .reg-rules { margin-top:20px;margin-left:20px; background-color:RGB(237,237,237);width:625px;height:95px;}
+.reg-content .reg-rules .rules-tabs{margin-top:15px; float:left; width:200px;margin-left:20px;  }
+.reg-content .reg-rules .rules-tabs ul  {  font-size:14px; font-weight:bold; padding:0px; margin:10px 0px; list-style-position:inside; color:black;}
+.reg-content .reg-rules .rules-tabs ul a { text-decoration:none; color:black;}
+.reg-content .reg-rules .rules-tabs ul li {width:125px; margin:5px 0px;  padding:2px 5px 2px 25px;  background-color:RGB(195,195,195); }
+.reg-content .reg-rules .rules-tabs ul span  {color:white; }
+.reg-content .reg-rules .rules-tabs ul li.upper  { background-color:RGB(129,129,129) }
+.reg-content .reg-rules .rules-details{ margin-top:8px; font-size:11px; color:black; float:left;  width:400px; }
+.reg-content .reg-rules .rules-details ul {padding:0px; list-style-type:none;}
+
+/* Form Fields */
+.reg-form .step2-content .form-item  label {
+  font-weight: bold;
+  display:block;
+  float:left;
+  width:120px;
+}
+/* Age exception */
+.reg-form .step2-content #edit-age-wrapper label {  width:120px;}
+.reg-form .step2-content #edit-age-wrapper  input {	width:100px;}
+.reg-form .step2-content #edit-age-wrapper .status { margin-right:120px;}
+
+/* check box exception */
+.reg-form .step3-content #edit-rules-wrapper .status { width:320px; margin-right:20px;}
+
+.reg-form .step2-content .form-item input,.form-item  select {
+	background-color:RGB(204,204,204);
+	border:0px;
+	width:250px;
+}
+
+
+/* Form validation css */
+span.form-error-icon {background-image:url('../images/bplv_images/wrong-icon.png'); width:16px; height:16px; }
+span.form-correct-icon {background-image:url('../images/bplv_images/correct-icon.png'); width:16px; height:16px; }
+div.status { float:right; width:230px; overflow:hidden;}
+div.status span { display:block; float:left;margin-right:5px; }

@@ -1,0 +1,5 @@
+; $Id$
+name = Obsessed
+description = Creates the various Obsessed content outputs
+core = 6.x
+package = "Oxygen"

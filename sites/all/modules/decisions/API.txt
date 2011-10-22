@@ -1,0 +1,67 @@
+The Mode API for Decisions.module
+====================================
+
+voting modes
+------------
+
+New voting modes can be defined by creating a file in
+modes/foo.inc. The mode must define the hooks defined below.
+
+Mode hooks
+==========
+
+In addition to the usual module hooks defined by Drupal,
+decisions.module also has its own hooks. modes that do not define
+mandatory hooks will create warnings and problems.
+
+decisions_algorithms
+--------------------
+
+Mandatory. Return a list of algorithms provided by this decision mode. The list
+if of the form:
+
+algorithm => description
+
+where algorithm is a short name for the algorithm (suitable for storage in the
+database) and description a freeform description of the algorithm that will be
+presented to the user.
+
+decisions_voting_form
+---------------------
+
+Mandatory. This hook has the duty to return a HTML form suitable for
+submitting new votes in the decision. It can also add arbitrary
+HTML. It is suggested to setup the form using the new form API and
+call drupal_get_form() to allow the theme to override the display.
+
+TODO: right now, there is a common theme hook for all hooks, which
+might be a problem.
+
+decision_view_results
+---------------------
+
+Mandatory. This hook is called when the user has already voted or when
+the module thinks it's relevant to display a decision's results. This
+will generally call _voting_api_get_raw_votes() or something similar.
+
+decisions_format_votes
+----------------------
+
+Mandatory. Format the votes of a user on a single line. Returns a
+string.
+
+decision_vote
+-------------
+
+Mandatory. This hook is called when a vote is registered. Form data
+setup in decisions_view_voting_$mode() will as an argument. This will
+usually call votingapi_set_vote() or similar.
+
+decisions_vote_validate
+-----------------------
+
+Optional. Additional validation of vote submissions. Defaults to no
+validation. This hook should behave as a normal form validation hook
+(ie. hook_validate() in drupal terminology), that is, amongst other
+things, set errors using form_set_error(). It should return TRUE if
+the form is valid, FALSE otherwise.

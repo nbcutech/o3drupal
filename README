@@ -1,0 +1,13 @@
+; README 2011-10-20 Randall Goya
+; https://github.com/decibelplaces/o3drupal
+
+This repository contains an updated version of Oxygen Production code
+including DEV code Promo Tools added via Drupal Features and manual configurations
+to be merged with DEV code in repository promotoolsdev
+
+.gitignore files:
+.htaccess
+settings.php
+sites/default/files/backup_migrate/*
+
+Backup & Migrate file: Dropbox\oxygen dev team shared\Shared\Tools- Exports Modules and Guides\OxygenAdmin-2011-10-19T18-23-00.mysql.gz

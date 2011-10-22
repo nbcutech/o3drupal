@@ -1,0 +1,13 @@
+Taxonomies can be imported from external service providers and locations.
+A few samples are built-in, and more can be provided by additional modules.
+Most supported services are direct URL requests, usually with an identifier in the GET string indicating the entry being requested.
+Others are simply URLs (no ID argument needed) where a third-party document can be downloaded from, provided as a convenience, or to avoid licensing problems, and to ensure you are retrieving the latest version.
+
+Two forms of 'service' are currently supported - search and lookup.
+
+Search is intended to take a text string and return a resource ID relevant to the service provider. 
+Each service has its own form of local ID.
+
+Lookup is used when you have uniquely identified the resource entry to be retrieved, and returns a machine-readable dump of that data in one of the supported formats.
+
+The service definition array is undergoing development

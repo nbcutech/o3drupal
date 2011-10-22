@@ -1,0 +1,11 @@
+; $Id: cookstr.info,v 0.01 2007/06/18 23:07:10 dww Exp $
+name = Cookstr
+description = This is the drupal module for the Recipe finder
+
+; Information added by drupal.org packaging script on 2007-06-19
+version = "5.x-1.x-dev"
+project = "cookstr"
+datestamp = "1182212751"
+
+
+core = 6.x

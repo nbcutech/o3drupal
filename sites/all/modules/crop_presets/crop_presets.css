@@ -1,0 +1,8 @@
+/* $Id$ crop_presets.css September 24, 2011 Randall Goya decibel.places
+*  this file is loaded on the node/add form
+*/
+
+/* this hides the file sources, except for IMCE browse and upload
+div.filefield-sources-list {visibility: hidden !important}
+div.filefield-source-imce {display: block !important}
+*/

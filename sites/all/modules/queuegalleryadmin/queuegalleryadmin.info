@@ -1,0 +1,6 @@
+; $Id$
+name = Admin Oxygen Gallery
+description = Manage galleries on Oxygen.com
+core = 6.x
+dependencies[] = queuegallery
+package = "Oxygen"

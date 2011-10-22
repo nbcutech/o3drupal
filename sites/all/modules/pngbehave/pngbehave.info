@@ -1,0 +1,18 @@
+name = PNG Behave
+description = "Uses CSS Class Selectors to fix PNG Alpha Transparency through Windows IE 5.5+ behaviors."
+core = 6.x
+
+package = Image
+; Information added by mrjeeves on 2008-11-29
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "pngbehave"
+datestamp = "1225022961"
+
+
+; Information added by drupal.org packaging script on 2011-05-24
+version = "6.x-1.8"
+core = "6.x"
+project = "pngbehave"
+datestamp = "1306231016"
+

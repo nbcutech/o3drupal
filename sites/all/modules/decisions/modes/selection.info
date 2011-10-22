@@ -1,0 +1,14 @@
+; $Id: selection.info,v 1.3 2008/11/26 17:22:26 anarcat Exp $
+name = Selection
+description = A decision mode for the Decisions module that allows select one or many options.
+package = Voting
+dependencies[] = decisions
+dependencies[] = votingapi
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-04-28
+version = "6.x-1.7"
+core = "6.x"
+project = "decisions"
+datestamp = "1272432004"
+

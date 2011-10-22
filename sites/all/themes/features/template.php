@@ -1,0 +1,346 @@
+<?php
+/**
+ * Return a themed breadcrumb trail.
+ *
+ * @param $breadcrumb
+ *   An array containing the breadcrumb links.
+ * @return a string containing the breadcrumb output.
+ */
+function phptemplate_breadcrumb($breadcrumb) {
+  if (!empty($breadcrumb)) {
+    return '<div class="breadcrumb">'. implode(' > ', $breadcrumb) .'</div>';
+  }
+}
+
+function features_preprocess_page(&$variables) {
+
+    if ($variables['node']->type != "") {
+    $variables['template_files'][] = "page-node-" . $variables['node']->type;
+
+  }
+}
+/**
+* Override or insert PHPTemplate variables into the templates.
+*/
+function _phptemplate_variables($hook, $vars) {
+  switch ($hook) {
+    case 'page':
+
+      // add from here
+      if (preg_match('/^__(.*)__$/', $vars['title'], $regs)) {
+        $vars['title'] = '';
+        $vars['head_title'] = $regs[1];
+      }
+      // add to here
+
+      break;
+  }
+  return $vars;
+}
+
+// this is NOT an API call. It's a utility to get info to add to the $variables array
+function features_preprocess_showsite_cast_fields(&$variables) {
+  static $accounts;  
+  $uid = $variables['fields']['uid']->content;
+  if (is_null($accounts[$uid])) {
+  	$cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $uid);
+  	$accounts[$uid] = db_fetch_object($cast_query);
+  }
+
+    $variables['cast_member_name'] = $accounts[$uid]->field_cast_name_value;  
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+    $variables['cast_member_short_bio'] = $accounts[$uid]->field_short_bio_value;
+    
+}
+
+function features_preprocess_allsite_cast_fields(&$variables) {
+  static $accounts;  
+  $uid = $variables['fields']['uid']->content; 
+  if (is_null($accounts[$uid])) {
+  	$cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $uid);
+  	$accounts[$uid] = db_fetch_object($cast_query);
+  }
+
+	preg_match('#<img\s+.*src=[\"\']([^>\"\']+)[\"\'].*[^>]*>#i', $variables['fields']['body']->raw, $matched);  
+	if ($matched[1]) {
+	 // $matched[0] is the whole image tag. $match[1] is the captured src attribute "([^>\"\']+)"  	
+		$img_path = $matched[1];  	
+	}
+
+//	$variables['cast_member_picture'] = $img_path;
+
+//    $variables['cast_member_name'] = $accounts[$uid]->field_cast_name_value;  
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+//    $variables['cast_member_short_bio'] = $accounts[$uid]->field_short_bio_value;
+
+	 preg_match('#href="/.*?/#', $variables['fields']['view_node']->content, $matched);
+    $urlPart = str_replace('/', '', $matched[0]);
+    $urlPart = str_replace('href="', '', $urlPart);
+	 
+	 switch($urlPart){
+		 case 'lovegames': $siteURL = 'http://love-games.oxygen.com'; break;
+		 case 'sbw': $siteURL = 'http://storibook-weddings.oxygen.com'; break;
+		 case 'bgc': $siteURL = 'http://bad-girls-club.oxygen.com'; break;
+		 case 'aaa': $siteURL = 'http://all-about-aubrey.oxygen.com'; break;
+		 case 'td': $siteURL = 'http://tori-and-dean.oxygen.com'; break;
+		 case 'dyao': $siteURL = 'http://dyao.oxygen.com'; break;
+		 case 'outloud': $siteURL = 'http://features.oxygen.com'; break;
+		 case 'gleeproj': $siteURL = 'http://thegleeproject.oxygen.com'; break;
+		 case 'paris': $siteURL = 'http://the-world-according-to-paris.oxygen.com'; break;
+		 case 'hbs': $siteURL = 'http://hair-battle-spectacular.oxygen.com'; break;
+	 }
+	 
+	 $variables['fields']['view_node']->content = str_replace('href="', 'href="'.$siteURL, $variables['fields']['view_node']->content);
+	 $variables['fields']['title']->content = str_replace('href="', 'href="'.$siteURL, $variables['fields']['title']->content);
+	 
+}
+
+function features_preprocess_allsite_cast_fields_attachment(&$variables) {
+	
+  static $accounts;  
+  $uid = $variables['fields']['uid']->content; 
+  if (is_null($accounts[$uid])) {
+  	$cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $uid);
+  	$accounts[$uid] = db_fetch_object($cast_query);
+  }
+
+	 preg_match('#href="/.*?/#', $variables['fields']['view_node']->content, $matched);
+    $urlPart = str_replace('/', '', $matched[0]);
+    $urlPart = str_replace('href="', '', $urlPart);
+	 
+	 switch($urlPart){
+		 case 'lovegames': $siteURL = 'http://love-games.oxygen.com'; break;
+		 case 'sbw': $siteURL = 'http://storibook-weddings.oxygen.com'; break;
+		 case 'bgc': $siteURL = 'http://bad-girls-club.oxygen.com'; break;
+		 case 'aaa': $siteURL = 'http://all-about-aubrey.oxygen.com'; break;
+		 case 'td': $siteURL = 'http://tori-and-dean.oxygen.com'; break;
+		 case 'dyao': $siteURL = 'http://dyao.oxygen.com'; break;
+		 case 'outloud': $siteURL = 'http://features.oxygen.com'; break;
+		 case 'gleeproj': $siteURL = 'http://thegleeproject.oxygen.com'; break;
+		 case 'paris': $siteURL = 'http://the-world-according-to-paris.oxygen.com'; break;
+		 case 'hbs': $siteURL = 'http://hair-battle-spectacular.oxygen.com'; break;
+	 }
+	 
+	 switch($urlPart){
+		 case 'lovegames': $site_name = 'Love Games'; break;
+		 case 'sbw': $site_name = 'sTORIbook Weddings'; break;
+		 case 'bgc': $site_name = 'Bad Girls Club'; break;
+		 case 'aaa': $site_name = 'All About Aubrey'; break;
+		 case 'td': $site_name = 'Tori &amp; Dean'; break;
+		 case 'dyao': $site_name = 'Dance Your A** Off'; break;
+		 case 'outloud': $site_name = 'Live Out Loud'; break;
+		 case 'gleeproj': $site_name = 'The Glee Project'; break;
+		 case 'paris': $site_name = 'The World According to Paris'; break;
+		 case 'hbs': $site_name = 'Hair Battle Spectacular'; break;
+	 }
+	 
+	 $variables['fields']['view_node']->content = str_replace('href="', 'href="'.$siteURL, $variables['fields']['view_node']->content);
+	 $variables['fields']['title']->content = str_replace('href="', 'href="'.$siteURL, $variables['fields']['title']->content);
+	 
+    $variables['cast_member_name'] = $accounts[$uid]->field_cast_name_value;  
+    $variables['cast_member_short_bio'] = $accounts[$uid]->field_short_bio_value;
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/".$urlPart.".jpg";
+    $variables['showsite_blogs_url'] = $siteURL . '/blogs/' . $urlPart;
+    $variables['showsite_name'] = $site_name;
+    
+}
+
+//this is NOT an API call. It's a utility to get info to add to the $variables array
+
+function features_allsite_blog_episode_image(&$variables) { //print_r($variables['fields']);
+	// New code to ame images work
+	static $accounts;  
+  $uid = $variables['fields']['uid']->content;
+  if (is_null($accounts[$uid])) {
+  	$cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $uid);
+  	$accounts[$uid] = db_fetch_object($cast_query);
+  }
+	//End of new code
+	
+  //$uid = $variables['fields']['uid']->content;
+  preg_match('#<img\s+.*src=[\"\']([^>\"\']+)[\"\'].*[^>]*>#i', $variables['fields']['body']->raw, $matched);  
+  if ($matched[1]) {
+    // $matched[0] is the whole image tag. $match[1] is the captured src attribute "([^>\"\']+)"  	
+  		$img_path = $matched[1];  	
+  }
+  // KK - my revisions: placing Sudha's code in conditional so that image from post displays, if present
+  if (is_null($img_path)) {
+  $variables['episodic_image'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+	} else  {
+	$variables['episodic_image'] = $img_path;
+	}
+  
+   
+  //echo "<!-- ".print_r($variables['fields']['uid'], true)." -->";
+}
+
+function features_showsite_blog_episode_image(&$variables) {
+ $uid = $variables['fields']['uid']->content;
+  preg_match('#<img\s+.*src=[\"\']([^>\"\']+)[\"\'].*[^>]*>#i', $variables['fields']['body']->raw, $matched);  
+  if ($matched[1]) {
+    // $matched[0] is the whole image tag. $match[1] is the captured src attribute "([^>\"\']+)"  	
+  		$img_path = $matched[1];  	
+  }
+  if (is_null($img_path)) {
+  	$img_path = "/sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($variables['cast_member_name']).".jpg"; 
+  }
+  $variables['episodic_image'] = $img_path;
+}
+
+/**
+ * this IS an API call, to make new variables available to the theme the name is constructed:
+ * function [theme name]_preprocess_[template name with '-' replaced by '_']
+ */
+ 
+function features_preprocess_views_view__allsite_blogs__page_1(&$variables) {
+  // the entire view view is in $variables['view'], the array of query result is in $variables['view']->result
+  $blog_rec = $variables['view']->result[0];
+  $cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $blog_rec->users_uid);
+  $account = db_fetch_object($cast_query);
+
+    $variables['cast_member_name'] = $account->field_cast_name_value;
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+    $variables['cast_member_short_bio'] = $account->field_short_bio_value;
+
+}
+ 
+function features_preprocess_views_view__allsite_blogsv2__page_1(&$variables) {
+  // the entire view view is in $variables['view'], the array of query result is in $variables['view']->result
+  $blog_rec = $variables['view']->result[0];
+  $cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $blog_rec->users_uid);
+  $account = db_fetch_object($cast_query);
+
+    $variables['cast_member_name'] = $account->field_cast_name_value;
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+    $variables['cast_member_short_bio'] = $account->field_short_bio_value;
+
+}
+ 
+function features_preprocess_views_view__allsite_blogsv2__page(&$variables) {
+  // the entire view view is in $variables['view'], the array of query result is in $variables['view']->result
+  $blog_rec = $variables['view']->result[0];
+  $cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $blog_rec->users_uid);
+  $account = db_fetch_object($cast_query);
+
+    $variables['cast_member_name'] = $account->field_cast_name_value;
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+    $variables['cast_member_short_bio'] = $account->field_short_bio_value;
+}
+ 
+function features_preprocess_views_view__showsite_blogs__page_1(&$variables) {
+  // the entire view view is in $variables['view'], the array of query result is in $variables['view']->result
+  $blog_rec = $variables['view']->result[0];
+  $cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $blog_rec->users_uid);
+  $account = db_fetch_object($cast_query);
+
+    $variables['cast_member_name'] = $account->field_cast_name_value;
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($accounts[$uid]->field_cast_name_value).".jpg"; 
+    $variables['cast_member_short_bio'] = $account->field_short_bio_value;
+}
+
+function features_preprocess_views_view_fields__lol_blogs__block_1(&$variables) {
+  // the entire view view is in $variables['view'], the array of query result is in $variables['view']->result
+  $blog_rec = $variables['view']->result[0];
+  $cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $blog_rec->users_uid);
+  $account = db_fetch_object($cast_query);
+
+  $variables['cast_member_name'] = $account->field_cast_name_value;
+  
+  $uid = $variables['fields']['uid']->content;
+  
+  preg_match('#<img\s+.*src=[\"\']([^>\"\']+)[\"\'].*[^>]*>#i', $variables['fields']['body']->raw, $matched);  
+  if ($matched[1]) {
+    // $matched[0] is the whole image tag. $match[1] is the captured src attribute "([^>\"\']+)"  	
+  		$img_path = $matched[1];  	
+  }
+  if (is_null($img_path)) {
+  	$img_path = "http://features.oxygen.com/sites/all/themes/oxygen/images/blog_photo/uid".$uid."-".strtolower($variables['cast_member_name']).".jpg"; 
+  }
+  $variables['episodic_image'] = $img_path;
+  
+}
+
+/**
+ * this IS an API call, to make new variables available to the theme the name is constructed:
+ * function [theme name]_preprocess_[template name with '-' replaced by '_']
+ */
+
+function features_preprocess_views_view_fields__allsite_blogs__page(&$variables) { //print_r($variables);
+  features_preprocess_allsite_cast_fields($variables);
+  features_allsite_blog_episode_image($variables);
+}
+
+function features_preprocess_views_view_fields__allsite_blogsv2__page(&$variables) { //print_r($variables);
+  features_preprocess_allsite_cast_fields($variables);
+  features_allsite_blog_episode_image($variables);
+}
+
+function features_preprocess_views_view_fields__showsite_blogs__page(&$variables) {
+  features_preprocess_showsite_cast_fields($variables);
+  features_showsite_blog_episode_image($variables);
+}
+
+/**
+ * this IS an API call, to make new variables available to the theme the name is constructed:
+ * function [theme name]_preprocess_[template name with '-' replaced by '_']
+ */
+
+function features_preprocess_views_view_fields__allsite_blogs__page_1(&$variables) {
+  features_preprocess_allsite_cast_fields($variables);
+  features_allsite_blog_episode_image($variables);
+}
+
+function features_preprocess_views_view_fields__allsite_blogsv2__page_1(&$variables) {
+  features_preprocess_allsite_cast_fields($variables);
+  features_allsite_blog_episode_image($variables);
+}
+
+function features_preprocess_views_view_fields__showsite_blogs__page_1(&$variables) {
+  features_preprocess_showsite_cast_fields($variables);
+  features_showsite_blog_episode_image($variables);
+}
+
+/**
+ * this IS an API call, to make new variables available to the theme the name is constructed:
+ * function [theme name]_preprocess_[template name with '-' replaced by '_']
+ */
+
+function features_preprocess_views_view_fields__showsite_blogs__block_1(&$variables) {
+  features_preprocess_showsite_cast_fields($variables);
+  // Earl D: this builds the link URL as relative to the show site for which the post was written
+  //get the nid
+  $nid = $variables['fields']['nid']->content;
+  // build an absolute url, which will be relative to the show site on which the block is displayed
+  $link_url = url('node/'.$nid, array('absolute' => true));
+  // get the base url of the show site for which the post was written
+  $show_base_url = oxygen_helpers_show_id_to_url($variables['fields']['name_1']->content);
+  // replace the base url in the link
+  $show_url = preg_replace('|^http://.+\.oxygen.com|', $show_base_url, $link_url);
+  $variables['external_url'] = $show_url;
+}
+
+/**
+ * this IS an API call, to make new variables available to the theme the name is constructed:
+ * function [theme name]_preprocess_[template name with '-' replaced by '_']
+ */
+
+function features_preprocess_views_view_fields__allsite_blogs__attachment_1(&$variables) { 
+  features_preprocess_allsite_cast_fields_attachment($variables);
+}
+
+function features_preprocess_views_view_fields__allsite_blogsv2__attachment(&$variables) { 
+  features_preprocess_allsite_cast_fields_attachment($variables);
+}
+
+function features_preprocess_views_view_fields__showsite_blogs__attachment_1(&$variables) {
+  features_preprocess_showsite_cast_fields($variables);
+}
+
+function features_preprocess_node($variables) {
+  $cast_query = db_query('select * from content_type_bios_cast where field_uid_uid = %d', $variables['uid']);
+  $account = db_fetch_object($cast_query);
+
+    $variables['cast_member_name'] = $account->field_cast_name_value;
+    $variables['cast_member_picture'] = "sites/all/themes/oxygen/images/blog_photo/uid".$variables['uid']."-".strtolower($account->field_cast_name_value).".jpg"; 
+    $variables['cast_member_short_bio'] = $account->field_short_bio_value;
+}

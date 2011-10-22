@@ -1,0 +1,171 @@
+<?php
+// $Id$
+
+
+
+/**
+* Valid Permission for this module
+*/
+
+function oxygen_comment_perm() {
+	return array('access oxygen comments');
+}
+
+
+function oxygen_comment_menu() {
+
+  $items = array();
+
+
+  // Ahah Delete Comment for Images, Admin Function
+  $items['comment/comment-delete/%'] = array(
+    'title' => 'report',
+    'page callback' => 'delete_oxygen_comment',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2), // where my wildcard is
+    'access arguments' => array('comment abuse moderation'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+  // Ahah report button, sends email should alerts crest in function
+  $items['comment/report/%/%'] = array(
+    'title' => 'report-1',
+    'page callback' => 'report_oxygen_comment',
+    // hence, we pass array(2) to 'page arguments'
+    'page arguments' => array(2,3), // where my wildcard is
+    'access arguments' => array('access oxygen content'),
+    // always use MENU_CALLBACK for ajax requests
+    'type' => MENU_CALLBACK
+  );
+
+
+  return $items;
+}
+
+
+/**
+* Function to delete an abusive comment
+*/
+
+function delete_oxygen_comment($nid) {
+	$offensive_node = node_load($nid);
+	nodecomment_nodeapi($offensive_node, "delete");
+	exit();
+}
+
+
+
+/**
+* Function to report abusive comment
+*/
+
+function report_oxygen_comment($nid, $report_link, $fragment = "") {
+
+        $threshold = 3; // number of reports before mail  is sent.
+
+        db_query("UPDATE content_type_comment SET content_type_comment.field_report_comment_value = content_type_comment.field_report_comment_value+1 WHERE content_type_comment.nid = %d", $nid);
+
+        $result = db_fetch_object(db_query("SELECT content_type_comment.field_report_comment_value FROM content_type_comment WHERE content_type_comment.nid = %d", $nid));
+        if ($result->field_report_comment_value == 3) {
+
+
+//
+//  Needs to be refactored to dynamically find user.rid is 'abuse' role rather than hard coding 7.
+//
+
+                $comment_node = node_load($nid);
+
+                $report_email_list = db_query("SELECT u.mail
+                FROM users_roles ur
+                LEFT JOIN users u ON ur.uid = u.uid
+                WHERE ur.rid =7
+                AND u.status =1
+                LIMIT 0 , 30");
+
+		$report_link = str_replace("|","/",$report_link);
+		$login_link = "Login here:  http://" . parse_url($report_link, PHP_URL_HOST) . '/user';
+		if ($fragment) {$report_link = $report_link ."#" . $fragment;}
+		$subject = "User Reported Comment";
+
+		$body = $login_link . "\n\n";
+		$body .= 'The reported comment appears on this page: ' . "\n" . $report_link . "\n\n";
+
+		$body .= "This comment was reported " . $result->field_report_comment_value . " times and is node #" . $nid . ".\n\n";
+		$body .= "The comment is:\n\n" . $comment_node->body;
+
+		while ($email_address = db_fetch_object($report_email_list)) {
+			$to = $email_address->mail;
+	
+	
+			mail($to, $subject, $body);
+		}
+
+        }
+
+        exit();
+}
+
+
+/**
+* Function to load comments.
+*/
+
+function oxygen_comment_display($nid) {
+  $this_node = node_load($nid);
+  $returned_content .= "<div class='comments_hr'>comments</div><div id='oxygen_all_comments'>";
+
+        $result = db_query("SELECT node_revisions.body, node.created, content_type_comment.field_commentor_name_value, node_comments.cid
+			    FROM node_revisions
+			    LEFT JOIN node ON node_revisions.vid = node.vid
+			    LEFT JOIN node_comments ON node.nid = node_comments.cid
+			    LEFT JOIN content_type_comment ON node.vid = content_type_comment.vid
+			    WHERE node_comments.nid=" . $nid . " AND node.status=1
+			    ORDER BY node.created DESC;");
+
+
+  $comments = "";
+
+  while ($current_comment = db_fetch_object($result)) {
+	global $user;	
+        $time = time();
+        $post_time = $current_comment->created;
+        $when = oxygen_helpers_distanceOfTimeInWords($post_time, $time);
+        $filtered_body = wordfilter_filter_process(strip_tags($current_comment->body));
+        $filtered_name = wordfilter_filter_process(strip_tags($current_comment->field_commentor_name_value));
+        if ($filtered_name == "") {$filtered_name = "anonymous";}
+	$comment_mod = "";	
+
+
+	// Check to see if $user has the administrator role.
+	if (in_array('abuse moderator', array_values($user->roles))) {
+	$comment_mod = " <a style='color:red;' class='unpublish_comment_photo' href='/comment/comment-delete/" . $current_comment->cid . "'>Delete Comment #" . $current_comment->cid . "</a>";
+	}
+
+
+        $comments .= "<div class='image-comment'>
+        <div class='comment-author'>" . $filtered_name .  $comment_mod . "</div>
+        <div class='comment-body'>" . $filtered_body . "</div>
+
+	<div class='commentsUtil'>	
+		<span class='comment-created'>&gt; posted " . $when . " ago</span>
+		<a title='report this comment' class='report_comment' href='/comment/report/" . $current_comment->cid . "'>Report</a>
+       	<a title='reply to this comment' class='reply_comment' href='#'>Reply</a>
+	</div> <!-- end comments util -->	
+
+        </div>";
+  }
+
+
+
+    $returned_content .= $comments . nodecomment_form_box($this_node) . "</div>";
+    return $returned_content;
+    exit(); // 'exit()' instead of 'return $returned_content' to send ONLY the HTML and not a whole page.
+
+}
+
+
+
+
+
+

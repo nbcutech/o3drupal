@@ -1,0 +1,120 @@
+/* CSS Document */
+
+div.verizon-p1 {
+	background-image:url(images/verizon/p1.jpg?v=3);
+	height:777px;
+	width:650px;
+	position:relative;
+	}
+	div.verizon-p1 div.get-glue {
+		position:absolute;
+		left: 377px;
+		top: 261px;
+		width: 241px;
+		height: 79px;
+		}
+		div.verizon-p1 div.get-glue a img{
+			border:0px;
+		}
+		
+div.verizon-p2 {
+	background-image:url(images/verizon/p2.jpg);
+	background-repeat:no-repeat;
+	height:777px;
+	width:650px;
+	position:relative;
+	}
+	div.verizon-p2 div.check-number {
+		position:absolute;
+		left: 155px;
+		top: 346px;
+		text-align:center;
+		font-family:Arial, Helvetica, sans-serif;
+		color:white;
+		font-size:13px;
+		}
+	div.verizon-p2 div.oops {
+		position:absolute;
+		left: 148px;
+		top: 282px;
+		}
+		div.verizon-p2 div.oops a img {
+			border:0px;
+			}
+	div.verizon-p2 div.enjoy-video {
+		position:absolute;
+		left: 156px;
+		top: 73px;
+		height:439px;
+		width:343px;
+		background-image:url(images/verizon/video-bkg.gif);
+		}
+		div.verizon-p2 div.enjoy-video div.video-container {
+			padding-top:102px;
+			padding-left:30px;
+			}
+		div.verizon-p2 div.enjoy-video p {
+			font-family:Arial, Helvetica, sans-serif;
+			color:white;
+			text-align:center;
+			font-size:12px;
+			padding:0px 5px;
+			}
+			div.verizon-p2 #close-video {
+				position:absolute;
+				left: 316px;
+				top: 416px;
+				font-family:Arial, Helvetica, sans-serif;
+				font-weight:bold;
+				color:#666;
+				display:block;
+				width:20px;
+				height:20px;
+				font-size:16px;
+				text-decoration:none;
+			}
+
+div.verizon-p3 {
+	background-image:url(images/verizon/p3.jpg);
+	background-repeat:no-repeat;
+	height:777px;
+	width:650px;
+	position:relative;
+	}
+	div.verizon-p3 div.video-container {
+		position:absolute;
+		left: 79px;
+		top: 142px;
+		text-align:center;
+		font-family:Arial, Helvetica, sans-serif;
+		color:white;
+		font-size:13px;
+		}
+	div.verizon-p3 div.video-archive {
+		position:absolute;
+		left: 73px;
+		top: 566px;
+		}
+		div.verizon-p3 div.video-archive h3 {
+			font-family:Arial, Helvetica, sans-serif;
+			color:black;
+			font-size:14px;
+			margin-top:0px;
+			margin-bottom:10px;
+			font-weight:bold;
+			}
+		div.verizon-p3 div.video-archive a {
+			margin-right:15px;
+			display:block;
+			width:100px;
+			height:100px;
+			float:left;
+			}
+			div.verizon-p3 div.video-archive a img {
+				border:0px;
+				}
+	div.verizon-p3 div.clear {
+		clear:both;
+		height:10px;
+		overflow:hidden;
+	}

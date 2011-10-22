@@ -1,0 +1,5 @@
+; $Id$
+name = OxygenComment
+description = Create, manage and display comments on Oxygen.com
+core = 6.x
+package = "Oxygen"

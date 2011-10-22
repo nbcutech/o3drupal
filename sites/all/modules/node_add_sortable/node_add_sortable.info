@@ -1,0 +1,6 @@
+; $Id$ node_add_sortable.info July 28, 2011 Randall Goya decibel.places
+name = Node Add Form Sortable Fieldsets
+description = Adds Sortable Fieldsets to node/add form
+core = 6.x
+package = "Oxygen"
+dependencies[] = jquery_interface

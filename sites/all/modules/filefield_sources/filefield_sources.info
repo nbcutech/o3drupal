@@ -1,0 +1,13 @@
+name = FileField Sources
+;description = Extends FileField to allow referencing of existing files, remote files, and server files.
+description = Customized by replacing sources/imce.inc with pre-patched version at http://drupal.org/node/877452#comment-4499144 to enable IMCE features set by IMCE profile
+dependencies[] = filefield
+package = Oxygen
+core = 6.x
+
+; Information added by drupal.org packaging script on 2011-04-29
+version = "6.x-1.4"
+core = "6.x"
+project = "filefield_sources"
+datestamp = "1304045215"
+

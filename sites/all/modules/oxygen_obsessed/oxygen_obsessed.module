@@ -1,0 +1,116 @@
+<?php
+
+function oxygen_obsessed_perm() {
+        return array('access promo content'); //Hanan, this is just a short way of not having to create a new permission type.
+}
+
+
+//
+// Call this function from a obsessed template in this form:
+// $next_nid = oxygen_obsessed_next(arg(1));
+//
+
+function oxygen_obsessed_next($nid) 
+{
+    $obsessed = db_query("SELECT * FROM node where type = 'obsessed' ORDER BY node.sticky DESC, node.created  DESC");
+    $obsessed_list = array();
+    while ($obsessed_nid = db_fetch_object($obsessed)) 
+	{
+        $obsessed_list[] = $obsessed_nid->nid;
+	}
+	$nid_location = array_search($nid,$obsessed_list);
+	
+	if ($nid_location===FALSE) {return NULL;} // making sure the page isn't used to display any given NID.
+	
+    // assign next nid for links        
+    if (count($obsessed_list > $nid_location+1)) 
+	{
+        $obsessed_return=$obsessed_list[$nid_location+1];
+    } 
+	else 
+	{
+        return NULL;
+    }
+    return $obsessed_return;
+}
+ 
+function oxygen_obsessed_block($op='list', $delta=0) {
+    if ($op == "list") 
+	{
+		$block[0]['info'] = t('obsessed_promo');
+		return $block;
+    } 
+	else if ($op == 'view') 
+	{
+		$block = array();
+		switch($delta) 
+		{
+			case 0:
+
+			$block_content .= '<div id="hp_obsessed_box">
+							<div id="hp_obsessed_box_top">
+								<a href="http://features.oxygen.com/obsessed/all-obsessed-articles"> </a>
+							</div>						
+							<h3><span class="hp_caption">the things we love - OBSESSED</span></h3>
+							<div id="obsessedCarousel">
+						<ul>';
+
+			$obsessed = db_query("  SELECT node.created, node.nid, node.title, node.sticky, node_revisions.teaser, node_revisions.body, files.filepath
+									FROM node
+									LEFT JOIN node_revisions ON node.nid = node_revisions.nid
+									LEFT JOIN content_type_obsessed ON node.nid = content_type_obsessed.nid
+									LEFT JOIN content_field_obsessed_image ON content_field_obsessed_image.nid = content_type_obsessed.nid
+									LEFT JOIN files ON files.fid = content_field_obsessed_image.field_obsessed_image_fid
+									WHERE node.type = 'obsessed' AND node.status =1
+									ORDER BY node.sticky DESC , node.created DESC
+									LIMIT 5 ");
+									
+				
+			
+			while ($obsessed_data = db_fetch_object($obsessed)) 
+			{
+				$isSticky = $obsessed_data->sticky == 1 ? "-- sponsored!" : "";
+				$isNew = ($obsessed_data->created > (time()-518400)) ? "-- so new" : "";
+				$obsessedBaseURL = "http://features.oxygen.com";
+				$cleanURL = $obsessedBaseURL . "/" . drupal_get_path_alias("node/" . $obsessed_data->nid);
+
+				$block_content .= '<li><span style="height:67px; overflow:hidden;width:145px;"><span><a style="text-decoration:none;font-weight:bold;" href="' . $cleanURL . '">' . $obsessed_data->title . '</a>';
+				$block_content .= '</span>	<span style="color:#00a2c9;font-weight:bold;">' .  $isSticky .  " " . $isNew .  '</span>';
+				$block_content .= '<span class="obsessedDescription" style="margin: 3px 0 0 0;">' . oxygen_helpers_truncateText($obsessed_data->teaser, 65, " ") .  '<a style="color:yellow" href="' . $cleanURL . '">Read more</a></span></span>';
+				$block_content .= '<a href="' . $cleanURL . '"><img style="border-color:#00a2c9;" src="' . $obsessedBaseURL . '/' . $obsessed_data->filepath . '" alt="' . $obsessed_data->title . '" width="107" height="67"/></a>';
+				$block_content .= '</li>';
+
+	
+			}
+			
+			$block_content .= '</ul></div><!-- End obsessedCarousel -->';
+			
+			$block_content .= '<div id="hp_obsessed_box_bottom">
+			<a style="left:130px;top:10px;display:block; width:160px; height:32px; position:absolute;text-decoration:none;" href="http://features.oxygen.com/obsessed/all-obsessed-articles">&nbsp;</a>						
+			<a style="left:5px;top:10px;display:block; width:120px; height:32px; position:absolute;text-decoration:none;" href="mailto:O2.online@nbcuni.com?subject=My obsessed suggestion">&nbsp;</a>												
+			</div>';
+			
+			$block_content .= '<div class="clearfix"></div>	</div>	<!-- End hp_obsessed_box -->';
+
+			$block_content .= '			
+			<script type="text/javascript">
+			    								$jq126("#obsessedCarousel").jScrollPane({showArrows:true, scrollbarWidth: 10});
+
+			</script>';
+/*
+			$block_content .= '<div style="text-align:right;"><img src="/images/hp/obsessed/obsessed_footer.jpg" width="300" height="39" border="0"></div>
+							<div class="clearfix"></div>
+						</div>	<!-- End hp_obsessed_box -->';
+
+			
+*/					
+			$block['subject'] = 'Promo';
+			$block['content'] = $block_content;
+			break;
+		}
+
+
+		return $block;
+
+    }
+}

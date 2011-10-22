@@ -1,0 +1,5 @@
+; $Id$
+name = OxygenOmniture
+description = Module to create and modify the Omniture tracking
+core = 6.x
+package = "Oxygen"

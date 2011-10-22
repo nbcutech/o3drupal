@@ -1,0 +1,29 @@
+<?php
+  /**
+   * @file
+   * Installs database tables and settings required by bravo_twitter module.
+   * 
+   */
+
+function cookstr_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+ 
+
+  }
+  
+  drupal_set_message(t('The Cookstr Application module installed. Please grant yourself <a href="!perm">permissions</a>', array('!perm' => url('admin/user/access'))));
+  
+}
+
+//function bravo_twitter_update_1() {
+//  // Add id field
+//  $ret[] = update_sql('ALTER TABLE {bravo_twitter} ADD search varchar(254) NOT NULL');
+//  $ret[] = update_sql('ALTER TABLE {bravo_twitter} ADD since varchar(254) NOT NULL');
+//  $ret[] = update_sql('ALTER TABLE {bravo_twitter} ADD until varchar(254) NOT NULL');    
+//  
+//  return $ret;
+//}
+
+?>

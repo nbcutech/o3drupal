@@ -1,0 +1,14 @@
+; // $Id: smartcrop.info,v 1.1.2.1 2010/09/10 00:12:41 grendzy Exp $
+name = SmartCrop
+description = Crops low-entropy parts of the image.
+core = 6.x
+dependencies[] = imagecache
+dependencies[] = imageapi_gd
+package = ImageCache
+
+; Information added by drupal.org packaging script on 2010-09-10
+version = "6.x-1.0-beta1"
+core = "6.x"
+project = "smartcrop"
+datestamp = "1284137807"
+

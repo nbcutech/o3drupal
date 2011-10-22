@@ -1,0 +1,155 @@
+<?php
+
+/**
+ * @file
+ *
+ * .install file for decisions module
+ */
+
+// $Id: decisions.install,v 1.33 2010/04/27 22:53:52 anarcat Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function decisions_schema() {
+  $schema['decisions'] = array(
+    'fields' => array(
+      'nid' => array('type' => 'int', 'not null' => TRUE, 'disp-width' => '10'),
+      'mode' => array('type' => 'varchar', 'length' => '32', 'not null' => TRUE),
+      'quorum_abs' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'disp-width' => '10'),
+      'quorum_percent' => array('type' => 'float', 'unsigned' => TRUE, 'length' => '32', 'not null' => TRUE, 'default' => '0'),
+      'uselist' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'default' => 0, 'disp-width' => '4'),
+      'active' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'default' => 1, 'disp-width' => '4'),
+      'runtime' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'maxchoices' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'disp-width' => '10'),
+      'algorithm' => array('type' => 'varchar', 'length' => '100', 'not null' => FALSE),
+      'showvotes' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'disp-width' => '4'),
+      'startdate' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'disp-width' => '10'),
+      'randomize' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'default' => 1, 'disp-width' => '4'),
+    ),
+    'primary key' => array('nid'),
+  );
+
+  $schema['decisions_electoral_list'] = array(
+    'fields' => array(
+      'nid' => array('type' => 'int', 'not null' => TRUE, 'disp-width' => '10'),
+      'uid' => array('type' => 'int', 'not null' => TRUE, 'disp-width' => '10'),
+    ),
+    'primary key' => array('nid', 'uid'),
+  );
+
+  $schema['decisions_choices'] = array(
+    'fields' => array(
+      'nid' => array('type' => 'int', 'not null' => TRUE, 'disp-width' => '10'),
+      'label' => array('type' => 'text', 'not null' => TRUE),
+      'vote_offset' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '2'),
+    ),
+    'primary key' => array('nid', 'vote_offset'),
+    'indexes' => array(
+      'vote_offset' => array('vote_offset'),
+    ),
+  );
+  $schema['cache_decisions'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_decisions']['description'] =  '';
+  return $schema;
+}
+
+function decisions_install() {
+  drupal_install_schema('decisions');
+}
+
+function decisions_update_1() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN showvotes TINYINT DEFAULT '1'");
+      break;
+  }
+  return $items;
+}
+
+function decisions_update_2() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN active TINYINT DEFAULT '1'");
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN runtime INT UNSIGNED DEFAULT '0'");
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN maxchoices INT UNSIGNED");
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN algorithm VARCHAR(255)");
+      $items[] = update_sql('UPDATE {decisions} SET maxchoices=1 WHERE mode="poll" AND maxchoices is null');
+      $items[] = update_sql("UPDATE {decisions} SET algorithm='runoff' WHERE mode='runoff'");
+      $items[] = update_sql("UPDATE {decisions} SET mode='ranking' WHERE mode='runoff'");
+      $items[] = update_sql("ALTER TABLE {decisions_options} CHANGE COLUMN opttext chtext text");
+      $items[] = update_sql("ALTER TABLE {decisions_options} CHANGE COLUMN optorder chorder int(2)");
+      $items[] = update_sql("RENAME TABLE {decisions_options} TO {decisions_choices}");
+      break;
+  }
+  return $items;
+}
+
+function decisions_update_3() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN startdate INT unsigned");
+      $items[] = update_sql("ALTER TABLE {decisions_choices} CHANGE COLUMN chtext `label` text NOT NULL");
+      $items[] = update_sql("ALTER TABLE {decisions_choices} CHANGE COLUMN chorder `vote_offset` int(2) default NULL");
+      break;
+  }
+  return $items;
+}
+
+function decisions_update_4() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN `uselist` tinyint default '0'");
+      break;
+  }
+  return $items;
+}
+
+function decisions_update_5() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $items[] = update_sql("ALTER TABLE {decisions} MODIFY `quorum` int(10) NOT NULL AFTER mode");
+      $items[] = update_sql("ALTER TABLE {decisions} CHANGE COLUMN quorum `quorum_abs` int(10) unsigned NOT NULL default '0'");
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN quorum_percent float unsigned NOT NULL default '0' AFTER quorum_abs");
+      break;
+  }
+  return $items;
+}
+
+function decisions_update_6000() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $items[] = update_sql("ALTER TABLE {decisions} ADD COLUMN `randomize` tinyint default '0'");
+      break;
+  }
+  return $items;
+}
+
+/*
+ * Add the Decisions cache table, currently used to tell where a user hs voted.
+ */
+function decisions_update_6001() {
+  $ret = array();
+  $ret[] = db_create_table($ret, 'cache_decisions', drupal_get_schema_unprocessed('system', 'cache'));
+  return $ret;
+}
+/**
+ * Implementation of hook_uninstall().
+ */
+function decisions_uninstall() {
+  // remove votes from all decisions
+  db_query("DELETE FROM {votingapi_vote} WHERE content_type='decisions'");
+  $result = db_query('SELECT nid FROM {decisions}');
+  while ($obj = db_fetch_object($result)) {
+    node_delete($obj->nid);
+  }
+  drupal_uninstall_schema('decisions');
+  variable_del('decisions_default_mode');
+  variable_del('decisions_default_electoral_list');
+}

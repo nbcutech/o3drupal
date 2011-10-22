@@ -1,0 +1,1713 @@
+<?php
+
+// $Id: aggregation.module,v 1.4.4.13 2010/03/29 16:05:52 waleedq Exp $
+
+/**
+ * A number of defs to ease naming
+ */
+define("FEEDS_ARENT_ASSIGNED_TERM_UNDER_ACTIVE_VOCABULARY", 1);
+define("FTP_REQUEST_FAILED", 2);
+define("HTTP_REQUEST_FAILED", 3);
+define("MALFORMED_XML", 4);
+define("AGGREGATION_FAILED", 5);
+define("EMPTY_IMAGE", 6);
+define("COULD_NOT_WRITE_TO_FILE", 7);
+define("INCORRECT_IMAGE_FORMAT", 8);
+
+// These two variables are needed to get the etag and/or last modified
+
+static $etag;
+static $last_modified;
+
+/**
+ * Implementation of hook_help
+ */
+function aggregation_help($path, $arg)
+{
+	switch ($path)
+	{
+		case 'admin/help#aggregation':
+			$output = '<p>'. t('The aggregation module is a module that is responsible for aggregating any XML feed, custom feeds need a feed_handler. Check the accompanying readme file.') .'</p>';
+			$output .= '<p>' .t('Visit the <a href="!admin-settings">settings</a> page to tweak its behavior', array('!admin-settings'=> url('admin/settings/aggregation')));
+			return $output;
+	}
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function aggregation_perm()
+{
+	return array(
+		'create feeds', 'manage all feeds', 'manage own feeds', 'view all feeds', 'view own feeds',
+		'create feed items', 'manage all feed items', 'manage own feed items', 'view all feed items', 'view own feed items',
+	);
+}
+
+/**
+ * Implementation of hook_node_info().
+ */
+function aggregation_node_info()
+{
+	return array
+	(
+    	'aggregation_feed' => array('name' => t('Feed'), 'module' => 'aggregation_feed', 'description' => t('Represents the feed the site aggregates from. Items are generated from feeds during cron runs.'), 'has_title' => TRUE, 'title_label' => t('Feed name'), 'has_body' => TRUE, 'body_label' => t('Description')),
+	    'aggregation_item' => array('name' => t('Feed Item'), 'module' => 'aggregation_item', 'description' => t('Items are usually auto-generated on cron runs, but this type exists in case you would like to manually add an item.'))
+    );
+}
+
+/**
+ * Implementation of hook_menu().
+ *
+ */
+function aggregation_menu()
+{
+	$items = array();
+
+	$items['admin/settings/aggregation'] = array(
+	'title' => 'Aggregation',
+	'description' => 'These options control the general behavior of the aggregation module.',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('aggregation_admin_settings'),
+	'access callback' => 'user_access',
+	'access arguments' => array('administer site configuration'),
+	'type' => MENU_NORMAL_ITEM);
+
+	return $items;
+}
+
+/**
+ * This is the function that will be called instead of the old hook_settings
+ */
+function aggregation_admin_settings()
+{
+	$form = array();
+
+	$vocabs = taxonomy_get_vocabularies('aggregation_feed');
+
+	foreach ($vocabs AS $vid => $vocab_object)
+		$vocabs[$vid] = $vocab_object->name;
+
+	$form['aggregation_current_vid'] = array(
+		'#type' => 'select',
+		'#title' => t('Aggregation feed types'),
+		'#default_value' => variable_get('aggregation_current_vid', -1),
+		'#options' => $vocabs,
+		'#description' => t('This vocabulary contains the XML types -as terms- that the module can aggregate from.'),
+		'#required' => TRUE
+	);
+
+	$form['aggregation_enable_logging'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => variable_get('aggregation_enable_logging', 1),
+		'#title' => t('Log Operations'),
+		'#description' => t('After moving to production, you may wish to disable this if you feel everything is stable enough. But it\'s recommended you keep it on. Fatal errors will ALWAYS be logged.')
+	);
+
+	if (module_exists('image'))
+	{
+		$func = '';
+		
+		if (function_exists('image_get_sizes'))
+			$func = 'image_get_sizes';
+		else if (function_exists('_image_get_sizes'))
+			$func = '_image_get_sizes';
+			
+		$image_sizes = array('none' => t('None'));
+			
+		foreach ($func() as $key => $size)
+			$image_sizes[$key] = $size['label'];
+		
+		$form['aggregation_image_to_display'] = array(
+			'#type' => 'select',
+			'#default_value' => variable_get('aggregation_image_to_display', 'preview'),
+			'#options' => $image_sizes,
+			'#required' => TRUE,
+			'#title' => t('Image to display on item full node display'),
+			'#description' => t('This is the image size that will be displayed on aggregated items\' node page for feeds that aggregate images.')
+		);
+		
+		$form['aggregation_teaser_image_to_display'] = array(
+			'#type' => 'select',
+			'#default_value' => variable_get('aggregation_teaser_image_to_display', 'thumbnail'),
+			'#options' => $image_sizes,
+			'#required' => TRUE,
+			'#title' => t('Image to display on item teaser node display'),
+			'#description' => t('This is the image size that will be displayed on aggregated items\' node teaser for feeds that aggregate images.')
+		);
+	}
+
+	$form['aggregation_enable_cron'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => variable_get('aggregation_enable_cron', 1),
+		'#title' => t('Enable Cron'),
+		'#description' => t('Remove this check if you want to stop aggregation cron temporarily.')
+	);
+
+	$form['aggregation_feeds_to_refresh_per_cron'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('aggregation_feeds_to_refresh_per_cron', 7),
+		'#required' => TRUE,
+		'#title' => t('The number of feeds to refresh every cron'),
+		'#description' => t('This is important if you have many feeds that may slow the site.').'<br />'.
+		t('All feeds will eventually be processed, so this option will simply slow the process down to minimize effects on the site. But it will delay the time needed for all feeds to refresh.')
+	);
+
+	$form['aggregation_feed_refresh_cooldown'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('aggregation_feed_refresh_cooldown', 0),
+		'#required' => TRUE,
+		'#title' => t('Time Between Feeds'),
+		'#description' => t('Does your server die when a refresh occurs? Try setting this IN SECONDS.')
+	);
+	
+	$form['aggregation_items_to_display_per_page'] = array(
+		'#type' => 'textfield',
+		'#default_value' => variable_get('aggregation_items_to_display_per_page', 10),
+		'#required' => TRUE,
+		'#title' => t('Items to display per feed'),
+		'#description' => t('Number of feed items to display inside feed node view.')
+	);
+
+	return system_settings_form($form);
+}
+
+/**
+ * This function validates the settings form
+ */
+function aggregation_validate_settings($form)
+{
+	if (!is_numeric($form['aggregation_feeds_to_refresh_per_cron']))
+		form_set_error('aggregation_feeds_to_refresh_per_cron', t('This field must be numeric.'));
+	else if ($form['aggregation_feeds_to_refresh_per_cron'] <= 0)
+		form_set_error('aggregation_feeds_to_refresh_per_cron', t('This field must be a positive number.'));
+	else if (!is_numeric($form['aggregation_feed_refresh_cooldown']))
+		form_set_error('aggregation_feed_refresh_cooldown', t('This field must be numeric.'));
+  else if ($form['aggregation_feed_refresh_cooldown'] < 0)
+		form_set_error('aggregation_feed_refresh_cooldown', t('This field must be positive or zero.'));
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function aggregation_cron()
+{
+	if (!variable_get('aggregation_enable_cron', TRUE))
+	{
+		watchdog('aggregation', 'You seem to have disabled aggregation from aggregation settings.');
+		return;
+	}
+	$vid = variable_get('aggregation_current_vid', -1);
+	if ($vid == -1)
+	{
+		watchdog('aggregation', 'For some reason, aggregation\'s vocabulary is not set.'.
+			'Try visiting aggregation\'s settings to set it!');
+		return;
+	}
+
+	$max_exec_time = ini_get('max_execution_time');
+	$max_exec_time = (int)$max_exec_time;
+
+	if (ini_get('safe_mode') == 'Off' || !ini_get('safe_mode'))
+		set_time_limit(20 * 60);
+
+	$feeds = db_query("SELECT n.nid FROM {aggregation_feed} af, {node} n ".
+		"WHERE af.nid = n.nid AND (%d - af.last_refreshed) >= af.refresh_interval * 60 ORDER BY af.last_refreshed", time());
+		
+  $feed_counter = 0;
+
+	while ($feed_nid = db_fetch_object($feeds)->nid)
+	{
+		$feed = node_load($feed_nid);
+		aggregation_feed_prepare($feed);
+		
+		if ($feed->aggregation_feed_options['enabled'])
+		  $feed_counter++;
+		else 
+		  continue;
+		
+		if ($feed_counter > variable_get('aggregation_feeds_to_refresh_per_cron', 7)) break;
+		
+	  db_query("UPDATE {aggregation_feed} SET last_refreshed = %d WHERE nid = %d", time(), $feed_nid);
+
+		try {
+			$success = _aggregation_parse($feed, $vid);
+
+			if (is_null($success)) continue;
+
+			if (!$success)
+				throw new Exception('Something wrong occured during the aggregation process!', AGGREGATION_FAILED);
+
+			if (variable_get('aggregation_enable_logging', TRUE))
+				watchdog('aggregation', 'aggregation has finished aggregating items from '.check_plain($feed->title));
+
+			// using this instead of node_save for performance reasons
+			db_query("UPDATE {aggregation_feed} SET etag = '%s', ".
+				"last_modified = %d, last_refreshed = %d WHERE nid = %d", $feed->etag,
+				$feed->last_modified, time(), $feed->nid);
+
+			if ($feed->time_to_live > 0)
+			{
+				$items_to_be_deleted = db_query("SELECT n.nid FROM {node} n, ".
+				"{aggregation_item} ai WHERE n.nid = ai.nid AND ai.fid = %d AND ".
+				"(%d - n.created) >= %d", $feed->nid, time(),
+				$feed->time_to_live * 24 * 60 * 60);
+
+				while ($item = db_fetch_object($items_to_be_deleted))
+					node_delete($item->nid);
+			}
+		}
+		catch (Exception $e) {
+			watchdog('aggregation', check_plain($e->getMessage()), NULL, WATCHDOG_ERROR, l(t('view'), "node/$feed->nid"));
+		}
+	}
+
+	if ((ini_get('safe_mode') == 'Off' || !ini_get('safe_mode')) && is_numeric($max_exec_time) && $max_exec_time > 0)
+		set_time_limit($max_exec_time);
+}
+
+/* Following are the aggregation_feed hooks */
+
+/**
+ * Implementation of hook_access().
+ */
+
+function aggregation_feed_access($op, $node, $account)
+{
+	global $user;
+	
+	if ($op == 'create')
+	{
+		return user_access('create feeds');
+	}
+	
+	else if ($op == 'view')
+	{
+		if (user_access('view all feeds')) return TRUE;
+		
+		if (($user->uid == $node->uid) && user_access('view own feeds')) return TRUE;
+		
+		return NULL;
+	}
+	
+	else 
+	{
+		if (user_access('manage all feeds')) return TRUE;
+		
+		if (($user->uid == $node->uid) && user_access('manage own feeds')) return TRUE;
+		
+		return NULL;
+	}
+}
+
+/**
+ * Implementation of hook_form().
+ */
+
+function aggregation_feed_form(&$node, &$param)
+{
+	$form = array();
+
+	$display_modes = array(
+		0 => t('Don\'t display'),
+		1 => t('In full node views'),
+		2 => t('In teaser node views'),
+		3 => t('In both teaser and full node views'),
+	);
+	
+	$form['title'] = array (
+		'#type' => 'textfield',
+		'#default_value' => $node->title,
+		'#required' => TRUE,
+		'#title' => t(node_get_types('type', 'aggregation_feed')->title_label),
+		'#description' => t('Enter something descriptive to identify your feed.')
+	);
+
+	$form['body_filter']['body'] = array (
+		'#type' => 'textarea',
+		'#default_value' => $node->body,
+		'#required' => FALSE,
+		'#title' => t(node_get_types('type', 'aggregation_feed')->body_label),
+		'#description' => t('Any description for your feed.')
+	);
+
+	$form['body_filter']['format'] = filter_form($node->format);
+
+	$form['original_author'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->original_author,
+		'#required' => TRUE,
+		'#title' => t('Original Author'),
+		'#description' => t('Please specify the original author for the items of this feed. '.
+			'This is used when none is present in the feed itself.')
+	);
+
+	$form['url'] = array (
+		'#type' => 'textfield',
+		'#default_value' => $node->url,
+		'#required' => TRUE,
+		'#title' => t('Feed URL'),
+		'#description' => t('Please provide the feed URL.'),
+		'#maxlength' => 250,
+	);
+
+	$form['authentication'] = array (
+		'#type' => 'fieldset',
+		'#title' => t('Authentication Settings'),
+		'#collapsible' => TRUE,
+		'#collapsed' => FALSE,
+		'#tree' => FALSE
+	);
+
+	$form['authentication']['username'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->username,
+		'#required' => FALSE,
+		'#description' => t('If your site uses authentication, please specify the username here.'),
+		'#title' => t('Enter Username')
+	);
+
+	$description = t('If your site uses authentication, please specify the password here.');
+
+	// This indicates we're in edit mode, in which case I'd like to add an additional directive
+	if ($node->password)
+		$description .= '<br />'.
+			t('(leave empty to preserve value)');
+
+	$form['authentication']['password'] = array(
+		'#type' => 'password',
+		'#default_value' => $node->password,
+		'#required' => FALSE,
+		'#description' => $description,
+		'#title' => 'Enter Password'
+	);
+
+	$description = t('If your site uses authentication, please retype your password here.');
+
+	// This indicates we're in edit mode, in which case I'd like to add an additional directive
+	if ($node->password)
+		$description .= '<br />'.
+			t('(leave empty to preserve value)');
+
+	$form['authentication']['repeat_password'] = array(
+		'#type' => 'password',
+		'#default_value' => $node->password,
+		'#required' => FALSE,
+		'#description' => $description,
+		'#title' => t('Retype Your Password')
+	);
+
+	$form['refresh_interval'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->refresh_interval,
+		'#required' => TRUE,
+		'#title' => t('Refresh Interval'),
+		'#description' => t('Please specify the refresh interval IN MINUTES.')
+	);
+
+	$form['title_as_guid_interval'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->title_as_guid_interval ? $node->title_as_guid_interval : 0,
+		'#required' => TRUE,
+		'#title' => t('Title as GUID interval'),
+		'#description' => t('When a feed contains no GUID or image URL, then the title is it\'s guid. This field '.
+			'specifies the time period the title is considered as a GUID. If you provide a GUID or image URL then '.
+			'this field value is irrelevant. If not, then you can set this to 0 which would prevent any new article '.
+			'with the same title from ever entering (unless the old one is deleted) - this could also be achieved by sending '.
+			'the title as the GUID - , or you can set it to the time IN HOURS the title will act as a GUID, after which '.
+			'any other article still in the feed with the same title will enter the system.')
+	);
+	
+	$form['aggregation_feed_options'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('Options'), 
+	    '#tree' => TRUE,
+	);
+
+	$form['aggregation_feed_options']['enabled'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['enabled']) ? $node->aggregation_feed_options['enabled'] : 1,
+		'#title' => t('Enabled'),
+		'#description' => t('Use this checkbox to enable/disable refreshing this feed.')
+	);
+
+	$form['aggregation_feed_options']['publish_new_items'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['publish_new_items']) ? $node->aggregation_feed_options['publish_new_items'] : 1,
+		'#description' => t('Use this checkbox to publish all aggregated feed items.'),
+		'#title' => t('Publish items')
+	);
+	
+	$form['aggregation_feed_options']['aggregate_item_categories'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['aggregate_item_categories']) ? $node->aggregation_feed_options['aggregate_item_categories'] : 1,
+		'#description' => t('Use this checkbox to aggregate this feed item\'s internal categories as auto-generated taxonomies.'),
+		'#title' => t('Aggregate categories')
+	);	
+
+	$form['aggregation_feed_options']['link_items_to_original_urls'] = array(
+		'#type' => 'select',
+		'#default_value' => isset($node->aggregation_feed_options['link_items_to_original_urls']) ? $node->aggregation_feed_options['link_items_to_original_urls'] : 1,
+		'#description' => t('Link items generated from this feed to original URLs.'),
+		'#title' => t('Display links to original URLs'),
+		'#options' => $display_modes, 	
+	);
+
+	$form['aggregation_feed_options']['aggregate_to_moderation_queue'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['aggregate_to_moderation_queue']) ? $node->aggregation_feed_options['aggregate_to_moderation_queue'] : 0,
+		'#description' => t('Use this checkbox to send aggregated items to the moderation queue. Weather they appear on the site or not depends on the \'publish items\', not weather they are on the moderation queue.'),
+		'#title' => t('Add aggregated items to moderation queue')
+	);
+
+	$form['aggregation_feed_options']['sticky_items'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['sticky_items']) ? $node->aggregation_feed_options['sticky_items'] : 0,
+		'#description' => t('All items aggregated from this feed will be sticky.'),
+		'#title' => t('Sticky items')
+	);
+
+	$form['aggregation_feed_options']['enable_comments_on_articles'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['enable_comments_on_articles']) ? $node->aggregation_feed_options['enable_comments_on_articles'] : 1,
+		'#description' => t('All aggregated articles will have commenting set to read/write.'),
+		'#title' => t('Aggregated article comments')
+	);
+	
+	$form['aggregation_feed_options']['update_existing_aggregation_items'] = array(
+		'#type' => 'checkbox',
+		'#default_value' => isset($node->aggregation_feed_options['update_existing_aggregation_items']) ? $node->aggregation_feed_options['update_existing_aggregation_items'] : 0,
+		'#description' => t('If the item is changed in the original feed, it will be updated. This may slow down aggregation considerably.'),
+		'#title' => t('Update existing aggregation items')
+	);	
+	
+	$form['aggregation_feed_options']['link_items_to_original_comments'] = array(
+		'#type' => 'select',
+		'#default_value' => isset($node->aggregation_feed_options['link_items_to_original_comments']) ? $node->aggregation_feed_options['link_items_to_original_comments'] : 0,
+		'#description' => t('All generated items will have a link to the original comments if one exists for that item.'),
+		'#title' => t('Display links to original comments'),
+		'#options' => $display_modes, 	
+	);
+	
+	$filter_list = filter_formats();
+	
+	foreach ($filter_list AS $key => $filter)
+		$filter_list[$key] = t($filter->name);
+	
+	/*$form['aggregation_feed_options']['aggregation_item_title_filter'] = array(
+		'#type' => 'select',
+		'#default_value' => isset($node->aggregation_feed_options['aggregation_item_title_filter']) ? $node->aggregation_feed_options['aggregation_item_title_filter']: FILTER_FORMAT_DEFAULT,
+		'#description' => t('Choose the filter to apply to the aggregated item titles'),
+		'#title' => t('Feed item title filter'),
+		'#options' => $filter_list,
+	);*/
+	
+	$form['aggregation_feed_options']['aggregation_item_body_filter'] = array(
+		'#type' => 'select',
+		'#default_value' => isset($node->aggregation_feed_options['aggregation_item_body_filter']) ? $node->aggregation_feed_options['aggregation_item_body_filter']: FILTER_FORMAT_DEFAULT,
+		'#description' => t('Choose the filter to apply to the aggregated item bodies'),
+		'#title' => t('Feed item body filter'),
+		'#options' => $filter_list,
+	);
+	
+	if (module_exists('image'))
+	{
+		$form['aggregation_feed_options']['aggregate_images_as_image_nodes'] = array(
+			'#type' => 'checkbox',
+			'#default_value' => isset($node->aggregation_feed_options['aggregate_images_as_image_nodes']) ? $node->aggregation_feed_options['aggregate_images_as_image_nodes'] : 1,
+			'#description' => t('All aggregated image enclosures will become image nodes.'),
+			'#title' => t('Aggregate image enclosures as image nodes')
+		);
+	  $form['aggregation_feed_options']['enable_comments_on_images'] = array(
+			'#type' => 'checkbox',
+			'#default_value' => isset($node->aggregation_feed_options['enable_comments_on_images']) ? $node->aggregation_feed_options['enable_comments_on_images'] : 0,
+			'#description' => t('All aggregated images will have commenting set to read/write.'),
+			'#title' => t('Aggregated images\' comments')
+		);
+	}
+
+	$form['promote_to_frontpage'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->promote_to_frontpage ? $node->promote_to_frontpage : 0,
+		'#required' => TRUE,
+		'#title' => t('Promote to frontpage'),
+		'#description' => t('Please specify the number of articles to promote to the frontpage.')
+	);
+	
+	$form['time_to_live'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->time_to_live ? $node->time_to_live : 0,
+		'#required' => TRUE,
+		'#title' => t('Time to live'),
+		'#description' => t('Any items older than this number of days will be deleted (0 means keep forever).')
+	);	
+
+	$form['item_taxonomies'] = array (
+		'#type' => 'fieldset',
+		'#title' => t('Item Taxonomies'),
+		'#collapsible' => TRUE,
+		'#collapsed' => FALSE,
+		'#tree' => FALSE,
+		'#description' => t('These taxonomies will be assigned to all items under this feed.')
+	);
+
+	$fakeform = array();
+	$fakeform['#node'] = new stdClass();
+	$fakeform_state = array();
+
+	if ($node->item_categories) {
+		$fakeform['#node']->taxonomy = $node->item_categories;
+	$fakeform_state['values']['taxonomy'] = $node->item_categories;
+  }
+
+	// This part will trick taxonomy into believing it's dealing with an aggregation_item
+	$fakeform['type']['#value'] = 'aggregation_item';
+	$fakeform['#node']->type = 'aggregation_item';
+
+	taxonomy_form_alter($fakeform, $fakeform_state, 'aggregation_item_node_form');
+
+	$form['item_taxonomies']['item_categories'] = $fakeform['taxonomy'];
+	
+	//$form['#submit'] = array('aggregation_feed_submit_handler');
+
+	return $form;
+}
+
+/**
+ * Implementation of hook_validate().
+ */
+
+function aggregation_feed_validate(&$node)
+{
+	if (!is_numeric($node->refresh_interval) || $node->refresh_interval < 0)
+		form_set_error('refresh_interval', 'The refresh interval is a numeric value greater than or equal to 0.');
+	else if (!is_numeric($node->title_as_guid_interval) || $node->title_as_guid_interval < 0)
+		form_set_error('title_as_guid_interval', 'The title as GUID interval is a positive numeric or 0.');
+	else if (!is_numeric($node->promote_to_frontpage) || $node->promote_to_frontpage < 0)
+		form_set_error('promote_to_frontpage', 'The number of items to promote to the frontpage is a positive numeric or 0.');
+	else if ($node->password != $node->repeat_password)
+		form_set_error('password', 'Your passwords did not match.');
+	else if (!is_numeric($node->time_to_live) || $node->time_to_live < 0)
+	  form_set_error('time_to_live', 'The time to live field can only be greater or equals to 0.');
+}
+
+/**
+ * Implementation of hook_submit().
+ * 
+ * In drupal 6.x, hook_submit() has been removed. We call this function
+ * through the 'presave' op in _nodeapi function.
+ */
+function aggregation_feed_submit(&$node)
+{
+	$node->title = $node->title;
+	$node->original_author = $node->original_author;
+
+	$node->etag = '';
+	$node->last_modified = 0;
+
+	$node->title = trim($node->title);
+	$node->original_author = trim($node->original_author);
+	$node->url = trim($node->url);
+	$node->username = trim($node->username);
+	$node->password = trim($node->password);
+
+	$node->aggregation_feed_options = serialize($node->aggregation_feed_options);
+	$node->item_categories = serialize($node->item_categories);
+}
+
+/**
+ * Implementation of hook_prepare().
+ */
+
+function aggregation_feed_prepare(&$node)
+{
+	$node->refresh_interval = $node->refresh_interval ? $node->refresh_interval : 15;
+	
+	$node->aggregation_feed_options = unserialize($node->aggregation_feed_options);
+
+	if ($node->item_categories && $node->item_categories != '')
+		$node->item_categories = unserialize($node->item_categories);
+
+	// There's a specific format needed to reconstruct a form, we're creating it now
+	if ($node->item_categories)
+	{
+		$formatted_item_categories = array();
+		if (is_array($node->item_categories))
+		{
+			foreach ($node->item_categories AS $vid => $tids)
+			{
+				if (is_array($tids) && count($tids) > 0)
+				{
+					foreach ($tids AS $tid => $tid)
+						if ($tid > 0)
+							$formatted_item_categories[$tid] = taxonomy_get_term($tid);
+				}
+				else if (is_string($tids))
+				{
+					if ($tids > 0)
+						$formatted_item_categories[$tids] = taxonomy_get_term($tids);
+				}
+			}
+		}
+
+		$node->item_categories = $formatted_item_categories;
+	}
+}
+
+/**
+ * Implementation of hook_load().
+ */
+
+function aggregation_feed_load($node)
+{
+	return db_fetch_object(db_query("SELECT * FROM {aggregation_feed} WHERE nid = %d", $node->nid));
+}
+
+/**
+ * Implementation of hook_insert().
+ */
+
+function aggregation_feed_insert($node)
+{
+	db_query("INSERT INTO {aggregation_feed} (nid, original_author, url, username, password, refresh_interval, title_as_guid_interval, promote_to_frontpage, time_to_live, item_categories, aggregation_feed_options, etag, last_modified, last_refreshed) VALUES ".
+		"(%d, '%s', '%s', '%s', '%s', %d, %d, %d, %d, '%s', '%s', '%s', %d, %d)",
+		$node->nid, $node->original_author, $node->url, $node->username, $node->password, $node->refresh_interval, 
+		$node->title_as_guid_interval, $node->promote_to_frontpage, $node->time_to_live, $node->item_categories, 
+		$node->aggregation_feed_options, '', 0, 0);
+}
+
+/**
+ * Implementation of hook_update().
+ */
+
+function aggregation_feed_update($node)
+{
+	$params = array($node->original_author, $node->url, $node->username);
+	
+	if (trim($node->password) != '')
+		$params[] = $node->password;
+			
+	$params += array(count($params) => $node->refresh_interval, 
+		$node->title_as_guid_interval, $node->promote_to_frontpage, $node->item_categories, $node->time_to_live, $node->aggregation_feed_options, ($node->etag && $node->etag != '') ? $node->etag : '', 
+		($node->last_modified && $node->last_modified != 0) ? $node->last_modified : 0,
+		0, $node->nid);
+	
+	db_query("UPDATE {aggregation_feed} SET original_author = '%s', url = '%s', ".
+		"username = '%s', ".(trim($node->password) != '' ? "password = '%s'," : '')." refresh_interval = %d, title_as_guid_interval = %d, ".
+		"promote_to_frontpage = %d, item_categories = '%s', time_to_live = %d, aggregation_feed_options = '%s', ".
+		"etag = '%s', last_modified = %d, last_refreshed = %d WHERE nid = %d", $params);
+}
+
+/**
+ * Implementation of hook_delete().
+ */
+
+function aggregation_feed_delete(&$node)
+{
+	$items = _aggregation_get_feed_items($node->nid);
+
+	while ($item = db_fetch_object($items))
+		node_delete($item->nid);
+
+	db_query("DELETE FROM {aggregation_feed} WHERE nid = %d", $node->nid);
+}
+
+/* Following are the aggregation_item hooks */
+
+/**
+ * Implementation of hook_access().
+ */
+
+function aggregation_item_access($op, $node)
+{
+	global $user;
+	
+	if ($op == 'create')
+	{
+		return user_access('create feed items');
+	}
+	
+	else if ($op == 'view')
+	{
+		if (user_access('view all feed items')) return TRUE;
+		
+		if (($user->uid == $node->uid) && user_access('view own feed items')) return TRUE;
+		
+		return NULL;
+	}
+	
+	else 
+	{
+		if (user_access('manage all feed items')) return TRUE;
+		
+		if (($user->uid == $node->uid) && user_access('manage own feed items')) return TRUE;
+		
+		return NULL;
+	}
+}
+
+/**
+ * Implementation of hook_form().
+ */
+
+function aggregation_item_form(&$node, &$param)
+{
+	$form = array();
+
+	$display_modes = array(
+		0 => t('Don\'t display'),
+		1 => t('In full node views'),
+		2 => t('In teaser node views'),
+		3 => t('In both teaser and full node views'),
+	);
+	
+	$form['title'] = array (
+		'#type' => 'textfield',
+		'#default_value' => $node->title,
+		'#required' => TRUE,
+		'#title' => t(check_plain(node_get_types('type', 'aggregation_item')->title_label)),
+		'#description' => t('The title of your feed item.')
+	);
+
+	$form['teaser'] = array (
+		'#type' => 'textarea',
+		'#default_value' => $node->teaser,
+		'#required' => FALSE,
+		'#title' => t('Teaser'),
+		'#description' => t('This is the article\'s teaser.')
+	);
+
+	$form['body_filter']['body'] = array (
+		'#type' => 'textarea',
+		'#default_value' => $node->body,
+		'#required' => FALSE,
+		'#title' => t(node_get_types('type', 'aggregation_item')->body_label),
+		'#description' => t('This is the main body of your article.')
+	);
+
+	$form['body_filter']['format'] = filter_form($node->format);
+
+	$form['original_author'] = array(
+		'#type' => 'textfield',
+		'#default_value' => $node->original_author,
+		'#required' => TRUE,
+		'#title' => t('Original Author'),
+		'#description' => t('Specify the author of this feed item.'),
+	);
+
+	$form['url'] = array (
+		'#type' => 'textfield',
+		'#default_value' => $node->url,
+		'#required' => FALSE,
+		'#title' => t('Original URL'),
+		'#description' => t('Provide the URL of the original article if needed.'),
+		'#maxlength' => 250,
+	);
+	
+	$form['aggregation_item_options'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('Options'), 
+	    '#tree' => TRUE,
+	);
+
+	$form['aggregation_item_options']['link_to_original_url'] = array(
+		'#type' => 'select',
+		'#default_value' => isset($node->aggregation_item_options['link_to_original_url']) ? $node->aggregation_item_options['link_to_original_url'] : 1,
+		'#title' => t('Display link to original URL'),
+		'#description' => t('Link this item to its original URL (if available).'),
+		'#options' => $display_modes, 	
+	);	
+
+	$form['aggregation_item_options']['link_to_original_comment'] = array(
+		'#type' => 'select',
+		'#default_value' => isset($node->aggregation_item_options['link_to_original_comment']) ? $node->aggregation_item_options['link_to_original_comment'] : 0,
+		'#description' => t('A link to the original comments will be placed in the feed item if one exists.'),
+		'#title' => t('Display link to original comments'),
+		'#options' => $display_modes, 	
+	);			
+	
+	$form['original_comments'] = array (
+		'#type' => 'textfield',
+		'#default_value' => $node->original_comments,
+		'#required' => FALSE,
+		'#title' => t('Original Comments'),
+		'#description' => t('URL of the original comments if needed.')
+	);
+
+	$form['image_id'] = array (
+		'#type' => 'textfield',
+		'#default_value' => $node->image_id,
+		'#required' => FALSE,
+		'#title' => t('Image ID'),
+		'#description' => t('Provide an image id to attach an image.')
+	);
+
+	$description = t('The GUID is a unique string that distingishes your article from '.
+			'all others and prevents a second aggregation. Please provide it if available.');
+
+	// This indicates we're in edit mode, in which case I'd like to add an additional directive
+	if ($node->story_guid)
+		$description .= '<br />'.
+			t('(leave empty to preserve value)');
+
+	$form['story_guid'] = array (
+		'#type' => 'textfield',
+		'#default_value' => '',
+		'#required' => FALSE,
+		'#title' => t('GUID'),
+		'#description' => $description
+	);
+
+	$feeds = db_query('SELECT n.nid, n.title FROM {node} n, {aggregation_feed} af '.
+		'WHERE n.nid = af.nid');
+
+		$feed_array = array();
+		while ($feed = db_fetch_object($feeds))
+			$feed_array[$feed->nid] = $feed->title;
+
+  if (count($feed_array)) 
+  {
+    $feed_array = array_merge (array(0 => '<none>'), $feed_array);
+
+		$form['fid'] = array (
+			'#type' => 'select',
+			'#default_value' => $node->fid,
+			'#required' => TRUE,
+			'#title' => t('Source Feed'),
+			'#description' => t('Provide the source feed if valid for this item.'),
+			'#options' => $feed_array
+		);
+  }
+  
+  //$form['#submit'] = array('aggregation_item_submit_handler');
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_validate().
+ */
+
+function aggregation_item_validate(&$node)
+{
+	if (trim($node->image_id) != '')
+	{
+		if (!is_numeric($node->image_id))
+			form_set_error('image_id', 'The image id must be numeric.');
+		// A node load is simply too costly, so I'm going to directly query instead.
+		else if ($node->image_id != 0 && db_fetch_object(db_query("SELECT COUNT(n.nid) AS image_count FROM {node} n ".
+			"WHERE n.nid = %d AND n.type = 'image'", $node->image_id))->image_count == 0)
+				form_set_error('image_id', 'This image ID seems to be incorrect!');
+	}
+}
+
+/**
+ * Implementation of hook_submit().
+ * 
+ * In drupal 6.x, hook_submit() has been removed. We call this function
+ * through the 'presave' op in _nodeapi function.
+ */
+function aggregation_item_submit(&$node)
+{
+	$node->title = $node->title;
+	$node->teaser = $node->teaser;
+	$node->original_author = $node->original_author;
+
+	$node->original_comments = trim($node->original_comments);
+
+	if (!$node->fid)
+		$node->fid = 0;
+
+	if ($node->image_id == '')
+		$node->image_id = 0;
+
+	if (!$node->story_guid)
+            $node->story_guid = 0;
+	else
+            $node->story_guid = sprintf('%u', crc32($node->story_guid));
+		
+	$node->aggregation_item_options = serialize($node->aggregation_item_options);
+}
+
+/**
+ * Implementation of hook_prepare().
+ */
+
+function aggregation_item_prepare(&$node)
+{
+  $node->aggregation_item_options = unserialize($node->aggregation_item_options);
+}
+
+/**
+ * Implementation of hook_load().
+ */
+
+function aggregation_item_load($node)
+{
+	return db_fetch_object(db_query('SELECT * FROM {aggregation_item} WHERE nid = %d', $node->nid));
+}
+
+/**
+ * Implementation of hook_insert().
+ */
+
+function aggregation_item_insert($node)
+{
+	db_query("INSERT INTO {aggregation_item} (nid, url, aggregation_item_options, original_author, ".
+		"story_guid, fid, image_id, image_guid, original_comments) VALUES (%d, '%s', '%s', '%s', %s, %d, ".
+		"%d, %s, '%s')",
+                $node->nid,
+                $node->url,
+                $node->aggregation_item_options,
+                $node->original_author,
+                $node->story_guid,
+                $node->fid,
+                $node->image_id,
+                $node->image_guid ? $node->image_guid : 0,
+                $node->original_comments);
+}
+
+/**
+ * Implementation of hook_update().
+ */
+
+function aggregation_item_update($node)
+{
+	$params = array($node->url, $node->original_author);
+	
+	if (!($node->story_guid === ''))
+		$params[] = $node->story_guid;
+		
+	$params += array(count($params) => $node->fid, $node->image_id, $node->image_guid ? $node->image_guid : 0, $node->aggregation_item_options);
+		
+	if (!(trim($node->original_comments) == ''))
+		$params[] = trim($node->original_comments);
+		
+	$params[] = $node->nid;
+	
+  db_query("UPDATE {aggregation_item} SET url = '%s', original_author = '%s', ".
+  	($node->story_guid === '' ? '' : "story_guid = %s,")." fid = %d, image_id = %d, image_guid = %s, aggregation_item_options = '%s' ".(trim($node->original_comments) == '' ? '' : ", original_comments = '%s'")." ".
+  	"WHERE nid = %d", $params);
+}
+
+/**
+ * Implementation of hook_delete().
+ */
+
+function aggregation_item_delete(&$node)
+{
+	if (db_fetch_object(db_query(
+		"SELECT count(nid) AS image_count FROM {aggregation_item} WHERE image_id = %d", $node->image_id))
+		->image_count == 1) node_delete($node->image_id);
+
+	db_query("UPDATE {aggregation_feed} SET etag = '', last_modified = 0 WHERE nid = %d", $node->fid);
+
+	db_query('DELETE FROM {aggregation_item} WHERE nid = %d', $node->nid);
+}
+
+/**
+ * This function is the implementation of hook_view
+ */
+
+function aggregation_item_view(&$node, $teaser = FALSE, $page = FALSE)
+{
+	$node = node_prepare($node, $teaser);
+	
+	if ($node->image_id > 0)
+	{
+		$image = node_load($node->image_id);
+		$node->image = $image;
+
+		// theme image
+		$image_render = theme('aggregation_image_render', $image, $teaser);
+	}
+	else
+	{
+		$node->image_nid = NULL;
+		$node->image = NULL;
+
+		$image_render = '';
+	}
+	
+	// theme body
+	$body_render = theme('aggregation_body_render', $teaser ? $node->teaser : $node->body);
+
+	// theme the final item
+	$node->content['body']['#value'] = theme('aggregation_item_render', $image_render, $body_render, $teaser);
+	
+	return $node;
+}
+
+/**
+ * This function is the implementation of hook_view
+ */
+
+function aggregation_feed_view(&$node, $teaser = FALSE, $page = FALSE)
+{
+	$node = node_prepare($node);
+	if (!$teaser)
+	{
+		$items = pager_query("SELECT n.nid FROM {node} n INNER JOIN {aggregation_item} ai ON n.nid = ai.nid INNER JOIN {aggregation_feed} af ON ai.fid = af.nid WHERE af.nid = %d ORDER BY n.created DESC", variable_get('aggregation_items_to_display_per_page', 10), 0, NULL, $node->nid);
+		
+		$output = '';
+		
+		while ($row = db_fetch_object($items))
+		{
+			$item_node = node_load($row->nid);
+			
+			$output .= node_view($item_node, TRUE, FALSE, FALSE);
+		}
+		
+		$node->content['body']['#value'] = $output . theme('pager');
+	}
+
+	return $node;
+}
+
+/**
+ * Implementation of hook_link
+ *
+ */
+function aggregation_link($type, $node = NULL, $teaser = FALSE)
+{
+	$links = array();
+	if ($type == 'node' && $node->type == 'aggregation_item')
+	{
+		aggregation_item_prepare($node);
+		if (valid_url($node->url, TRUE)) 
+		{
+			if (($node->aggregation_item_options['link_to_original_url']==3) ||
+				($teaser && $node->aggregation_item_options['link_to_original_url']==2) ||
+				(!$teaser && $node->aggregation_item_options['link_to_original_url']==1))
+			{
+				$links['agregation_original_url'] = array(
+					'href' => $node->url,
+					'title' => t('Original article'),
+					'attributes' => array('class' => 'aggregation-link')
+				);
+			}
+		}
+			
+		if (valid_url($node->original_comments, TRUE)) 
+		{
+			if (($node->aggregation_item_options['link_to_original_comment']==3) ||
+				($teaser && $node->aggregation_item_options['link_to_original_comment']==2) ||
+				(!$teaser && $node->aggregation_item_options['link_to_original_comment']==1))
+			{
+				$links['agregation_original_comments'] = array(
+					'href' => $node->original_comments,
+					'title' => ($node->comment ? t('Original Comments') : t('Comments')),
+					'attributes' => array('class' => 'aggregation-link')
+				);
+			}
+		}
+	}		
+	return $links;
+}
+
+function theme_aggregation_item_render($image_render, $body_render, $teaser)
+{
+	return "<div class=\"aggregation_item".($teaser ? '_teaser' : '')."\">{$image_render}{$body_render}</div>";
+}
+
+function theme_aggregation_body_render($body)
+{
+	return '<div class="aggregation_item_body">'.$body.'</div>';
+}
+
+function theme_aggregation_image_render($image, $teaser)
+{
+	$image_size = $teaser ? variable_get('aggregation_teaser_image_to_display', 'thumbnail') : variable_get('aggregation_image_to_display', 'preview');
+	
+	// if none, don't display image
+	if ($image_size == 'none') return '';
+	
+	return '<div class="aggregation_item_image"><img src="'.base_path().$image->images[$image_size].'" />'.'</div>';
+}
+
+/* Following are the module's private methods */
+
+/**
+ * This function returns the feed items for a particular feed
+ */
+
+function _aggregation_get_feed_items($fid)
+{
+	return db_query("SELECT n.nid FROM {node} n, {aggregation_item} ai WHERE n.nid = ai.nid AND ai.fid = %d", $fid);
+}
+
+/**
+ * This method retrieved the etag and last_modified tags
+ */
+
+function read_etag_and_modified($ch, $header)
+{
+   global $etag;
+   global $last_modified;
+
+   $length = strlen($header);
+   if(strstr($header, "Last-Modified:"))
+   {
+       $last_modified = strtotime(substr($header, 15));
+   }
+   if (strstr($header, "ETag:"))
+   {
+   		$etag = substr($header, 6);
+   }
+   return $length;
+}
+
+/**
+ * This function returns the data in a URL (XML, image, etc...)
+ */
+function aggregation_get_URL($url, $username = NULL, $password = NULL, $feed = NULL,
+	$feed_etag = NULL, $feed_last_modified = NULL)
+{
+	global $etag;
+	global $last_modified;
+
+	if (trim($username) == '') $username = NULL;
+	if (trim($password) == '') $password = NULL;
+
+	$headers = array();
+
+	if (!is_null($feed_etag) && $feed_etag != '')
+		$headers['If-None-Match'] = $feed_etag;
+
+	if (!is_null($feed_last_modified) && $feed_last_modified != 0)
+		$headers['If-Modified-Since'] = gmdate('D, d M Y H:i:s', $feed_last_modified) .' GMT';
+
+	if(count($headers) > 0)
+	{
+		$temp = array();
+
+		foreach ($headers as $header => $value)
+			$temp[] = $header .': '. $value;
+
+		$headers = $temp;
+	}
+
+	$ch = curl_init();
+
+	$is_ftp = FALSE;
+
+	if (stripos($url, 'ftp://') !== FALSE)
+		$is_ftp = TRUE;
+
+	if (!$is_ftp)
+		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)");
+
+	if (is_array($headers) && count($headers) > 0 && !$is_ftp)
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+	if (!$is_ftp)
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, 'read_etag_and_modified');
+
+	if (!$is_ftp)
+	{
+		if (!ini_get('open_basedir') && (ini_get('safe_mode') == 'Off' || !ini_get('safe_mode')))
+		{
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+		}
+	}
+
+	if (!is_null($username) && !is_null($password))
+	{
+		curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+		if (!$is_ftp)
+			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+	}
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	if ($is_ftp)
+		curl_setopt($ch, CURLOPT_FTP_USE_EPSV, FALSE);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+	$data = curl_exec($ch);
+
+	$return_code = curl_getinfo($ch);
+	$return_code = $return_code['http_code'];
+
+	$error = curl_error($ch);
+
+	curl_close($ch);
+	unset($ch);
+
+	if ($return_code != 304)
+	{
+		// It was an FTP request but failed
+		if ($is_ftp && $return_code != 226)
+		{
+			$fragment = '';
+
+			if (!is_null($feed))
+				$fragment = " while processing feed \"$feed->title\"";
+
+			throw new Exception("FTP request returned error code \"$return_code\"".
+				"$fragment on \"$url\"", FTP_REQUEST_FAILED);
+		}
+
+		// It was an HTTP request but failed
+		if (!$is_ftp && $return_code != 200)
+		{
+			$fragment = '';
+
+			if (!is_null($feed))
+				$fragment = " while processing feed \"$feed->title\"";
+
+			throw new Exception("HTTP request returned error code \"$return_code\"".
+				"$fragment on \"$url\"", HTTP_REQUEST_FAILED);
+		}
+	}
+	else
+		return FALSE;
+
+	if (!is_null($feed_etag) && !is_null($feed_last_modified))
+		return array($data, $etag, $last_modified);
+
+	return $data;
+}
+
+/**
+ * This function returns the simpleXML object of a given string, or throws an exception
+ * if the string is in an invalid XML format
+ */
+function aggregation_get_XML($string, $feed = NULL)
+{
+	// PHP versions earlier than 5.1 have different argument counts for simplexml_load_string,
+	// this condition was added to check against this case
+
+	if (!defined('LIBXML_VERSION') || (version_compare(phpversion(), '5.1.0', '<')))
+		@ $xml = simplexml_load_string($string, NULL);
+	else
+		@ $xml = simplexml_load_string($string, NULL, LIBXML_NOERROR | LIBXML_NOWARNING);
+	
+	// We got a malformed XML
+	if ($xml === FALSE)
+	{
+		$fragment = '';
+
+		if (!is_null($feed))
+			$fragment = " while processing feed \"$feed->title\"";
+
+		throw new Exception("XML malformed$fragment", MALFORMED_XML);
+	}
+
+	return $xml;
+}
+
+/* This is where we'll implement the handler functions */
+
+/**
+ * This is the generic feed XML handler, it calls the user implemented handler, it is meant as
+ * a wrapper to the actual call
+ */
+function _aggregation_parse($feed, $vid)
+{
+	$handler_name = '';
+
+	foreach ($feed->taxonomy AS $tid => $term_object)
+		if ($term_object->vid == $vid)
+		{
+			$handler_name = $term_object->name;
+			break;
+		}
+
+	if ($handler_name == '')
+		throw new Exception('Did you change the vocabulary name without re-assigning the feeds?',
+			FEEDS_ARENT_ASSIGNED_TERM_UNDER_ACTIVE_VOCABULARY);
+
+	$data = aggregation_get_URL($feed->url, $feed->username, $feed->password, $feed,
+		$feed->etag, $feed->last_modified);
+
+	if ($data === FALSE)
+	{
+		watchdog('aggregation', 'Feed "@feed-title" was not modified since last refresh', array('@feed-title' => $feed->title));
+		return NULL;
+	}
+
+	$feed->etag = $data[1];
+	$feed->last_modified = $data[2];
+	$data = $data[0];
+
+	$feed_xml = aggregation_get_XML($data, $feed);
+
+	require_once(drupal_get_path('module', 'aggregation')."/feed_handlers/$handler_name.inc");
+
+	try {
+	call_user_func_array('_aggregation_'.$handler_name.'_parse', array($feed_xml, $feed));
+	} catch (Exception $e) {
+		throw new Exception('Check your feed_handler! Also consider handling the exception in your code: <br />'.
+		'All items after the exception have been skipped! Internal handling would prevent this.<br />'.
+		'If you catch an exception, please save the object and throw it when you\'re done to preserve logging.<br >'.
+		$e->getMessage(), $e->getCode());
+	}
+	db_query("UPDATE {aggregation_feed} SET last_refreshed = %d WHERE nid = %d", time(), $feed->nid);
+	return TRUE;
+}
+
+/**
+ * This internal function is responsible for adding items
+ */
+function _aggregation_add_item($title, $body, $teaser, $original_author, $feed,
+	$additional_taxonomies, $timestamp = NULL, $original_item_url = NULL, $guid = NULL,
+	$image_array = NULL, $other = NULL)
+{
+  if ($feed->time_to_live != 0 && time() - $timestamp >= $feed->time_to_live * 24 * 60 * 60) return;
+	if (!is_null($title)) $title = trim($title);
+	if (!is_null($body)) $body = trim($body);
+	if (!is_null($teaser)) $teaser = trim($teaser);
+	if (!is_null($original_author)) $original_author = trim($original_author);
+	if (!is_null($original_item_url)) $original_item_url = trim($original_item_url);
+	if (!is_null($guid)) $guid = trim($guid);
+
+	//setting guid
+	$interval_check = FALSE;
+	if (is_null($guid) || empty($guid))
+	{
+		if (!is_null($original_item_url) && !empty($original_item_url))
+			$guid = $original_item_url;
+		elseif (!is_null($title) && !empty($title))
+		{
+			$guid = $title;
+			$interval_check = TRUE;
+		}
+		else
+		{
+			$guid = $body;
+			$interval_check = TRUE;
+		}
+	}
+
+	// Noticed that some feeds unexpectedly lack a title
+	if (is_null($title) || empty($title))
+		$title = t("no title provided in feed");
+		
+	//tracks if item already exists
+	$preexisting = FALSE;
+	$feed->process_updates = $feed->aggregation_feed_options['update_existing_aggregation_items'] ? TRUE : FALSE;
+	
+	// check item exists by checking GUID
+	$temp_guid = sprintf('%u', crc32($guid));
+	if (!$interval_check)
+	{
+	 	$result = db_query("SELECT nid FROM {aggregation_item} WHERE ".
+							 		"story_guid = %s AND fid = %d", $temp_guid, $feed->nid);
+	    if ($r = db_fetch_object($result)) 
+	      $nid = $r->nid;
+		else
+		  $nid = 0;
+		  
+	}
+	else // since no real guid is available (neither unique guid nor url), we resort to checking the title or body
+	{
+	 	$result = db_query("SELECT n.nid AS nid FROM {node} n, {aggregation_item} ai ".
+			"WHERE ai.nid = n.nid AND ai.story_guid = %s AND %d - n.created ".
+			($feed->title_as_guid_interval == 0 ? ">=" : "<=")." %d",
+			$temp_guid, time(), $feed->title_as_guid_interval * 60 * 60);
+		
+		if ($r = db_fetch_object($result)) 
+		  $nid = $r->nid;
+		else
+		  $nid = 0;
+	}
+	
+	if ($nid > 0) 
+	{
+		// if update checkbox is unchecked no need to bother with the update
+		if (!$feed->process_updates) return;
+		
+		// we need to bother with the update
+		$item_object = node_load($nid);
+		
+		//don't update if the body and title are equal, or if process updates on the feeds is turned of	
+		if ($item_object->body == $body && $item_object->title == $title) return;
+		
+		$preexisting = TRUE;
+	} else 
+		$item_object = clone($feed);
+
+	if (!$preexisting) 
+	{
+		if (isset($feed->aggregation_feed_options['aggregation_item_body_filter']))
+			$item_object->format = $feed->aggregation_feed_options['aggregation_item_body_filter'];
+			
+		$item_object->status = $feed->aggregation_feed_options['publish_new_items'] ? 1 : 0;
+		$item_object->moderate = $feed->aggregation_feed_options['aggregate_to_moderation_queue'] ? 1 : 0;
+		$item_object->sticky = $feed->aggregation_feed_options['sticky_items'] ? 1 : 0;
+		$item_object->comment = $feed->aggregation_feed_options['enable_comments_on_articles'] ? 2 : 0;
+		$item_object->promote = $feed->promote_to_frontpage-- > 0 ? 1 : 0;
+		$item_object->aggregation_item_options = array();
+		$item_object->aggregation_item_options['link_to_original_url'] = $feed->aggregation_feed_options['link_items_to_original_urls'];
+		$item_object->aggregation_item_options['link_to_original_comment'] = $feed->aggregation_feed_options['link_items_to_original_comments'];
+		unset($item_object->nid);
+		unset($item_object->vid);
+		unset($item_object->path);
+		
+		$item_object->taxonomy = $item_object->item_categories;
+	}
+	
+	if (is_array($additional_taxonomies))
+	{
+		foreach ($additional_taxonomies AS $vocabulary => $taxonomies)
+		{
+			if ($vocabulary == 'Feed Categories' && !$feed->aggregation_feed_options['aggregate_item_categories']) continue;	// This should prevent auto-taxonomies when feed option is disabled
+			$vid = _aggregation_add_vocab($vocabulary);
+			
+			foreach ($taxonomies AS $key => $term)
+			{
+				$tid = _aggregation_add_term($vid, $term);
+				if ($item_object->taxonomy[$tid]) continue;
+				$item_object->taxonomy[$tid] = taxonomy_get_term($tid);
+			}
+		}
+	}
+	
+
+	$image_nid = 0;
+	$image_guid = 0;
+	if ($item_object->aggregation_feed_options['aggregate_images_as_image_nodes'] && module_exists('image'))
+	{
+		foreach ($image_array as $image)
+		{
+			if (!is_null($image['url'])) $image['url'] = trim($image['url']);
+			if (!$image['url'] || empty($image['url']))
+				$image = NULL;
+			else
+			{
+	  			if (!is_null($image['title'])) $image['title'] = trim($image['title']);
+	  			if (!is_null($image['guid'])) $image['guid'] = trim($image['guid']);
+	  			if (!is_null($image['teaser'])) $image['teaser'] = trim($image['teaser']);
+	  			if (!is_null($image['body'])) $image['body'] = trim($image['body']);
+	  			if (!is_null($image['url'])) $image['url'] = trim($image['url']);
+  
+	  			if (is_null($image['title']) || empty($image['title']))
+	  				$image['title'] = $title;
+  
+  				if (is_null($image['guid']) || empty($image['guid']))
+  					$image['guid'] = $image['url'];
+  
+  				if (is_null($image['teaser']) || empty($image['teaser']))
+  					$image['teaser'] = $image['body'];
+  
+  				if (is_null($image['timestamp']))
+  					$image['timestamp'] = time();
+	  			//Add image. Only last image will be connected with aggregation_feed_item
+				$image_result_array = _aggregation_create_image($image, $title, $feed, $item_object);
+				if ($image_result_array === FALSE)
+				{
+ 					watchdog('aggregation', 'Image with URL "@image_url" from feed "@feed_title" was not retrieved.', array('@image_url' => $image_array['url'], '@feed_title' => $feed->title));
+ 					
+					$image_nid = 0;
+					$image_guid = 0;
+				} else
+				{
+					$image_nid = $image_result_array[0];
+					$image_guid = $image_result_array[1];
+				}
+  			}
+		}
+	}
+
+	
+	$item_object->image_id = $image_nid;
+
+	$item_object->story_guid = (!is_null($guid) && !empty($guid)) ? $guid : '';
+	$item_object->image_guid = $image_guid;
+
+	$item_object->fid = $feed->nid;
+	$item_object->title = $title;
+	$item_object->body = $body;
+	$item_object->teaser = $teaser;
+	$item_object->original_author = $original_author;
+	$item_object->url = is_null($original_item_url) || !valid_url($original_item_url, TRUE) ? '' : $original_item_url;
+	$item_object->created = is_null($timestamp) ? time() : $timestamp;
+	$item_object->type = 'aggregation_item';
+	
+	//add in extra attributes potentially set by feed variables
+	if (!is_null($other)) 
+		 foreach ($other AS $key => $val)
+		 		$item_object->$key = $val;
+	
+	// this will undo the corruption that happened in the submit call
+   // set this to make the submit call to set story_guid to this value
+ 	$item_object->feed_guid = (!is_null($guid) && !empty($guid)) ? $guid : '';
+
+        if (module_exists('og')) { // integration with the OG module...
+            if (og_is_group_type($feed->type)) // assign the item to the feed as its group
+                $item_object->og_groups[$feed->nid] = $feed->nid;
+            else if (og_is_group_post_type($feed->type)) // assign the item to the same group that the feed is under
+                $item_object->og_groups = $feed->og_groups;
+        }
+
+ 	node_save($item_object);
+	if (variable_get('aggregation_enable_logging', TRUE))
+			if (!$prexisting) watchdog('aggregation', 'Added item "@item-title" from feed "@feed-title"', array('@item-title' => $item_object->title, '@feed-title' => $feed->title), WATCHDOG_NOTICE, l(t('view'), "node/$item_object->nid"));
+			else watchdog('aggregation', 'Updated item "@item-title" from feed "@feed-title"', array('@item-title' => $item_object->title, '@feed-title' => $feed->title), WATCHDOG_NOTICE, l(t('view'), "node/$item_object->nid"));
+	if (variable_get('aggregation_feed_refresh_cooldown', 0) > 0)
+		sleep(variable_get('aggregation_feed_refresh_cooldown', 0));
+}
+
+/**
+ * This internal function is responsible for creating an image node and returning its nid,
+ * if it already exists it returns its nid, 0 on failure
+ */
+function _aggregation_create_image($image_array, $title, $feed, $item_object)
+{
+	// check that image module is up and running!
+	if (!function_exists('_image_filename')) return 0;
+	
+	// Determine path to uploaded images.
+	static $path_to_uploaded_images;
+	if(empty($path_to_uploaded_images)) {
+	  $path_to_uploaded_images = file_directory_path().'/'.variable_get('image_default_path', 'images').'/temp/';
+	}
+
+	// if there's no URL, return 0
+	if (!$image_array['url']) return 0;
+	
+	// make sure windows long filenames won't cause any problems
+	$image_array['url'] = ereg_replace(" ", "%20", $image_array['url']);
+
+	$numeric_guid = sprintf('%u', crc32($image_array['guid']));
+
+	$image_exists =
+		db_query("SELECT ai.image_id FROM {aggregation_item} ai WHERE ai.image_guid = %s", $numeric_guid);
+	
+	if ($r = db_fetch_object($image_exists)) 
+    	return array($r->image_id, $numeric_guid);
+
+	$newfile = substr($image_array['url'], strrpos($image_array['url'], '/') + 1);
+    	
+    $extension = explode('.', $newfile);
+	$extension = strtolower($extension[count($extension) - 1]);
+
+	$filename = $numeric_guid.".".$extension;
+
+	$newfile = _image_filename($filename, NULL, TRUE);
+
+	try {
+		if (!($extension == 'jpg' || $extension == 'jpeg' || $extension == 'gif' || $extension == 'png'))
+			throw new Exception('Invalid image extension', INCORRECT_IMAGE_FORMAT);		
+		
+		$data = aggregation_get_URL($image_array['url'], $image_array['username'] ? $image_array['username'] : NULL, $image_array['password'] ? $image_array['password'] : NULL, $feed);
+
+		if ($data == '') throw new Exception('Image appears to be empty?!', EMPTY_IMAGE);
+
+		if (file_put_contents($newfile, $data) == 0)
+			throw new Exception('Could not write to file! Maybe permissions?', COULD_NOT_WRITE_TO_FILE);
+	}
+	catch (Exception $e) {
+		watchdog('aggregation', check_plain($e->getMessage()), NULL, WATCHDOG_ERROR);
+		return 0;
+	}
+
+	$image_object = clone($item_object);
+
+	$image_object->title = $image_array['title'];
+	$image_object->body = $image_array['body'];
+	$image_object->teaser = $image_array['teaser'];
+	$image_object->description = '';
+	$image_object->created = $image_array['timestamp'];
+	$image_object->type = 'image';
+
+	$image_object->comment = $feed->aggregation_feed_options['enable_comments_on_images'] ? 2 : 0;
+
+	$image_object->promote = 0;
+
+	$image_object->images[IMAGE_ORIGINAL] = $path_to_uploaded_images.$filename;
+
+	$image_object->images = _image_build_derivatives($image_object, FALSE);
+
+	node_save($image_object);
+
+	return array($image_object->nid, $numeric_guid);
+}
+
+/**
+ * This function adds a vocabulary if it doesn't exist and returns its vid,
+ * if it exists, it returns the current vocabulary's vid
+ */
+function _aggregation_add_vocab($name)
+{
+	$vid = db_query("SELECT vid FROM {vocabulary} WHERE name = '%s'", $name);
+	if ($r = db_fetch_object($vid))
+		return $r->vid;
+
+	$vocab = array();
+
+	$vocab['name'] = $name;
+	$vocab['description'] = $name;
+	$vocab['help'] = $name;
+	$vocab['multiple'] = 1;
+	$vocab['required'] = 0;
+	$vocab['module'] = 'aggregation';
+	$vocab['nodes']['aggregation_item'] = 1;
+	if (module_exists('image'))
+	   $vocab['nodes']['image'] = 1;
+	$vocab['tags'] = 0;
+	$vocab['weight'] = 0;
+
+	taxonomy_save_vocabulary($vocab);
+
+	return $vocab['vid'];
+}
+
+/**
+ * This function adds a term under a vocabulary if it doesn't exist and returns its tid,
+ * if it exists, it returns the current term's tid
+ */
+function _aggregation_add_term($vid, $name)
+{
+	$tid = db_query("SELECT tid FROM {term_data} WHERE vid = %d AND name = '%s'", $vid, $name);
+	if ($r = db_fetch_object($tid))
+		return $r->tid;
+
+	$term = array();
+
+	$term['name'] = trim($name);
+	$term['description'] = trim($name);
+	$term['vid'] = $vid;
+	$term['weight'] = 0;
+
+	taxonomy_save_term($term);
+
+	return $term['tid'];
+}
+
+/**
+  * Implementation of hook_theme()
+  */
+function aggregation_theme() {
+  return array(
+      'aggregation_image_render' => array(
+        'arguments' => array('image'),
+        ),
+      'aggregation_body_render' => array(
+        'arguments' => array('body'),
+        ),
+      'aggregation_item_render' => array(
+        'arguments' => array('image_render', 'body_render'),
+        ),
+      );
+}
+
+function aggregation_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL)
+{
+	if ($op == 'presave')
+	{
+		if ($node->type == 'aggregation_item')
+			aggregation_item_submit($node);
+		else if ($node->type == 'aggregation_feed')
+			aggregation_feed_submit($node);
+	}
+}
+
+
+function aggregation_views_api() 
+{
+  return array(
+    'api' => 2,
+  );
+}
+

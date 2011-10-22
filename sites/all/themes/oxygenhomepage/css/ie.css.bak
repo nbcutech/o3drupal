@@ -1,0 +1,19 @@
+
+/******************/
+/* Styles for IE  */
+/******************/
+
+/* OBSESSED STYLES*/
+
+#hp_obsessed_box {
+	background: url(../images/oxygencom/obsessed_header.png) no-repeat;
+	display:inline;
+	float:right;
+	margin: 20px 26px 0 0px;
+	font-size: 11px;
+	line-height: 13px;
+	width:300px;	
+}
+
+
+

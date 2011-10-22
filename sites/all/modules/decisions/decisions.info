@@ -1,0 +1,13 @@
+; $Id: decisions.info,v 1.9 2008/11/26 17:28:15 anarcat Exp $
+name = Decisions
+description = "An advanced voting module that includes plurarity voting, instant-runoff voting, and electoral lists."
+dependencies[] = votingapi
+package = Voting
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-04-28
+version = "6.x-1.7"
+core = "6.x"
+project = "decisions"
+datestamp = "1272432004"
+

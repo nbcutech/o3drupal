@@ -1,0 +1,5 @@
+; $Id$
+name = iVillage Feed Aggregator
+description = iVillage Feed Aggregator uses the feeds provided by iVillage to populate content on DYAO site.
+core = 6.x
+package = "Oxygen"

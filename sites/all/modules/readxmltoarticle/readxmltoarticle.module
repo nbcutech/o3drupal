@@ -1,0 +1,302 @@
+<?
+
+/**
+* Display help and module information
+* @param path which path of the site we're displaying help
+* @param arg array that holds the current path as would be returned from arg() function
+* @return help text for the path
+*/
+function readxmltoarticle_help($path, $arg) {
+  $output = '';  //declare your output variable
+  switch ($path) {
+    case "admin/help#readxmltoarticle_help":
+      $output = '<p>'.  t("Read XML feed into DB as Article content type") .'</p>';
+      break;
+  }
+  return $output;
+} // function readxmltoarticle_help_help
+
+
+/**
+* Valid permissions for this module
+* @return array An array of valid permissions for the onthisdate module
+*/
+function readxmltoarticle_perm() {
+  return array('access readxmltoarticle content');
+} // function readxmltoarticle_perm()
+
+
+function readxmltoarticle_admin() {
+  $form = array();
+
+  $form['readxmltoarticle_urlfeed'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL to XML Feed'),
+    '#default_value' => variable_get('readxmltoarticle_urlfeed', ''),
+    '#size' => 75,
+    '#description' => t("The URL to the XML feed to load during cron."),
+    '#required' => TRUE
+  );
+
+  $form['readxmltoarticle_css'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The URL to CSS to use'),
+    '#default_value' => variable_get('readxmltoarticle_css', ''),
+    '#size' => 75,
+    '#maxlength' => 200,
+    '#description' => t("The URL to CSS to use."),
+    '#required' => TRUE
+  );
+
+  $form['readxmltoarticle_blocknumarticles'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of Articles to show in block'),
+    '#default_value' => variable_get('readxmltoarticle_blocknumarticles', 10),
+    '#size' => 10,
+    '#maxlength' => 3,
+    '#description' => t("Number of Articles to show in block."),
+    '#required' => TRUE
+  );
+  
+  $lastFeedLoad = variable_get('readxmltoarticle_lastfeedload', '1169528400');
+  $lastFeedLoad = date("m-d-Y H:i:s", $lastFeedLoad);
+  $form['readxmltoarticle_null'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Feed Load'),
+    '#default_value' => $lastFeedLoad,
+    '#size' => 35,
+    '#maxlength' => 35,
+    '#description' => t("Last Feed Load."),
+    '#disabled' => TRUE
+  );
+
+  $form['readxmltoarticle_landingtitle'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Page title for landing page'),
+    '#default_value' => variable_get('readxmltoarticle_landingtitle', 'Access Hollywood Feed'),
+    '#size' => 45,
+    '#maxlength' => 45,
+    '#description' => t("page title for landing page."),
+    '#required' => TRUE
+  );
+
+  $form['readxmltoarticle_landingpath'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path for landing page'),
+    '#default_value' => variable_get('readxmltoarticle_landingpath', ''),
+    '#size' => 45,
+    '#maxlength' => 45,
+    '#description' => t("Changing this value will rebuild menu cache and may affect performance while rebuild menu cache.  Word of caution."),
+    '#required' => TRUE
+  );
+
+  $form['readxmltoarticle_landingpager'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of articles to show per page'),
+    '#default_value' => variable_get('readxmltoarticle_landingpager', '15'),
+    '#size' => 20,
+    '#maxlength' => 20,
+    '#description' => t("Number of articles to show per page."),
+    '#required' => TRUE
+  );
+
+  return system_settings_form($form);
+}
+
+function readxmltoarticle_menu() {
+
+	$items = array();
+
+	$items['admin/settings/readxmltoarticle'] = array(
+		'title' => t('Read XML to Article module settings'),
+		'description' => t('XML to Article settings page'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('readxmltoarticle_admin'),
+		'access arguments' => array('access administration pages'),
+		'type' => MENU_NORMAL_ITEM,
+	);
+  
+	$items[variable_get('readxmltoarticle_landingpath', 'access_hollywood_articles')] = array(
+		'title' => 'Wedding Stories',
+		'page callback' => 'readxmltoarticle_all',
+		'access arguments' => array('access readxmltoarticle content'),
+		'type' => MENU_CALLBACK
+	);
+
+  return $items;
+}
+
+function readxmltoarticle_form_alter(&$form, &$form_state, $form_id) {
+	
+	if(!empty($form_state['post']['readxmltoarticle_landingpath'])) {
+		if(variable_get('readxmltoarticle_landingpath', 'access_hollywood_articles') <> $form_state['post']['readxmltoarticle_landingpath']){
+			variable_set('readxmltoarticle_landingpath', $form_state['post']['readxmltoarticle_landingpath']);
+			cache_clear_all('*', 'cache_menu', TRUE);
+			menu_router_build(TRUE);
+		}
+	}
+	
+}
+
+function readxmltoarticle_admin_validate($form, &$form_state) {
+  $urlfeed = $form_state['values']['readxmltoarticle_urlfeed'];
+  if (empty($urlfeed)) {
+    form_set_error('readxmltoarticle_urlfeed', t('You must provide a value.'));
+  }
+}
+
+function readxmltoarticle_block($op='list', $delta=0) {
+    if ($op == "list"){
+		$block[0]['info'] = t('Read XML To Article');
+		return $block;
+    }else if ($op == 'view'){
+		$block = array();
+		switch($delta){
+			case 0:
+				$seeAllLink = variable_get('readxmltoarticle_landingpath', 'access_hollywood_articles');
+				$limitBy = variable_get('readxmltoarticle_blocknumarticles', '5');
+				$lastFeedLoad = variable_get('readxmltoarticle_lastfeedload', '1169528400');
+				$lastFeedLoad = strtotime('+6 hours', $lastFeedLoad);
+				$css = variable_get('readxmltoarticle_css', '');
+				
+				//Recheck Feed in if last feed load was more than 6 hours ago
+				if($lastFeedLoad < time()){ //echo 'load feed';
+					readxmltoarticle_loadxmlfeed();
+				}
+				
+				$Qresults = db_query("SELECT CT.field_guid_value, CT.field_image_link_value, node.title, node.nid FROM node LEFT JOIN content_type_access_hollywood_feed_v2 as CT ON CT.nid = node.nid WHERE node.type = 'access_hollywood_feed_v2' AND node.status = 1 ORDER BY node.created DESC limit 0, $limitBy");
+									
+				while ($data = db_fetch_object($Qresults)) {
+					$articleGUIDs[] = $data->guid;
+					$li .= '
+					<li>
+						<div class="thumb"><img src="'.$data->field_image_link_value.'" width="60" height="60" title="'.$data->title.'" alt="'.$data->title.'" /></div>
+						<div class="info"><strong>'.$data->title.'</strong><br /><a href="/'.drupal_get_path_alias("node/" . $data->nid).'" title="'.$data->title.'">Learn more...</a></div>
+					</li>';
+				}
+				
+				$block['content'] = '<style type="text/css" media="screen">@import url( '.$css.' );</style><div id="readxmltoarticle_div"><div class="top"><h2></h2></div><ul>'.$li.'</ul><div class="bottom"><a href="/'.$seeAllLink.'" class="see-all" title="See All"><span>See All</span></a></div></div>';
+				break;
+		}
+
+		return $block;
+    }
+}
+
+function readxmltoarticle_getguids(){
+	$Qresults = db_query("SELECT CT.field_guid_value as guid FROM node LEFT JOIN content_type_access_hollywood_feed_v2 as CT ON CT.nid = node.nid WHERE node.type = 'access_hollywood_feed_v2' AND node.status = 1 ORDER BY node.created");
+									
+	while ($data = db_fetch_object($Qresults)) {
+		$articleGUIDs[] = $data->guid;
+	}
+	
+	return $articleGUIDs; }
+
+function readxmltoarticle_nextarticle($nid){ //echo $nid;
+	$Qresults = db_query("SELECT node.nid FROM node LEFT JOIN content_type_access_hollywood_feed_v2 as CT ON CT.nid = node.nid WHERE node.type = 'access_hollywood_feed_v2' AND node.status = 1 ORDER BY node.created");
+									
+	while ($data = db_fetch_object($Qresults)) {
+		$nids[] = $data->nid;
+	}
+	$index = array_search($nid, $nids);
+	
+	if($index <> (count($nids) - 1)){
+		return drupal_get_path_alias('node/'.$nids[++$index]);
+	}else{
+		return '';	
+	}
+}
+	
+function readxmltoarticle_loadxmlfeed(){
+	//$guids = array();
+	$url = variable_get('readxmltoarticle_urlfeed','');
+	variable_set('readxmltoarticle_lastfeedload',time());
+	
+	if(!empty($url)){
+		$guids = readxmltoarticle_getguids(); //print_r($guids);
+		$xml = simplexml_load_file($url);
+	
+		$articlesIndex = 0;
+		foreach($xml->channel[0]->item as $item){
+			$articles[$articlesIndex]['title'] = (string)$item->title;
+			$articles[$articlesIndex]['description'] = (string)$item->description;
+			$articles[$articlesIndex]['pubDate'] = (string)$item->pubDate;
+			$articles[$articlesIndex]['guid'] = (string)$item->guid;
+			$mediaAttrs = $item->enclosure->attributes();
+			$articles[$articlesIndex]['media'] = (string)$mediaAttrs['url'];
+			
+			$articlesIndex++;
+		}
+		foreach($articles as $article){
+			if(@in_array($article['guid'], $guids)) continue;
+			$timestamp = strtotime($article['pubDate']);
+			readxmltoarticle_node_create($article['title'],$article['description'],'access_hollywood_feed_v2',$timestamp,$article['guid'],$article['media']);
+		}
+	}
+}
+
+function readxmltoarticle_node_create($title,$body,$type,$timestamp,$guid,$image) { //echo $body.'<br>';
+	$node = new stdClass();
+	
+	$node->title = $title;
+	$node->body = $body;
+	$node->type = $type;   // Your specified content type
+	$node->created = $timestamp;
+	$node->changed = $node->created;
+	$node->status = 1;
+	$node->promote = 1;
+	$node->sticky = 0;
+	$node->filter = 1;       // Filtered HTML
+	$node->uid = 1;          // UID of content owner
+	$node->language = 'en';
+	$node->field_guid[0]['value'] = $guid;
+	$node->field_image_link[0]['value'] = $image;
+	 
+	node_save($node);
+}
+
+function readxmltoarticle_all() {
+	// content variable that will be returned for display
+	$page_content = '<style>
+.obssessed_article {
+    background: url("http://storibook-weddings.oxygen.com/sites/all/themes/storibookweddings/access_hollywood_feed_v2/diamondBullet.gif") no-repeat scroll left center transparent;
+    margin: 9px 0 0;
+    padding: 0 0 0 20px;
+}
+.obssessed_article a {
+    color: #666666;
+    text-decoration: underline;
+}
+div.readxmltoarticle_all-container {
+	color: #666666;
+   padding:0px 30px;
+	padding-top:85px;
+	padding-bottom:15px;
+	background-image: url("http://storibook-weddings.oxygen.com/sites/all/themes/storibookweddings/access_hollywood_feed_v2/celebrity_news_header.png");
+	background-repeat:no-repeat;
+	background-position:top right;
+}
+div.readxmltoarticle_all-container h2 {
+    color: #177fb0;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 25px 0 0;
+}
+	</style>
+	<div class="readxmltoarticle_all-container"><h2>'.variable_get('readxmltoarticle_landingtitle', 'Access Hollywood Feed').'</h2>';
+
+	$links_per_page = variable_get('readxmltoarticle_landingpager', 15);
+	$sql = "SELECT title, nid FROM `node` WHERE `type` = 'access_hollywood_feed_v2' AND `status` =1 ORDER BY `created` DESC";
+	
+	$results = pager_query($sql, $links_per_page);
+	while ($data = db_fetch_object($results)){
+		$page_content .= "<div class='obssessed_article'><a href='" .  drupal_get_path_alias("node/" . $data->nid) . "'>" . $data->title . "</a></div>";
+	}
+	$page_content .= '</div>';
+	$page_content .=  theme('pager', NULL, $links_per_page, 0);
+	
+	return $page_content;
+}
+
+
+

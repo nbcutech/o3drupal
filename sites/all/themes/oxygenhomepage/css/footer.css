@@ -1,0 +1,56 @@
+	
+/***********************************************
+ * Global Footer *******************************
+ ***********************************************/
+
+#footer {
+	clear: both;
+	background: #fff url(../images/oxygencom/footer_background.jpg) no-repeat;
+	overflow: hidden;
+	border-top: 1px solid #cfcfcf;
+	height: 227px;
+}
+#mainFooterLogos
+{
+	height:128px;
+	padding-top:40px;
+
+}
+* html #footer
+{
+margin:20px 0px 0px 0px;
+}
+
+.footerLogo
+{
+	margin-left:70px;
+	display:inline; 
+	float:left;
+	width:140px;
+
+} 
+.footerLogo a, .footerLogo a:visited
+{
+	color:#fff;
+	font-size:11px;
+
+}
+
+#globalSubFooter ul { overflow: hidden; height: 1%;}
+
+  
+#globalSubFooter {
+	margin: 0;
+	padding: 23px 8px 0 0;
+	text-align:center;
+}
+
+ 
+
+#globalSubFooter span a {
+	color: #fff;
+	line-height: 1.3em;
+	font-weight:bold;
+}
+
+ 

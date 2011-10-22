@@ -1,0 +1,266 @@
+<?php
+/**
+ * @file
+ * Provides with a registration form for the users
+ */
+ 
+/*
+ * hook_menu
+ */
+function bplv_registration_menu() {
+  $items = array();
+  $items['bplv/registration'] = array(
+    'title' => 'Girls Night Out SweepStakes',
+    'page callback' => 'bplv_registration_page',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+   $items['bplv/registration/facebook'] = array(
+    'title' => 'Girls Night Out SweepStakes',
+    'page callback' => 'bplv_registration_page_facebook',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  // Callback for Ajax Services
+  $items['bplv/services/%/%'] = array(
+    'page callback' => 'bplv_services',
+    'access arguments' => array('access content'),
+    'page arguments' => array(2,3),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function bplv_registration_page_facebook() {
+	$path = drupal_get_path('module', 'bplv_registration');
+	drupal_add_css($path.'/css/bplv_registration.css');
+	drupal_add_js($path.'/js/bplv_registration.js');
+	$form = drupal_get_form('bplv_registration_form');
+	print theme('bplv_registration_page_facebook', $form);
+	exit;
+
+}
+
+function bplv_registration_page() {
+	$path = drupal_get_path('module', 'bplv_registration');
+	drupal_add_css($path.'/css/bplv_registration.css');
+	drupal_add_js($path.'/js/jquery.cookie.js');
+	drupal_add_js($path.'/js/bplv_registration.js');
+	
+
+	$form = drupal_get_form('bplv_registration_form');
+	return $form;
+}
+
+function bplv_services($service, $param) {
+	switch($service) {
+		
+		case "email":
+			$exists = _bplv_check_email_exists($param);
+			$return = array('error' => false, 'data' => $exists);
+			print json_encode($return);
+			break;
+		case "fb_user_id":
+			$exists = _bplv_check_fb_user_id_exists($param);
+			$return = array('error' => false, 'data' => $exists);
+			print json_encode($return);
+			break;
+		case "test_insert":
+			bplv_test_insert();
+			break;
+		default:
+			print "Not supported";
+	}
+	exit;
+}
+
+function _bplv_check_fb_user_id_exists($fb_user_id) {
+	$query = "select * from {bplv_reg} where fb_user_id = %d";
+	$result_set = db_result(db_query($query, $fb_user_id));
+	if(!$result_set) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function _bplv_check_email_exists($email) {
+	$email = strtolower($email);
+	$query = "select * from {bplv_reg} where email = '%s'";
+	$result_set = db_result(db_query($query, $email));
+	if(!$result_set) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function bplv_test_insert() {
+	 $form_state = array();
+	 $form_state['values'] = array (
+      'firstname' => 'sdf',
+      'lastname' => 'dsf',
+      'address' => 'fds',
+      'city' => 'fds',
+      'state' => 5,
+      'zipcode' => '91232',
+      'email' => 'marojupavan@gmail.com',
+      'phone' => "123",
+      'age' => "",
+      'newsletter' => 0,
+      'rules' => 1,
+      'op' => "Submit",
+      'submit' => 'Submit',
+      'ip_address' => "test",
+      'form_build_id' => 'form-ca1d13724ef6081d047b265f9c1f538e',
+      'form_token' => 'a279bac5e17aa2d7f616ee4c84a0c0bf',
+      'form_id' => 'bplv_registration_form',
+   );
+   print_r(drupal_get_schema('bplv_reg'));
+   
+   print "Test<Br/>";
+   print ereg_replace("[^0-9]", "", "815--5034-334");  
+	 //bplv_registration_form_submit(null, $form_state);
+}
+
+
+function bplv_registration_form() {
+
+	$form['firstname'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('First Name'),
+	  '#required'  => TRUE,
+	);
+	
+	$form['lastname'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('Last Name'),
+	  '#required'  => TRUE,
+	);
+	$form['address'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('Address'),
+	  '#required'  => TRUE,
+	);
+	$form['city'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('City'),
+	  '#required'  => TRUE,
+	);
+	
+	$states_info = _bplv_registration_get_states();
+	$form['state'] = array(
+	  '#type' => 'select',
+	  '#title' => t('State'),
+	  '#options' => $states_info,
+	  '#required'  => TRUE,
+	);
+	$form['zipcode'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('ZIP Code'),
+	  '#required'  => TRUE,
+	  '#maxlength'=>5,
+	);
+	$form['email'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('E-mail Address'),
+	  '#required'  => TRUE,
+	);
+	
+	$form['phone'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('Phone'),
+	);
+	$form['age'] = array(
+	  '#type' => 'textfield',
+	  '#title' => t('Age'),
+	  '#maxlength' => 3,
+	);
+	
+	$form['newsletter'] = array(
+	  '#type' => 'checkbox',
+	  //'#title' => 'test',
+	  '#title' => t('Sign up for the Oyxgen e-newsletter to receive information about our shows, specials and promotions! <span>(optional)</span>'),
+	);
+	$form['rules'] = array(
+	  '#type' => 'checkbox',
+	  '#title' => t('I have read and agree to the Official Rules'),
+	  '#required'  => TRUE,
+	);
+	$path = drupal_get_path('module', bplv_registration);
+	$form['submit'] = array(
+	  '#type' => 'image_button',
+	  '#title' => t('Submit'),
+	  '#value' => t('Submit'),
+	  '#attributes' => array('src' => "/$path/images/bplv_images/bplv_submit_button.jpg"),
+	);
+	$form['fb_user_id'] = array(
+	  '#type' => 'hidden',
+	  '#default_value'  => "",
+	);
+	$form['#theme'] = 'bplv_registration_form';
+	
+	return $form;
+}
+
+function bplv_registration_form_submit($form, $form_state) {
+	$form_state['values']['ip_address'] = ip_address();
+	$form_state['values']['phone'] = ereg_replace("[^0-9]", "", $form_state['values']['phone']);
+	$form_state['values']['email'] = strtolower($form_state['values']['email']);
+	drupal_write_record('bplv_reg', $form_state['values']);
+	drupal_set_message("Thank You for Registering");
+}
+
+function _bplv_registration_get_states() {
+	$key = 'blpv_states_cache_key';
+	$states = cache_get($key);
+	if($states == null || !is_array($states)) {
+		$query = "select * from {state}";
+		$result_set = db_query($query);
+		$states_data = array();
+		$states_data[0] = "Please select one";
+		while($row = db_fetch_array($result_set)) {
+			$states_data[$row['state_id']] = $row['state'];
+		}
+		cache_set($key, $states_data);
+		return $states_data;
+	}
+	else return $states;
+}
+
+function bplv_registration_theme() {
+	return array(
+    'bplv_registration_form' => array(
+    	'template' => 'bplv-registration-page-template',
+      'arguments' => array('form' => NULL),
+    ),
+    'bplv_registration_page_facebook' => array(
+    	'template' => 'bplv-registration-page-facebook',
+    	'arguments' => array(
+    		'form' => NULL,
+    	),
+    ),
+  );
+}
+
+
+function bplv_registration_preprocess_bplv_registration_form(&$vars)
+{
+	$form = $vars['form'];
+	$vars['firstname'] = drupal_render($form['firstname']);
+	$vars['lastname']  = drupal_render($form['lastname']);
+	$vars['address'] = drupal_render($form['address']);
+	$vars['city'] = drupal_render($form['city']);
+	$vars['state'] = drupal_render($form['state']);
+	$vars['zipcode'] = drupal_render($form['zipcode']);
+	$vars['email'] = drupal_render($form['email']);
+	$vars['phone'] = drupal_render($form['phone']);
+	$vars['age'] = drupal_render($form['age']);
+	$vars['newsletter'] = drupal_render($form['newsletter']);
+	$vars['rules'] = drupal_render($form['rules']);
+	$vars['submit'] = drupal_render($form['submit']);
+	$vars['form_rest'] = drupal_render($form);
+}

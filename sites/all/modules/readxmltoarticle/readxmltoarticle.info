@@ -1,0 +1,3 @@
+name = Read XML Feed Into Articles Content Type
+description = Read XML feed into DB node with conent type as Articles.  Used initially for Access Hollywood rss feed.
+core = 6.x

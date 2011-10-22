@@ -1,0 +1,197 @@
+
+<link rel="stylesheet" href="http://dev-features.oxygen.com/sites/all/themes/features/o2_homepage.css" type="text/css"/>
+               
+
+
+
+
+		<div id="content"><!--Begin Content-->
+			<div id="primary"><!--Begin Primary Content Column-->
+						
+				<div id="block-promo-20" class="png block-promo">
+  
+				<div id="promoOneSlider">
+						<div id="cycleMeNow">
+						<div class="promoOneMain"style="display:block;">	
+								<a href="/" target="_blank" class="png promoIMG hp_promo1_image1">
+								<img src="" class="hp_promo1_img" thumbnail="" width="569" height="250" alt="" border="0"></a> 
+						<div class="promoOneCopy">
+							<h1 class="promoOneCopyHeader"></h1>Don't miss it!<a href="/" target="_blank" ></a></div><!-- END promoOneCopy --></div><!-- END promoOneMain -->
+						<div class="promoOneMain">	
+								<a href="/" target="_blank" class="png promoIMG hp_promo1_image2">
+								<img src="" class="hp_promo1_img" thumbnail="" width="569" height="250" alt="" border="0"></a> 
+						<div class="promoOneCopy">
+							<h1 class="promoOneCopyHeader"></h1>Don't miss it!<a href="/" target="_blank" ></a></div><!-- END promoOneCopy --></div><!-- END promoOneMain -->
+						<div class="promoOneMain">	
+								<a href="/" target="_blank" class="png promoIMG hp_promo1_image3">
+								<img src="" class="hp_promo1_img" thumbnail="" width="569" height="250" alt="" border="0"></a> 
+						<div class="promoOneCopy">
+							<h1 class="promoOneCopyHeader"></h1>Don't miss it!<a href="/" target="_blank" ></a></div><!-- END promoOneCopy --></div><!-- END promoOneMain -->
+						<div class="promoOneMain">	
+								<a href="/" target="_blank" class="png promoIMG hp_promo1_image4">
+								<img src="" class="hp_promo1_img" thumbnail="" width="569" height="250" alt="" border="0"></a> 
+						<div class="promoOneCopy">
+							<h1 class="promoOneCopyHeader"></h1>Don't miss it!<a href="/" target="_blank" ></a></div><!-- END promoOneCopy --></div><!-- END promoOneMain --></div><!-- END CYCLEME -->
+						<div id="promoOneNav">
+							<!-- DO NOT REMOVE -->
+							<!-- jQuery slider Fills this section in -->
+							<!-- DO NOT REMOVE -->
+						</div>
+					</div><!-- END SLIDER --></div>
+<div id="block-promo-21" class="png block-promo">
+  
+				<div id="hp_video_box" >
+				
+					<div id="vbox_player_col">
+						<h3><span class="hp_caption">VIDEO PLAYER</span></h3>	
+						<div id="video_holder">
+							<div id="videoplayer"><!-- Video player placeholder --></div>
+							<div id="nowplaying"> Now playing: <div id="metadataTitle"></div></div>
+						</div>							
+				  	</div>
+				
+				<div id="vbox_watch_col" class="hp_must_watch_video">
+                <h3><span class="hp_caption">MUST WATCH - our fave clips</span></h3>
+        <div class="vid_promo">
+		<a href="http://naughty-kitchen.oxygen.com/recipes-from-the-naughty-kitchen-with-chef-blythe-beck?clip=1142533" title="Housewives vs Chef Skills" class="png hp_must_watch_video_link1"><img src="/sites/default/files/oxgn-homepage/videothumbs/1142533.jpg" class="hp_must_watch_video_img" width="80" height="60" border="0" /></a>
+        <div class="vid_title vid_1">Housewives vs Chef Skills</div>Learn some easy cooking tips from the pros. <a href="http://naughty-kitchen.oxygen.com/recipes-from-the-naughty-kitchen-with-chef-blythe-beck?clip=1142533" class="hp_must_watch_video_anchor">Watch Now</a></div>
+
+        <div class="vid_promo">
+		<a href="http://naughty-kitchen.oxygen.com/recipes-from-the-naughty-kitchen-with-chef-blythe-beck?clip=1138732" title="Blythe Beck Explains Naughty" class="png hp_must_watch_video_link2"><img src="/sites/default/files/oxgn-homepage/videothumbs/1138876.jpg" class="hp_must_watch_video_img" width="80" height="60" border="0" /></a>
+        <div class="vid_title vid_2">Blythe Beck Explains Naughty</div>This fiery Texas native reveals what naughty means to her. <a href="http://naughty-kitchen.oxygen.com/recipes-from-the-naughty-kitchen-with-chef-blythe-beck?clip=1138732" class="hp_must_watch_video_anchor">Watch Now</a></div>
+
+        <div class="vid_promo">
+		<a href="http://naughty-kitchen.oxygen.com/recipes-from-the-naughty-kitchen-with-chef-blythe-beck?clip=1138876" title="Cream Corn How-To" class="png hp_must_watch_video_link3"><img src="/sites/default/files/oxgn-homepage/videothumbs/1138732.jpg" class="hp_must_watch_video_img" width="80" height="60" border="0" /></a>
+        <div class="vid_title vid_3">Cream Corn How-To</div>Learn how to make this scrumptious side dish. <a href="http://naughty-kitchen.oxygen.com/recipes-from-the-naughty-kitchen-with-chef-blythe-beck?clip=1138876" class="hp_must_watch_video_anchor">Watch Now</a></div>
+</div><!-- END vbox_watch_col --></div><!-- END hp_video_box --></div>
+<div id="block-promo-22" class="png block-promo">
+  
+				
+				<div id="hp_blogs_and_photos_box" >
+				
+					<div id="hp_blogs_box" class="hp_blogs_wide">
+
+					<h3><span class="hp_caption">blogs - reality stars tell all</span></h3>
+					
+					<div id="hp_featured_blog">
+						<a href="/nk/blog/blythe/world-culinary-domination" target="_blank" title="o2hp blogs 09292009" class="png hp_blogs_wide_link1">
+						<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/blogsphotos-wide/blogs.jpg" width="280" height="114" border="0" class="hp_blogs_wide_img" alt="blogs">
+						Blythe shares more kitchen drama and juicy gossip in her personal blog.</a>
+					</div>			
+					<div id="hp_more_blogs">
+						more blogs
+						<ul>
+        <li><a href="http://naughty-kitchen.oxygen.com/nk/blog/curtis-nk/its-going-to-be-an-extremely-naughty-season">"Door whore" Curtis dishes up what you didn't see in the show.</a></li>     
+	<li><a href="http://naughty-kitchen.oxygen.com/nk/blog/robyn-nk/robyns-blog-is-coming-soon">Robyn gets real with what you can expect this season on Naughty Kitchen.</a></li>     
+        <li><a href="http://naughty-kitchen.oxygen.com/nk/blog/melanie/sams-blog-is-coming-soon">Get to know Sam, and all his totes funny sayings.</a></li>
+</ul>
+					</div>
+				
+				
+					</div>
+					
+					<div id="hp_photos_box" class="hp_photos_wide">
+
+					<h3><span class="hp_caption">photos - tempting!</span></h3>
+					
+					<div id="hp_featured_photos">
+						<a href="/nk/photos/naughty-dishes" target="_blank" title="o2hp photos 09292009" class="png hp_photos_wide_link1">
+						<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/blogsphotos-wide/Photos.jpg" width="280" height="114" border="0" class="hp_photos_wide_img" alt="photos">
+						Check out these delish dishes from Central 214.</a>
+					</div>			
+					<div id="hp_more_photos">
+						more galleries
+						<ul>
+        <li><a href="http://naughty-kitchen.oxygen.com/nk/photos/episode-2-cooking-up-love">Episode 2: Cooking Up Love</a></li>     
+	<li><a href="http://www.oxygen.com/tvshows/topmodel/photos/season13.aspx"><i>ANTM</i>'s Newest Models </a></li>     
+        <li><a href="http://naughty-kitchen.oxygen.com/nk/photos/curtis-candids"><i>Naughty</i> "Door Whore" Curtis' Candids</a></li>
+</ul>
+					</div>
+				
+				
+					</div>
+				</div></div>
+<div id="block-promo-23" class="png block-promo">
+  
+				
+				<div id="hp_music_movies_games_more_box" class="hp_music_movies_more">
+				
+					<h3><span class="hp_caption">music, movies, games, and more</span></h3><div class="hp_medium_promo">	
+								<a href="http://www.oxygen.com/games/" title="games & fun" class="png hp_music_movies_more_link1">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/makeovermatic.jpg" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="games & fun">
+								<div class="hp_medium_promo_title medium_promo_1">games & fun</div></a>Use our popular makeover tools, take a game break, and have fun.</div><div class="hp_medium_promo">	
+								<a href="http://quiz.oxygen.com/" target="_blank" title="quizOlicious" class="png hp_music_movies_more_link2">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/quizolicious.jpg" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="quizOlicious">
+								<div class="hp_medium_promo_title medium_promo_2">quizOlicious</div></a>Take one of our fun quizzes to test your personality, trivia knowledge, and more.</div><div class="hp_medium_promo">	
+								<a href="http://www.tweetoverse.com/" target="_blank" title="tweetOverse" class="png hp_music_movies_more_link3">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/tweetoverse.jpg" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="tweetOverse">
+								<div class="hp_medium_promo_title medium_promo_3">tweetOverse</div></a>Follow Oxygen and our stars for the latest news and gossip.</div><div class="hp_medium_promo">	
+								<a href="http://shop.oxygen.com/b2c/PK/ecom/ecomEnduser/default/defaultNF.aspx?store=oxygen" target="_blank" title="shopOholic" class="png hp_music_movies_more_link4">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/badgirlsclubshop.jpg" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="shopOholic">
+								<div class="hp_medium_promo_title medium_promo_4">shopOholic</div></a>Get the look from our shows! Shop our Oxygen store.</div><div class="hp_medium_promo">	
+								<a href="http://www.oxygen.com/soundslikeoxygen/" title="sounds like oxygen" class="png hp_music_movies_more_link5">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/soundslikeoxygen.jpg" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="sounds like oxygen">
+								<div class="hp_medium_promo_title medium_promo_5">sounds like oxygen</div></a>Watch music videos from the latest up-and-coming artists.</div><div class="hp_medium_promo">	
+								<a href="http://www.oxygen.com/movies/" title="movie lounge" class="png hp_music_movies_more_link6">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/twoweeksnotice.jpg" class="hp_music_movies_more_img" width="205" height="92" border="0" alt="movie lounge">
+								<div class="hp_medium_promo_title medium_promo_6">movie lounge</div></a>See behind-the-scenes pics and trailers for movies on Oxygen.</div></div></div>
+<div id="block-promo-24" class="png block-promo">
+  
+				<div id="hp_dont_miss_box" class="hp_dont_miss" >
+					<h3><span class="hp_caption">DONT MISS</span></h3><div class="hp_medium_promo">	
+								<a href="http://oxygen.com/games/shoppingspree/" title="HP Dont Miss Promo1 09292009" class="png hp_dont_miss_link1">
+								<img src="http://features.oxygen.com/sites/default/files/oxgn-homepage/medium/shoppingspree.jpg" class="hp_dont_miss_img" width="205" height="92" border="0" alt="HP Dont Miss Promo1 09292009">Do some fall shopping – without paying a cent. Play our Shopping Spree game.</a></div><div class="hp_medium_promo">	
+								<a href="http://naughty-kitchen.oxygen.com/recipes/" title="HP Dont Miss Promo2 09292009" class="png hp_dont_miss_link2">
+								<img src="/sites/default/files/oxgn-homepage/medium/MacAndCheese.jpg" class="hp_dont_miss_img" width="205" height="92" border="0" alt="HP Dont Miss Promo2 09292009">Get cooking! Browse thousands of ideas in our new recipe engine.</a></div><div class="hp_medium_promo">	
+								<a href="http://www.facebook.com/pages/Naughty-Kitchen/122347890976?ref=ts" target="_blank" title="HP Dont Miss Promo3 09242009" class="png hp_dont_miss_link3">
+								<img src="/sites/default/files/oxgn-homepage/medium/facebook-NK.jpg" class="hp_dont_miss_img" width="205" height="92" border="0" alt="HP Dont Miss Promo3 09242009">Get social and become a fan of our <i>Naughty Kitchen</i> Facebook page.</a></div></div></div>
+<div id="block-block-69" class="png block-block">
+      <script type="text/javascript" src="http://video.nbcuni.com/framework/FrameworkManager.js?include=EmbeddedPlayerManager"></script>
+    <script type="text/javascript">
+	    doAfterLoad(function(){
+	     embeddedPlayerManager.setAttribute("targetDivID","videoplayer");
+	     embeddedPlayerManager.setAttribute("companionContainerID","companion_300x250");
+	     embeddedPlayerManager.setAttribute("clipPlaylist","1140096,1134007,1137981,1140118,1140123");
+	     embeddedPlayerManager.setAttribute("height",277);
+	     embeddedPlayerManager.setAttribute("width",320);
+	     embeddedPlayerManager.setAttribute("configID","27000");
+	     embeddedPlayerManager.setAttribute("initialVolume",50);
+	     embeddedPlayerManager.setAttribute("autoStartOnEmbed",true);
+	     embeddedPlayerManager.embedVideoPlayer();
+	     embeddedPlayerManager.getPlayer().metadataContainers.setTitle('metadataTitle');
+	    });
+    </script>
+</div>
+				<div id="node-39334">
+
+  <div class="content clear-block">
+    <!--paging_filter-->  </div>
+
+
+</div>
+			
+			</div><!--End Primary Content Column-->	
+				<!--Begin Secondary Content Column-->
+			<div id="secondary">
+	    			<div id="block-oxygen_dart-1" class="png block-oxygen_dart">
+          
+<div id="ad300x250">
+<span>Advertisement</span>
+<div id="x95AdBlock">
+<script type="text/javascript" language="javascript">
+	//<![CDATA[
+	document.write('<scr' + 'ipt language="javascript" type="text/javascript" src="http://iv.doubleclick.net/adj/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;' + (top.__nbcudigitaladops_dtparams||'') + 'ord=' + randDARTNumber + '?"></scr' + 'ipt>');//]]>
+
+</script><noscript><a target="_blank" href="http://iv.doubleclick.net/jump/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=123456a?"><img src="http://iv.doubleclick.net/ad/nbcu.oxygen/oxygen_gen;site=oxygen;sect=gen;!category=oxygen;!category=home;sz=300x250;tile=7;pos=7;ord=123456a?" border="0" alt="" /></a></noscript>
+</div>
+</div><div id='dart_string_300x250' style='display:none'>site=oxygen;sz=300x250;tile=7;pos=7;ord=</div></div>
+				
+				<div class="mobileSidebarTout">
+			       	<div class="mobileCopy">
+			              	<h4>Get behind-the-scenes gossip, pics, and videos on the go!</h4>
+			              	<h3><a href="/mobile/"> Go mobile here.</a></h3>			              
+			            </div>
+				</div>
+				<div id="sideBarFooter">&nbsp;</div>
+			</div><!--End Secondary Content Column-->
+		</div><!--End Content-->

@@ -1,0 +1,41 @@
+name = Oxygen Homepage
+description = Oxygen Drupal Homepage theme based on Features theme by Hanan Mahmood
+screenshot = screenshot.png
+core = 6.x
+engine = phptemplate
+
+stylesheets[all][] = css/common.css
+stylesheets[all][] = css/header.css.css
+stylesheets[all][] = css/homepage.css
+stylesheets[all][] = css/footer.css
+stylesheets[all][] = css/shell.css
+stylesheets[all][] = css/modal.css
+
+scripts[] = js/util.js
+scripts[] = js/jquery.js
+scripts[] = js/jquery.cycle.all.js
+scripts[] = js/jScrollPane.js
+scripts[] = js/oxygen_embed_player.js
+scripts[] = js/jquery.modal.js
+
+
+regions[right] = Right Column
+regions[left] = Left Column
+regions[header] = Header
+regions[middle] = Middle Column
+regions[content] = Main Content
+regions[footer] = Footer
+regions[topAdBlock] = Top Ad Block
+
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+; features[] = secondary_links
+
+version = "6.x"
+core = "6.x"
+project = "oxygen"
+datestamp = "1311094154"
+

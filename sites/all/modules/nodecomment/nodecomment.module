@@ -1,0 +1,465 @@
+<?php
+/**
+ * @file
+ * Enables comments to be nodes if needed.
+ */
+
+require_once(dirname(__FILE__) . '/includes/nodecomment.common.inc');
+require_once(dirname(__FILE__) . '/includes/nodecomment.forms.inc');
+require_once(dirname(__FILE__) . '/includes/nodecomment.theme.inc');
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function nodecomment_nodeapi(&$node, $op, $arg = 0, $page = 0) {
+  switch ($op) {
+    case 'load':
+      return _nodecomment_nodeapi_load($node, $op, $arg, $page);
+
+    case 'presave':
+      // Restore comment setting so that we don't disable commenting
+      // accidentally.
+      if (isset($node->node_comment)) {
+        // Allow changing of comment setting during node form submission.
+        if (!isset($node->nodecomment_real_node_form)) {
+          $node->comment = $node->node_comment;
+        }
+      }
+      break;
+
+    case 'insert':
+    case 'update':
+      // If this is a comment, save comment data.
+      if (isset($node->comment_target_nid)) {
+        nodecomment_save($node);
+      }
+      break;
+
+    case 'delete':
+      // If this node has own comments, delete them.
+      // For increased durability, don't add any checks here: it should help to 
+      // deal with the orphan problem.
+      _nodecomment_delete_comments($node->nid);
+      
+      // If this is a comment, delete it and it's children comments from the thread.
+      if (isset($node->comment_target_nid)) {
+        _nodecomment_thread_delete_children($node->nid, $node->comment_target_nid);
+        
+        // For increased durability, delete node_comments entries one by one, 
+        // together with their nodes, even when mass deleting. 
+        db_query('DELETE FROM {node_comments} WHERE cid = %d', $node->nid);
+        
+        _nodecomment_update_node_statistics($node->comment_target_nid);
+      }
+      break;
+
+    case 'view':
+      // If this is a comment. 
+      if ($page && isset($node->comment_target_nid)) {
+        // Redirect to target node, if needed.
+        // We could do it inside hook_init() but then we would add 1 query for 
+        // every node view, which is a tax it's better not to pay.
+        if (variable_get('node_comment_node_redirect', TRUE)) {
+          if (!nodecomment_is_content($node->type)) {
+            // This is a pure comment. Pure comments don't have own pages.
+            // Redirect this to the node page the comment is displayed on.
+            _nodecomment_target_node_redirect($node);
+          }
+        }
+        // Adjust the breadcrumb trail to include target node.
+        $target_node = node_load($node->comment_target_nid);
+        nodecomment_set_breadcrumb($target_node);
+      }
+      break;
+  }
+}
+
+function _nodecomment_nodeapi_load($node, $op, $arg, $page) {
+  // We want to process 3 cases: 
+  // - node which is a node comment
+  // - node which has node comments
+  // - both
+  $comment_types = nodecomment_get_comment_types();
+  $node->comment_type = nodecomment_get_comment_type($node->type);
+  $comment_data = array();
+  
+  // Is this a comment type ?
+  if (in_array($node->type, $comment_types)) {
+    $query = "SELECT nc.nid AS comment_target_nid, nc.pid AS comment_target_cid,
+              nc.hostname, nc.thread, nc.name, nc.uid, nc.mail, nc.homepage,
+              u.signature, u.signature_format
+              FROM {node_comments} nc
+              INNER JOIN {users} u ON nc.uid = u.uid
+              WHERE nc.cid = %d";  
+    $comment_data = db_fetch_array(db_query($query, $node->nid));
+    if ($comment_data) {
+      // It's a node comment! Populate commenty stuff.
+      // Don't let the "name" field in the comment overwrite a username.
+      if (!empty($node->uid)) {
+        unset($comment_data['name']);
+      }
+      // Add the user signature like comment.module does
+      if (variable_get('user_signatures', 0) && !empty($comment_data['signature'])) {
+        $comment_data['signature'] = check_markup($comment_data['signature'], $comment_data['signature_format'], FALSE);
+      }
+      else {
+        $comment_data['signature'] = '';
+      }
+    }
+    else {
+      // Node type is a comment, but node_comments table entry is missing.
+      watchdog(
+        'nodecomment',
+        'Node @nid is configured as comment, but the comment data is missing.',
+        array('@nid' => $node->nid),
+        WATCHDOG_ERROR
+      );
+    }
+  }
+  
+  // Does this node have node comments ?
+  if ($node->comment_type) {
+    // Move $node->comment to $node->node_comment and set $node->comment 
+    // to disabled to prevent core comment module messing with the node.
+    // In presave nodeapi operation restore this setting.
+    // In 3.x branch this is the only hack we do with core comment module.
+    $node->node_comment = $node->comment;
+    $node->comment = COMMENT_NODE_DISABLED;
+  }
+  
+  return $comment_data;
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function nodecomment_user($type, $edit, &$user, $category = NULL) {
+  if ($type == 'delete') {
+    // 'node_comment_statistics' table is updated by comment module.
+    db_query('UPDATE {node_comments} SET uid = 0 WHERE uid = %d', $user->uid);
+  }
+}
+
+/**
+ * Implementation of hook_link().
+ */
+function nodecomment_link($type, $node = NULL, $teaser = FALSE) {
+  global $user;
+  $links = array();
+
+  if ($type != 'node') {
+    return;
+  }
+  
+  if (isset($node->comment_target_nid)) {
+    // This node is a comment to a parent node.
+    _nodecomment_comment_links($links, $node, $teaser);
+  }
+  
+  if (!empty($node->node_comment)) {
+    // This node can have node comments.
+    _nodecomment_node_links($links, $node, $teaser);
+  }
+
+  return $links;
+}
+
+function _nodecomment_comment_links(&$links, &$node, $teaser) {
+  // This really looks like a "security by obscurity" anti-pattern: user with
+  // edit permission can still edit comment even while the link is hidden.
+  // But the core comment does the same.
+  // Fixing this properly will require an advanced node access module.
+  if (node_comment_mode($node->comment_target_nid) == COMMENT_NODE_READ_WRITE) {
+    if (node_access('update', $node)) {
+      $links['comment_edit'] = array(
+        'title' => t('edit'),
+        'href' => 'node/'. $node->nid .'/edit',
+        'query' => drupal_get_destination(),
+      );
+    }
+    if (node_access('delete', $node)) {
+      $links['comment_delete'] = array(
+        'title' => t('delete'),
+        'href' => 'node/'. $node->nid .'/delete',
+        'query' => drupal_get_destination(),
+      );
+    }
+    // Show comment reply links in threaded mode. In flat mode we only 
+    // hide the link: separate comment reply pages are always accessible.
+    $mode = _comment_get_display_setting('mode', $node);
+    $flat = in_array($mode, array(COMMENT_MODE_FLAT_COLLAPSED, COMMENT_MODE_FLAT_EXPANDED));
+    if (!$flat && node_access('create', $node)) {
+      $links['comment_reply'] = array(
+        'title' => t('reply'),
+        'href' => 'node/add/'. str_replace('_', '-', $node->type) .'/'. $node->comment_target_nid .'/'. $node->nid,
+      );
+    }
+  }
+
+  return $links;
+}
+
+function _nodecomment_node_links(&$links, &$node, $teaser) {
+  global $user;
+
+  if ($teaser && user_access('access comments')) {
+    // Main page: display the number of comments that have been posted.
+    $all = comment_num_all($node->nid);
+    if ($all) {
+      $links['comment_comments'] = array(
+        'title' => theme('nodecomment_comment_count', $all, $node->comment_type),
+        'href' => "node/$node->nid",
+        'attributes' => array('title' => t('Jump to the first comment of this posting.')),
+        'fragment' => 'comments'
+      );
+
+      $new = nodecomment_num_new($node->nid);
+      if ($new) {
+        $links['comment_new_comments'] = array(
+          'title' => theme('nodecomment_new_comment_count', $new, $node->comment_type),
+          'href' => "node/$node->nid",
+          'query' => nodecomment_new_page_count($all, $new, $node),
+          'attributes' => array('title' => t('Jump to the first new comment of this posting.')),
+          'fragment' => 'new'
+        );
+      }
+    }
+  }
+
+  // This node needs an Add new comment link.
+  // Note that the add comment link is shown on full node view no matter
+  // where the comment form is located, which differs from core's
+  // comment.module. See http://drupal.org/node/480282.
+  if ($node->node_comment == COMMENT_NODE_READ_WRITE) {
+    $comment_type = nodecomment_get_comment_type($node->type);
+    // Can the current user create the node comment ?
+    if (user_access("create $comment_type content")) {
+      // Is num of comments link present ?
+      if (!isset($links['comment_comments'])) {
+        $links['comment_add'] = array(
+          'title' => t('Add new @comment_type', array('@comment_type' => node_get_types('name', $comment_type))),
+          'attributes' => array('title' => t('Add a new comment to this page.')),
+        );
+        if (variable_get('comment_form_location_'. $node->type, COMMENT_FORM_SEPARATE_PAGE) == 1) {
+          $links['comment_add']['href'] = "node/$node->nid";
+          $links['comment_add']['fragment'] = 'node-form';
+        }
+        else {
+          $links['comment_add']['href'] = "node/add/". str_replace('_', '-', $comment_type) ."/". $node->nid;
+        }
+      }
+    }
+    // The user can't create the comment nodetype.
+    elseif ($user->uid == 0) {
+      // Show anonymous users the chance to login or register
+      // We cannot use drupal_get_destination() because these links sometimes 
+      // appear on /node and taxonomy listing pages.
+      if (variable_get('comment_form_location_'. $node->type, COMMENT_FORM_SEPARATE_PAGE) == COMMENT_FORM_SEPARATE_PAGE) {
+        $destination = 'destination='. drupal_urlencode('node/add/'. str_replace('_', '-', $comment_type) .'/'. $node->nid);
+      }
+      else {
+        $destination = 'destination='. drupal_urlencode('node/'. $node->nid .'#nodecomment_form');
+      }
+
+      $links['login_register']['html'] = TRUE;
+      if (variable_get('user_register', 1)) {
+        $links['login_register']['title'] = t(
+          '<a href="@login">Login</a> or <a href="@register">register</a> to post @comments',
+          array(
+            '@login' => url('user/login', array('query' => $destination)),
+            '@register' => url('user/register', array('query' => $destination)),
+            '@comments' => variable_get('node_comment_plural_'. $node->type, 'comments')
+          )
+        );
+      }
+      else {
+        $links['login_register']['title'] = t(
+          '<a href="@login">Login</a> to post @comments',
+          array(
+            '@login' => url('user/login', array('query' => $destination)),
+            '@comments' => variable_get('node_comment_plural_'. $node->type, 'comments')
+          )
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_link_alter().
+ */
+function nodecomment_link_alter(&$links, $node) {
+  // Ensure comment links go before "read more" one. Other modules can still
+  // add links and break the order, but its the best we can do.
+  if (isset($links['node_read_more'])) {
+    $readmore = $links['node_read_more'];
+    unset($links['node_read_more']);
+    $links['node_read_more'] = $readmore;
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function nodecomment_menu() {
+  $items = array();
+  $items['admin/settings/nodecomment'] = array(
+    'title' => 'Node Comments',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('nodecomment_admin_settings_form'),
+    'access arguments' => array('administer content types'),
+    'file' => 'includes/nodecomment.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu_alter()
+ *
+ * Alter the node view page to come to us instead. Don't do this if
+ * another module has already done so, or if delegator module is enabled.
+ */
+function nodecomment_menu_alter(&$items) {
+  // Override the node view handler for our purpose.
+  if ((!module_exists('page_manager') ||
+      variable_get('page_manager_node_view_disabled', TRUE)) &&
+      $items['node/%node']['page callback'] == 'node_page_view') {
+
+    $items['node/%node']['page callback'] = 'nodecomment_node_view';
+  }
+
+  $comment_types = nodecomment_get_comment_types();
+  foreach ($comment_types as $type) {
+    $path = "node/add/". str_replace('_', '-', $type);
+    if (isset($items[$path])) {
+      // Attach custom access callback that ensures proper access denied page
+      // when needed.
+      $items[$path]['access callback'] = '_nodecomment_node_add_access';
+      // Make all our comment types not visible to node/add.
+      $items[$path]['type'] = MENU_CALLBACK;
+    }
+  }
+}
+
+/**
+ * Menu access callback for node/add pages of node comment types.
+ */
+function _nodecomment_node_add_access($op, $type) {
+  // Note: menu callbacks receive proper type with underscores instead of
+  // hyphens because Node module creates menu items with predefined
+  // callback arguments rather than lets callback fetch argument from the url.
+  
+  // Don't allow to add nodecomments without comment context.
+  //
+  // TODO: we may want to allow this later, if we want to add comments
+  // that are "content" by our terms without comment context.
+  // But before doing so, we need to be sure that our nodeapi & nodecomment 
+  // logics can handle that.
+  if (!is_numeric(arg(3))) {
+    return FALSE;
+  }
+
+  // Check basic create permission before performing more heavy checks.
+  if (!node_access('create', $type)) {
+    return FALSE;
+  }
+
+  $target_node = node_load(arg(3));
+
+  // Verify that target node being commented on exists and can be commented.
+  if (!$target_node || $target_node->node_comment != COMMENT_NODE_READ_WRITE) {
+    return FALSE;
+  }
+
+  // Check that we are trying to add a proper node comment type.
+  $comment_type = nodecomment_get_comment_type($target_node->type);
+  if (!$comment_type || $type != $comment_type) {
+    return FALSE;
+  }
+
+  // If we are replying to a nodecomment, check it's validity.
+  if (is_numeric(arg(4))) {
+    $target_comment = node_load(arg(4));
+    // Target node should be a comment and should belong to the same thread.
+    if (!$target_comment ||
+        !isset($target_comment->comment_target_nid) ||
+        $target_comment->comment_target_nid != $target_node->nid) {
+
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Ask Page Manager to use our version of the node page view instead of
+ * Drupal's when falling back.
+ */
+function nodecomment_page_manager_override($type) {
+  if ($type == 'node_view') {
+    return 'nodecomment_node_view';
+  }
+}
+
+/**
+ * Implementation of hook_views_pre_build()
+ */
+function nodecomment_views_pre_build(&$view) {
+  if ($view->display[$view->current_display]->display_plugin == 'nodecomment_comments') {
+    $view->display_handler->pre_build();
+  }
+}
+
+/**
+ * Implementation of hook_node_type().
+ * 
+ * Update nodecomment variables when node type information changes.
+ */
+function nodecomment_node_type($op, $info) {
+  if ($op == 'delete') {
+    $vars = _nodecomment_type_vars($info->type);
+    foreach ($vars as $var) {
+      variable_del($var);
+    }
+  }
+  else if ($op == 'update' && !empty($info->old_type) && $info->type != $info->old_type) {
+    $vars = _nodecomment_type_vars($info->old_type);
+    foreach ($vars as $var) {
+      variable_del($var);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_features_pipe_COMPONENT_alter().
+ */
+function nodecomment_features_pipe_node_alter(&$pipe, $data, $export) {
+  if (!empty($data)) {
+    foreach ($data as $node_type) {
+      $variables = _nodecomment_type_vars($node_type);
+      foreach ($variables as $variable_name) {
+        $pipe['variable'][] = $variable_name;
+      }
+    }
+  }
+}
+
+/**
+* Implementation of hook_ctools_plugin_directory().
+*/
+function nodecomment_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function nodecomment_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'nodecomment') .'/views',
+  );
+}

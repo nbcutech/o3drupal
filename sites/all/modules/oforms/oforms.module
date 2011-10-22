@@ -1,0 +1,57 @@
+<?php
+// $Id$
+
+
+  /**
+   * Implementation of hook_form_alter().
+   *
+   */
+  
+function oforms_form_alter(&$form, $form_state, $form_id) {
+
+  // Normally a switch is used because you may want to alter more than
+  // one form and it is easy to add a new case for each form.
+  switch ($form_id) {
+    
+
+   case 'comment_node_form':
+//    print_r($form)
+//    could NOT find a better way to get #redirect back to originating page.  Sigh.
+//    print parse_url($_SERVER ["HTTP_REFERER"],PHP_URL_PATH);
+	unset($form['title']);      
+        unset($form['body_field']['#after_build']);
+        unset($form['body_field']['teaser_js']);
+        unset($form['body_field']['teaser_include']);
+        unset($form['body_field']['format']);
+	
+	
+	$form['body_field']['body']['#title'] = "comment";
+	$form['buttons']['submit']['#type'] = "image_button";
+	$form['buttons']['submit']['#src'] = drupal_get_path('theme','torianddean') . "/images/submit_comment_button.gif";
+	
+	$form['buttons']['submit']['#value'] = "Save comment";
+	unset($form['revision_information']);
+	unset($form['author']);
+	unset($form['options']);
+	unset($form['buttons']['preview']);
+	unset($form['menu']);
+	unset($form['path']);
+//	unset($form['#after_build']);
+
+	
+//	unset($form['comment_filter']['format']);
+//	unset($form['preview']);
+//	unset($form['homepage']);
+        $fragment = parse_url($_SERVER ["HTTP_REFERER"]);
+	$form['#redirect'] = ltrim(parse_url($_SERVER ["HTTP_REFERER"],PHP_URL_PATH) . $fragment['fragment'], "/");
+
+//	$form['submit']['#value'] = "Submit Comment";
+    break;
+
+  }
+
+}
+
+
+
+

@@ -1,0 +1,195 @@
+# $Id: multiblock.pot,v 1.1.2.1 2009/01/24 21:33:07 nancyw Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  multiblock.module,v 1.1.4.11 2009/01/24 20:57:25 nancyw
+#  multiblock.module,v 1.1.4.10 2009/01/18 16:26:07 nancyw
+#  multiblock.install,v 1.1.4.2 2009/01/24 20:57:25 nancyw
+#  multiblock.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-01-24 16:28-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: multiblock.module:148 xmultiblock.module:130
+msgid "Instance Title"
+msgstr ""
+
+#: multiblock.module:174 xmultiblock.module:152
+msgid "Block type"
+msgstr ""
+
+#: multiblock.module:181;380 xmultiblock.module:159
+msgid "Save"
+msgstr ""
+
+#: multiblock.module:190 xmultiblock.module:168
+msgid "The multiblock with the delta @delta was not found."
+msgstr ""
+
+#: multiblock.module:196 xmultiblock.module:174
+msgid "Delete the block instance %title?"
+msgstr ""
+
+#: multiblock.module:198 xmultiblock.module:176
+msgid "This will delete the instance of the block %title."
+msgstr ""
+
+#: multiblock.module:199;336 xmultiblock.module:177;314
+msgid "Delete"
+msgstr ""
+
+#: multiblock.module:199 xmultiblock.module:177
+msgid "Cancel"
+msgstr ""
+
+#: multiblock.module:204 xmultiblock.module:182
+msgid "Block successfully deleted!"
+msgstr ""
+
+#: multiblock.module:207 xmultiblock.module:185
+msgid "There was a problem deleting the block"
+msgstr ""
+
+#: multiblock.module:253 xmultiblock.module:231
+msgid "Bad block module input, contact administrator"
+msgstr ""
+
+#: multiblock.module:260 xmultiblock.module:238
+msgid "Module or block doesn't exist, contact administrator"
+msgstr ""
+
+#: multiblock.module:284 xmultiblock.module:262
+msgid "Block instance %instance created."
+msgstr ""
+
+#: multiblock.module:330 xmultiblock.module:308
+msgid "Edit Instance"
+msgstr ""
+
+#: multiblock.module:330 xmultiblock.module:308
+msgid "Add Instance"
+msgstr ""
+
+#: multiblock.module:332 xmultiblock.module:310
+msgid "Title"
+msgstr ""
+
+#: multiblock.module:332 xmultiblock.module:310
+msgid "Original Block Title"
+msgstr ""
+
+#: multiblock.module:332 xmultiblock.module:310
+msgid "Original Module"
+msgstr ""
+
+#: multiblock.module:332 xmultiblock.module:310
+msgid "MultiBlock Enabled"
+msgstr ""
+
+#: multiblock.module:332 xmultiblock.module:310
+msgid "Original Delta"
+msgstr ""
+
+#: multiblock.module:332 xmultiblock.module:310
+msgid "Action"
+msgstr ""
+
+#: multiblock.module:335 xmultiblock.module:313
+msgid "Edit"
+msgstr ""
+
+#: multiblock.module:339 xmultiblock.module:317
+msgid "Not Multiblock enabled"
+msgstr ""
+
+#: multiblock.module:341 xmultiblock.module:319
+msgid "Multiblock enabled"
+msgstr ""
+
+#: multiblock.module:352 xmultiblock.module:330
+msgid "Manage Instances"
+msgstr ""
+
+#: multiblock.module:369
+msgid "Add modules, one per line, that will not be shown in the \"Add Instance\" list."
+msgstr ""
+
+#: multiblock.module:375
+msgid "Note: The following modules are automatically blocked: @auto"
+msgstr ""
+
+#: multiblock.module:394
+msgid "Configuration saved"
+msgstr ""
+
+#: multiblock.module:15
+msgid "Instances"
+msgstr ""
+
+#: multiblock.module:16 xmultiblock.module:11
+msgid "Create and delete instances of blocks."
+msgstr ""
+
+#: multiblock.module:24
+msgid "Blocked Modules"
+msgstr ""
+
+#: multiblock.module:25
+msgid "Block modules from instance creation."
+msgstr ""
+
+#: multiblock.module:34
+msgid "Delete Block Instance"
+msgstr ""
+
+#: multiblock.module:0
+msgid "multiblock"
+msgstr ""
+
+#: xmultiblock.module:0
+msgid "xmultiblock"
+msgstr ""
+
+#: multiblock.install:13
+msgid "Table for storing information about block instances used by the multiblock module."
+msgstr ""
+
+#: multiblock.install:16
+msgid "Unique key for each created block instance."
+msgstr ""
+
+#: multiblock.install:21
+msgid "The title used to display a block instance in the instance administration."
+msgstr ""
+
+#: multiblock.install:28
+msgid "The name of the module that provided the original block."
+msgstr ""
+
+#: multiblock.install:35
+msgid "The delta of the original block."
+msgstr ""
+
+#: multiblock.install:42
+msgid "Boolean flag that stores if the original module has multiblock support for multiple instance of this block."
+msgstr ""
+
+#: multiblock.info:0
+msgid "MultiBlock"
+msgstr ""
+
+#: multiblock.info:0
+msgid "Allows the creation of multiple instances of blocks"
+msgstr ""
+

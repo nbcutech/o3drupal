@@ -1,0 +1,95 @@
+.commentsUtil
+{
+	display: block; 
+	height: 18px;
+}
+.comment-created{float:left;}
+.commentsUtil .report_comment
+{
+	background-image:url(/sites/all/themes/oxygen/images/comment_report.jpg); 
+	width:45px; 
+	height:18px; 
+	margin: 0 10px 0 0;
+	display:inline;
+	float:right;
+	text-indent:-999px;
+}
+.commentsUtil .reply_comment
+{
+	background-image:url(/sites/all/themes/oxygen/images/comment_reply.jpg);
+	width:38px; 
+	height:18px; 
+	float: right; 
+	display: inline; 
+	text-indent: -999px;  
+	margin: 0 20px 0 0;
+}
+
+.commentsUtil .reported_comment
+{
+	background-image:url(/sites/all/themes/oxygen/images/comment_reported.jpg); 
+	width:198px; 
+	height:18px; 
+	margin: 0 10px 0 0;
+	display:inline;
+	float:right;
+	text-indent:-999px;
+}
+
+#btns{display: block; height: 31px; width: 448px;}
+#btns_left a {
+
+	background:url(./images/button_previous.jpg) 0 -31px no-repeat;
+	height:31px;
+	position:absolute;
+	width:224px;
+}
+#btns_left a:hover {
+	background:url(./images/button_previous.jpg) 0 0 no-repeat;
+}
+
+#btns_right a {
+
+	background:url(./images/button_next.jpg) 0 -31px no-repeat;
+	height:31px;
+	left:224px;
+	position:absolute;
+	width:224px;
+}
+
+#btns_right a:hover {
+	background:url(./images/button_next.jpg) 0 0 no-repeat;
+}
+
+
+/** RELATED GALLERY SECTION ***/
+
+#related_gallery_wrapper {
+	background:#fff url(./images/related_galleries_BG.jpg) no-repeat 0 0;
+	height:188px;
+	padding:40px 0 5px 5px;
+	width:449px;
+}
+
+#related_gallery_content {
+	height:180px;
+	margin:0 0 5px;
+	overflow:auto;
+	width:440px;
+}
+
+.related_gallery_item {
+	float:left;
+	height:135px;
+	margin:10px 15px 0;
+	width:160px;
+}
+
+.related_gallery_image_bg {
+	background:transparent url(./images/tout_BG.png) no-repeat scroll 0 0;
+	display:block;
+	height:96px;
+	padding:14px 0 0 15px;
+	width:158px;
+}
+/*****END Related Galleries **********/

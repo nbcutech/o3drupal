@@ -1,0 +1,24 @@
+
+Google Appliance 6.x-2.x
+------------------------
+
+- [#271896] by coltrane: First commit of the Drupal 6 branch.
+
+
+Google Appliance 6.x-2.2
+------------------------
+
+- [#271896] by Signify, jweowu: Added other GSA search options
+  (e.g. meta-tag constraints), multiple tabs for specified Front End
+  and Collection combinations, arbitrary Front End and Collection combinations,
+  works with or without the core search.module, standard Drupal pager,
+  standard or custom search-result(s) theme templates, available fields
+  for search result themeing, attributes and Meta Tags for search result
+  themeing, MIME type display, synonyms (alternate search terms)
+  
+- [#528428] by jweowu, larskleiner: changed google_appliance_update_1 to
+  google_appliance_update_6201
+  
+- [#528428] by jweowu: added google_appliance_update_6000
+
+- [#704002] by SamLerner: improved handling of errors during ->query()

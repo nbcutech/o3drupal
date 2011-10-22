@@ -1,0 +1,9 @@
+.hp_caption {display:none;} /* MOST POPULAR STYLES*/ 
+#hp_most_popular { background-color:#fff; padding:10px 0 0 0; line-height: 1;} 
+#hp_most_popular ul {border-bottom: 4px solid #dcdcdc; margin:0px;padding:0px;} 
+#hp_most_popular ul li {height:44px; border-bottom: 4px solid #dcdcdc;} 
+#hp_most_popular ul li.videos {background:url(http://features.oxygen.com/sites/all/themes/features/images/o2_homepage/popular_videos.gif) no-repeat 10px 0;} 
+#hp_most_popular ul li.photos {background:url(http://features.oxygen.com/sites/all/themes/features/images/o2_homepage/popular_photos.gif) no-repeat 10px 0;} 
+#hp_most_popular ul li.blogs {background:url(http://features.oxygen.com/sites/all/themes/features/images/o2_homepage/popular_blogs.gif) no-repeat 10px 0;} 
+#hp_most_popular ul li a {display:block; height:30px; padding: 5px 5px 4px 64px;font-size:11px;color:#626262; overflow:hidden;} /* height used to be 44px w/no bottom padfing */ 
+#hp_most_popular ul li a .pop_headline {color:#075e8c;display:block;} 

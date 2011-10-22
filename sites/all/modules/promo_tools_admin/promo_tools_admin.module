@@ -1,0 +1,3 @@
+<?php
+
+include_once('promo_tools_admin.features.inc');

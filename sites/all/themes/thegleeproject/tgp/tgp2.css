@@ -1,0 +1,304 @@
+/* CSS Document */
+body {
+	margin:0px;
+	padding:0px;
+}
+
+div.wrapper {
+	width:648px;
+}
+
+div.assignment-top {
+	height:449px;
+	background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-top.jpg);
+	background-repeat:no-repeat;
+	position:relative;
+	}
+	div.assignment-top div.week-title {
+		font-family:Arial, Helvetica, sans-serif;
+		position:absolute;
+		top:116px;
+		left:128px;
+		color:white;
+		font-weight:bold;
+		font-size:20px;
+		}
+	div.assignment-top div.weeks-listing {
+		margin-top:144px;
+		margin-left:11px;
+		float:left;
+		height:240px;
+		overflow:auto;
+		width:102px;
+		}
+		div.assignment-top div.weeks-listing a {
+			display:block;
+			height:34px;
+			border-bottom:1px solid #45484C;
+			width:70px;
+			font-family:Arial, Helvetica, sans-serif;
+			font-size:10px;
+			color:#b6f64c;
+			padding-top:14px;
+			padding-left:9px;
+			text-decoration:none;
+			}
+			div.assignment-top div.weeks-listing a span {
+				display:block;
+				color:white;
+			}
+		div.assignment-top div.weeks-listing a:hover, div.assignment-top div.weeks-listing a.on {
+			background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-nav-bkg.jpg);
+			background-repeat:repeat-x;
+			color:#669900;
+			}
+		div.assignment-top div.weeks-listing a:hover span, div.assignment-top div.weeks-listing a.on span{
+			color:#333333;
+			}
+	div.assignment-top div.video-container {
+		margin-top:147px;
+		margin-left:15px;
+		float:left;
+		width:281px;
+		height:240px;
+		overflow:hidden;
+		}
+	div.assignment-top div.share-fb-twitter {
+		float:left;
+		width:215px;
+		margin-top:147px;
+		padding-top:232px;
+		padding-left:15px;
+		}
+		div.assignment-top div.share-fb-twitter div.left {
+			width:100px;
+			float:left;
+			}
+		div.assignment-top div.share-fb-twitter div.right {
+			width:115px;
+			float:right;
+			}
+	div.assignment-top div.add-your-homework {
+		position:absolute;
+		left: 130px;
+		top: 404px;
+		width: 270px;
+		height: 29px;
+		}
+		div.assignment-top div.add-your-homework a {
+			display:block;
+			text-decoration:none;
+			}
+			
+div.assignment-comments-container {
+	background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-comments-bkg.jpg);
+	background-repeat:no-repeat;
+	height:442px;
+	padding-left:35px;
+	position:relative;
+	}
+	div.assignment-comments-container div.week-chooser {
+		padding-top:98px;
+		padding-right:35px;
+		text-align:right;
+		height:25px;
+		}
+	div.assignment-comments-container div.comment-form {
+		width:284px;
+		float:left;
+		}
+		div.assignment-comments-container div.comment-form div.comment-buttons {
+			padding-top:98px;
+			height:30px;
+			overflow:hidden;
+			}
+			div.assignment-comments-container div.comment-form div.comment-buttons a {
+				width:83px;
+				height:23px;
+				display:block;
+				float:left;
+				margin-right:3px;
+				background-repeat:no-repeat;
+				}
+				div.assignment-comments-container div.comment-form div.comment-buttons a span {
+					display:none;	
+				}
+			div.assignment-comments-container div.comment-form div.comment-buttons a.facebook {
+				background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-fb-icon.gif);
+			}
+			div.assignment-comments-container div.comment-form div.comment-buttons a.twitter {
+				background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-tw-icon.gif);
+			}
+			div.assignment-comments-container div.comment-form div.comment-buttons a.email {
+				background-image:url(/sites/all/themes/thegleeproject/tgp/images/assignment-em-icon.gif);
+			}
+		div.assignment-comments-container div.comment-form textarea {
+			width:245px;
+			height:75px;
+			margin-left:2px;
+			background-color:transparent;
+			border:0px solid black;
+			color:white;
+			font-size:11px;
+			}
+		div.assignment-comments-container div.comment-form div.chars-left {
+			font-size:11px;
+			color:white;
+			font-family:Arial, Helvetica, sans-serif;
+			padding-left:3px;
+		}
+		div.assignment-comments-container div.comment-form div.submit-button {
+			text-align:right;
+			padding-top:15px;
+			padding-right:20px;
+		}
+	div.assignment-comments-container div.comment-stream {
+		width:295px;
+		height:250px;
+		float:left;
+		overflow:auto;
+		margin-top:5px;
+		}
+		div.assignment-comments-container div.comment-stream div.comment-entry {
+			margin-top:5px;
+			position:relative;
+			}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.icon {
+				width:51px;
+				height:51px;
+				float:left;
+				margin-right:5px;
+				}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.comment {
+				font-family:Arial, Helvetica, sans-serif;
+				font-size:12px;
+				width:210px;
+				float:left;
+				}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.comment div.like-share {
+				color:#502b14;
+				font-weight:bold;
+				font-size:10px;
+				}
+				div.assignment-comments-container div.comment-stream div.comment-entry div.comment div.like-share a {
+					color:#502b14;
+					padding-right:7px;
+					}
+				div.assignment-comments-container div.comment-stream div.comment-entry div.comment div.like-share span {
+					float:right;
+					}
+			div.assignment-comments-container div.comment-stream div.comment-entry div.flasher {
+				background-color:white;
+				position:absolute;
+				top:0px;
+				left:0px;
+				height:100%;
+				width:100%;
+				display:none;
+			}
+		div.assignment-comments-container div.comment-stream div.comment-entry div.clear {
+			clear:both;
+			height:1px;
+			overflow:hidden;
+			}
+	div.assignment-comments-container div.clear {
+		clear:both;
+		height:1px;
+		overflow:hidden;
+	}
+	div.assignment-comments-container div.email-signin-form {
+		position:absolute;
+		width:590px;
+		height:300px;
+		background-color:white;
+		-moz-border-radius: 15px;
+		padding:0px 15px;
+		top:50px;
+		left:10px;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:12px;
+		padding-top:25px;
+		}
+		div.assignment-comments-container div.email-signin-form div.inner {
+			padding-top:15px;
+			}
+			div.assignment-comments-container div.email-signin-form div.inner p {
+				margin:0px;
+				padding-bottom:7px;
+				}
+				div.assignment-comments-container div.email-signin-form div.inner p input.text {
+					width:99%;
+			}
+	div.assignment-comments-container div.email-signin-form2 {
+		position:absolute;
+		width:380px;
+		height:225px;
+		background-color:white;
+		-moz-border-radius: 15px;
+		padding:0px 15px;
+		top:50px;
+		left:90px;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:12px;
+		padding-top:25px;
+		}
+		div.assignment-comments-container div.email-signin-form2 div.inner {
+			padding-top:15px;
+			}
+			div.assignment-comments-container div.email-signin-form2 div.inner p {
+				margin:0px;
+				padding-bottom:7px;
+				}
+				div.assignment-comments-container div.email-signin-form2 div.inner p input.text {
+					width:99%;
+			}
+	#cancel-email, a.cancel-email {
+		position:absolute;
+		right:25px;
+		top:10px;
+		border:1px solid black;
+		padding:0px 3px;
+		text-decoration:none;
+	}
+div.autopost {
+	display:none;
+	float:right;
+	padding-right:40px
+}
+	
+	
+/*Dialog Box */
+#dialog {position:fixed; width:525px; padding:0px; z-index:200; background:#fff; font-family:Verdana, Arial, Helvetica; font-size:14px; }
+#dialog-header {display:block; position:relative; padding:3px 6px 7px; height:14px; font-size:14px; font-weight:bold}
+#dialog-title {float:left}
+#dialog-close {float:right; cursor:pointer; margin:3px 3px 0 0; height:11px; width:11px; background:url(/sites/all/themes/img/jquery.modaldialog/close.gif) no-repeat}
+#dialog-content {display:block; padding:6px; min-height:160px; color:#666666; font-size:13px;}
+#dialog-content-inner { min-height:128px; }
+#dialog-mask {position:fixed; top:0; left:0; height:100%; width:100%; background:#FFF; opacity:.75; filter:alpha(opacity=75); z-index:100}
+#dialog-button-container { text-align:center; margin:2px 6px 6px 2px; }
+#dialog-button { font-weight:bold; font-size:1.1em; font-family:Arial, sans-serif; padding:2px 5px 2px 5px; }
+.error {background:#fff url(/sites/all/themes/img/jquery.modaldialog/e_bg.jpg) bottom right no-repeat; border:1px solid #924949; border-top:none}
+.errorheader {background:url(/sites/all/themes/img/jquery.modaldialog/e_hd.gif) repeat-x; color:#6f2c2c; border:1px solid #924949; border-bottom:none}
+.errorbutton { background-color:#9F4C4C; border:1px solid #924949; color:#fff; }
+.warning {background:#fff url(/sites/all/themes/img/jquery.modaldialog/w_bg.jpg) bottom right no-repeat; border:1px solid #c5a524; border-top:none}
+.warningheader {background:url(/sites/all/themes/img/jquery.modaldialog/w_hd.gif) repeat-x; color:#957c17; border:1px solid #c5a524; border-bottom:none}
+.warningbutton { background-color:#eFcC47; border:1px solid #957C17; color:#957C17; }
+.success {background:#fff url(/sites/all/themes/img/jquery.modaldialog/s_bg.jpg) bottom right no-repeat; border:1px solid #60a174; border-top:none}
+.successheader {background:url(/sites/all/themes/img/jquery.modaldialog/s_hd.gif) repeat-x; color:#3c7f51; border:1px solid #60a174; border-bottom:none}
+.successbutton { background-color:#3c7f51; border:1px solid #fff; color:#fff; }
+.prompt {background:#fff url(/sites/all/themes/img/jquery.modaldialog/p_bg.jpg) bottom right no-repeat; border:1px solid #4f6d81; border-top:none}
+.promptheader {background:url(/sites/all/themes/img/jquery.modaldialog/p_hd.gif) repeat-x; color:#355468; border:1px solid #4f6d81; border-bottom:none}
+.promptbutton { background-color:#4F6D81; border:1px solid #fff; color:#fff; }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
