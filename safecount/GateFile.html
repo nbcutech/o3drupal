@@ -1,0 +1,15 @@
+<html> 
+<head></head> 
+<body style=margin:0;padding:0> 
+<script language="javascript"> 
+// Get the parameters from the IFrame
+var strSearch = document.location.search;
+// Find a parameter called 'sub'.  This holds the name of a server at QuestionMarket where the rest of the code is stored.
+var subPos = strSearch.indexOf("sub");
+// Pull this parameter out where we can use it.
+var strHTML = unescape(strSearch.substr(subPos+4, strSearch.indexOf("&")-subPos-4));
+// Insert a script from the indicated server into the containing page.  Pass the parameters to this script.
+self.document.write('<scr'+'ipt language="javascript" src="http://'+strHTML+'.questionmarket.com/adscgen/dynamiclink.js.php'+strSearch+'"></scr'+'ipt>');
+</script> 
+</body> 
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Listerine Video</title>
+</head>
+<script type="text/javascript" language="javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="/sites/all/themes/thegleeproject/tgp/js/flowplayer-3.2.6.min.js"></script>
+<script>
+var iamfirst = true;
+function restart_video(){
+	if(!iamfirst){
+		//parent.window.location.href = 'http://clk.atdmt.com/534/go/332066534/direct;at.223631012_350813_25;ct.1/01/';
+		window.open ("http://clk.atdmt.com/534/go/332066534/direct;at.223631012_350813_25;ct.1/01/","mywindow");
+		//$('#click').show();
+	}
+	iamfirst = false;
+}
+
+function imFinished(){
+	iamfirst = false;
+}
+</script>
+<body>
+<div style="width:450px; height:450px; overflow:hidden; position:relative">
+<a href="/sites/all/themes/thegleeproject/video/Listerine_Whitening_JJLW0030000_640x480_283_0500.flv" style="display:block;width:450px;height:450px" id="player"></a>
+<script>flowplayer("player", "http://thegleeproject.oxygen.com/sites/all/themes/thegleeproject/tgp/flowplayer/flowplayer.commercial-3.2.7.swf",{key: '#@e9e546d433168a4dd2e', plugins:{controls:{scrubber: false }}, clip:{autoPlay: true, onFinish: function() { imFinished(); }, onBeforeFinish: function() { this.getPlugin("play").css({opacity: 0}); }, onCuepoint: [10, function() { restart_video(); }] }});</script>
+<!--<a href="http://clk.atdmt.com/534/go/332066534/direct;at.223631012_350813_25;ct.1/01/" target="_blank" id="click" style="text-decoration:none; display:none; width:450px; height:450px; position:absolute; top:0px; left:0px; z-index:999">&nbsp;</a>-->
+</div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>NBC - Oxygen</title>
+
+<script src="updateRequestOxygen.js" ></script>
+
+
+
+<script language="JavaScript">
+
+<!--
+
+function newPage(){
+//use this function for additional js action. this funtion is called for any new trigger update that the flash application choose to display.
+}
+
+var isInternetExplorer = navigator.appName.indexOf("Microsoft") != -1;
+var globalCommandBridge="";
+//var jsVersion = null;
+// Handle all the FSCommand messages in a Flash movie.
+function flashObject_DoFSCommand(command, args) {
+	if(globalCommandBridge!="")
+		command = globalCommandBridge;
+	if(jsVersion==null){		
+		globalCommandBridge = command;
+		window.setTimeout(flashObject_DoFSCommand,2000)
+		return;
+	}
+	
+	switch(command){
+		case "newPage":
+			globalCommandBridge="";
+			newPage();
+			break;
+		case "initiate calls":
+			globalCommandBridge="";
+			//call for update after flash is loaded
+			window.document["flashObject"].TGotoFrame("/",3);
+			window.document["flashObject"].SetVariable("sURL",serviceURL);
+			window.document["flashObject"].SetVariable("jsVersion",jsVersion);
+			//window.document["flashObject"].SetVariable("loginType","1");
+			//window.document["flashObject"].SetVariable("externalMovies","hanamovie1:HANA1.swf");
+			try{
+				window.document["flashObject"].focus();
+			}catch(e){}
+			doRequest();
+			break;
+	}
+	
+}
+
+
+function setStatus(state){window.status=state;}
+
+// Hook for Internet Explorer.
+if (navigator.appName && navigator.appName.indexOf("Microsoft") != -1 && navigator.userAgent.indexOf("Windows") != -1 && navigator.userAgent.indexOf("Windows 3.1") == -1) {
+	document.write('<script language=\"VBScript\"\>\n');
+	document.write('On Error Resume Next\n');
+	document.write('Sub flashObject_FSCommand(ByVal command, ByVal args)\n');
+	document.write('	Call flashObject_DoFSCommand(command, args)\n');
+	document.write('End Sub\n');
+	document.write('</script\>\n');
+}
+
+
+//-->
+</script>
+
+<style type="text/css">
+<!--
+body {
+	
+ margin:0px;
+	
+}
+-->
+</style>
+</head>
+<body >
+
+<script src="externalActiveXOxygen3d.js"></script>
+<br>
+
+
+</body>
+</html>

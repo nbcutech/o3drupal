@@ -1,0 +1,137 @@
+@charset "utf-8";
+/* CSS Document */
+#bgca-main-blocker-copy {
+    width: 391px;
+    height: 233px;
+    margin: 30px auto;
+    background: url(bgca-close.png) no-repeat;
+    position:absolute;
+    top: 70px;
+    left: 265px;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 180%;
+}
+
+#bgca-main-blocker {
+    height: 1501px;
+	margin: 10px 10px 0 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: url(bgca-mainback.jpg) no-repeat;
+    opacity: .7;
+    filter:alpha(opacity=70)
+}
+
+#bgca-main, #bgca-main-3 {
+    height: 1501px;
+	margin: 0px 10px 0 10px;
+	text-align: center;
+    background: url(bgca-mainback.jpg) no-repeat;
+}
+
+#bgca-main-3 {
+    height: 1146px;
+    background: url(bgca-mainback2.jpg) no-repeat;
+}
+
+#bgca-header {
+	background: url(bgca-header.jpg) no-repeat;
+	height: 65px;
+	width: 961px;
+}
+
+.bgca-char-row {
+    clear: both;
+    display: inline-block;
+    text-align: center;
+}
+
+.bgca-char, .bgca-char-achievment {
+	width: 306px;
+	height: 309px;
+	float: left;
+	margin: 0;
+    text-align: center;
+}
+
+.bgca-char-lifetime {
+	width: 513px;
+	height: 309px;
+    font-family: Arial;
+    font-size: 12px;
+    font-weight: bold;
+    color: #990000;
+}
+
+.bgca-char-lifetime p {
+    margin: 20px 0 0 0;
+}
+
+.bgca-char-img {
+    height: 249px;
+    display: inline-block;
+}
+
+.bgca-char-buttons {
+    height: 60px;
+    text-align: center;
+}
+
+.bgca-char-buttons img, .bgca-char-buttons input {
+    display: inline-block;
+    margin: 26px 7px 0 7px;
+}
+
+.bgca-char-buttons img:HOVER, #bgca-nav img:HOVER, form.bgca-vote-form input:HOVER {
+    opacity: .8;
+}
+
+#bgca-nav {
+    text-align: center;
+    padding: 40px;
+}
+
+#bgca-nav img {
+    display: inline-block;
+    margin: 0 20px;
+}
+
+#bgca-char-buttons a, form.bgca-vote-form input {
+    outline:0;
+}
+
+form.bgca-vote-form {
+    margin: 0;
+    display: inline-block;
+}
+
+.clearfix {
+	clear: both;
+}
+
+/* popup */
+
+#bgca-bgPopup{
+    display:none;
+    position:fixed;
+    _position:absolute; /* hack for internet explorer 6*/
+    height:100%;
+    width:100%;
+    top:0;
+    left:0;
+    background:#000000;
+    z-index:1;
+}
+
+#bgca-popup{
+     display:none;
+     position:fixed;
+     _position:absolute; /* hack for internet explorer 6 */
+     z-index:2;
+     cursor:pointer;
+}

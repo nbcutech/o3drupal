@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- crossdomain.xml -->
+<cross-domain-policy>
+  	<allow-access-from domain="*.nbcuni.com"/>
+	<allow-access-from domain="*.oxygen.com"/>
+  	<allow-access-from domain="widgets.nbcuni.com"/>
+	<allow-access-from domain="*.oxygenlive.com"/>
+</cross-domain-policy>

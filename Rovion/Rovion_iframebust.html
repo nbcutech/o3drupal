@@ -1,0 +1,17 @@
+<html>
+<head>
+<title>Rovion iFrame Buster</title>
+<script type="text/javascript">
+if(document.URL.split("rovioniframetopdomain=")[1] != ""){
+	document.domain = document.URL.split("rovioniframetopdomain=")[1];
+}
+</script>
+</head>
+<body style="margin:0px;padding:0px;">
+<script type="text/javascript">
+/* COPYRIGHT 2001-<?=date("Y");?> ROVION, INC. (WWW.ROVION.COM) ALL RIGHTS RESERVED */
+var inDapIF=true;
+document.write('<scr'+'ipt type="text/javascript" src="'+unescape(document.URL.split("&rovioniframetopdomain")[0].split("rovioniframeadurl=")[1])+'"></scr'+'ipt>');
+</script>
+</body>
+</html>
