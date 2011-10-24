@@ -8,6 +8,13 @@ to be merged with DEV code in repository promotoolsdev
 .gitignore files:
 .htaccess
 settings.php
-sites/default/files/* (you can get the image assets from the server)
+*.bak
 
-Backup & Migrate file: sites/default/files/backup_migrate/manual/OxygenAdmin-2011-10-19T18-23-00.mysql.gz
+
+sites/default/files/* not added
+(you can get the image assets from the server)
+except for
+sites/default/files/backup_migrate/manual/
+sites/default/files/file_attach (for testing purposes)
+
+Backup & Migrate file: sites/default/files/backup_migrate/manual/OxygenAdmin-FeaturesAdded-2011-10-24T01-10-57.mysql.gz

@@ -12,14 +12,9 @@ else if(is_numeric(arg(1))) {
 }
 }
 }
-//$thenodetype = str_replace('_', '-', arg(2));
+
 //dsm($thenodetype);
-
-/* TODO
-create method to set fieldname in JS in one statement from node type without switches
-*/
-
-
+//dsm('sortable');
 
 switch($thenodetype) 
 {
@@ -42,3 +37,10 @@ case 'highlights_promo':
 default:
 	break;
 }
+
+/**
+ * set module weight to load after promo_title_alt_copy module
+ * see http://drupal.org/node/110238
+ */
+$weight = db_result(db_query("SELECT weight FROM {system} WHERE name = 'promo_title_alt_copy'"));
+db_query("UPDATE {system} SET weight = %d WHERE name = 'node_add_sortable'", $weight + 1);
