@@ -3,7 +3,7 @@
 
 This repository contains an updated version of Oxygen Production code
 including DEV code Promo Tools added via Drupal Features and manual configurations
-to be merged with DEV code in repository promotoolsdev
+derived from DEV code in repository promotoolsdev
 
 .gitignore files:
 .htaccess
@@ -11,13 +11,14 @@ settings.php
 *.bak
 
 
-sites/default/files/* not added completely (Git stalled)
+sites/default/files/* subdirectories not added
 (you can get the image assets from the server)
 except for
 sites/default/files/backup_migrate/manual/
 sites/default/files/file_attach (for testing purposes)
 
-Backup & Migrate file: sites/default/files/backup_migrate/manual/OxygenAdmin-FeaturesAdded-2011-10-24T01-10-57.mysql.gz
+Backup & Migrate files: sites/default/files/backup_migrate/manual/
+eg OxygenAdmin-FeaturesAdded-2011-10-24T01-10-57.mysql.gz
 
 clarify commit message: "standardize how is set in custom Promo Tools modules"
 php variable stripped from message, should read: "standardize how var content_types is set in custom Promo Tools modules"
