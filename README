@@ -18,3 +18,6 @@ sites/default/files/backup_migrate/manual/
 sites/default/files/file_attach (for testing purposes)
 
 Backup & Migrate file: sites/default/files/backup_migrate/manual/OxygenAdmin-FeaturesAdded-2011-10-24T01-10-57.mysql.gz
+
+clarify commit message: "standardize how is set in custom Promo Tools modules"
+php variable stripped from message, should read: "standardize how var content_types is set in custom Promo Tools modules"
