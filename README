@@ -11,7 +11,7 @@ settings.php
 *.bak
 
 
-sites/default/files/* not added
+sites/default/files/* not added completely (Git stalled)
 (you can get the image assets from the server)
 except for
 sites/default/files/backup_migrate/manual/
