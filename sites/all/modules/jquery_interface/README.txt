@@ -20,4 +20,6 @@ The Interface library included here depends on JQuery version 1.1.x. Drupal 5
 comes with version 1.0.1, so you will need to update JQuery using the
 JQuery Update module.
 
+** NOTE by Randall Goya: in DEV jQuery version is 1.3.2 and works
+
 Enjoy!

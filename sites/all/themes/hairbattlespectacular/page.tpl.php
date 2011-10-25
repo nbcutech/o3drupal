@@ -1,4 +1,4 @@
-<?php require_once("/var/www/html/sites/all/themes/oxygen/global_head.inc"); ?>
+<?php require_once $_SERVER["DOCUMENT_ROOT"] . "/sites/all/themes/oxygen/global_head.inc"; ?>
 <?php require_once("showsite_head.inc"); ?>
 
     <?php if ($header): ?>
@@ -24,4 +24,4 @@
     <div style="clear:both;"></div>
 </div>
 <div class="png">
-<?php require_once "/var/www/html/sites/all/themes/oxygen/global_footer.inc"; ?>
+<?php require_once $_SERVER["DOCUMENT_ROOT"] . "/sites/all/themes/oxygenhomepage/footer.inc"; ?>

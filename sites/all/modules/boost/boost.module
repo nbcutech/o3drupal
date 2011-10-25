@@ -499,7 +499,7 @@ function boost_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         $GLOBALS['_boost_nid'] = $node->nid;
         // Can not reliability call require_once inside a shutdown function; see http://drupal.org/node/652508
         views_include('view');
-        views_include('query');
+        //views_include('query');
         register_shutdown_function('_boost_view_insert');
       }
       boost_expire_node($node);

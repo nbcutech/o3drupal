@@ -2,12 +2,12 @@
 // this script is loaded on the node/add form
 
 $(document).ready(function() {
-//$("a:contains('browse')").text("Open file browser");
+$("a:contains('browse')").text("Open file browser");
 $('.crop-rect').focus(function() {
 $('.crop-rect').val('0,0,' + cropw + ',' + croph);
 setTimeout("$('.crop-rect').focus()",100);
-)};
+});
 
 });
 
-alert(jQuery.fn.jquery);
+//alert(jQuery.fn.jquery);

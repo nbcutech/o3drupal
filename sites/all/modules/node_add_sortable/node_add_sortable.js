@@ -3,6 +3,7 @@
 //Drupal.behaviors.run_after_page_loads not working here, maybe because of module weight?
 
 $(document).ready(function() {
+	//alert('sortable');
 	var oldorder;
 	var newindex = 1;
 	$(".textarea-identifier").css({'display':'none'});

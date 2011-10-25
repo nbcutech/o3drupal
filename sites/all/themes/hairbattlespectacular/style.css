@@ -2433,3 +2433,60 @@ width:110px;
 .bloglist-row-name a {
 	color: #333333;
 }
+
+
+/* Highlights Promo Content Type and View/Block */
+
+#block-views-babypromos-highlights_block {margin-top: 10px; background: url(images/highlights_block_BG_top.png) no-repeat 0 0;}
+#block-views-babypromos-highlights_block table {margin: 33px 0 0 0px; background: url(images/highlights_block_BG_mid.png) repeat-y 0px 0;}
+#block-views-babypromos-highlights_block td {background: url(images/highlights_block_BG_bottom.png) no-repeat 0 bottom; padding: 0 9px 10px 8px;}
+
+#block-views-babypromos-highlights_block p {margin: 0; padding: 0}
+
+#block-views-babypromos-highlights_block .babypromo-blurb {
+    color:#fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:12px;
+	margin: 7px 5px -10px 0px;
+	display: block;
+	width: 275px;
+}
+
+#block-views-babypromos-highlights_block a{
+      color:#f9dd36;
+      text-decoration: underline;
+	  margin-left: 15px;
+}
+
+/* Hot Pics Promo Content Type and View/Block */
+
+div.field-web-title {display: none}
+
+#block-views-babypromos-hotpics_block {background: url(images/hot_pics_block_BG_top.png) no-repeat 0 0; width: 298px}
+#block-views-babypromos-hotpics_block table {margin: 43px 0 0 -2px; background: url(images/hot_pics_block_BG_middle.png) repeat-y 2px 2px; width: 300px}
+#block-views-babypromos-hotpics_block td {background: url(images/hot_pics_block_BG_bottom.png) no-repeat 2px bottom; padding: 0 0 30px 16px; margin-bottom: 50px; width: 295px}
+
+#block-views-babypromos-hotpics_block img {margin: 0px 0 15px -3px}
+
+#block-views-babypromos-hotpics_block .babypromo-blurb {
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:12px;
+	margin: -10px 5px 0px 10px;
+	display: block;
+	font-weight: bold;
+	font-style: italic;
+}
+
+#block-views-babypromos-hotpics_block .babypromo-link-text a {
+      color: black;
+      text-decoration: none;
+	  margin: -10px 0 0px 10px;
+	  display: list-item;
+	  list-style-type:square;
+	  padding: 0;
+}
+
+#block-views-babypromos-hotpics_block a:hover {
+      text-decoration: underline;
+}
