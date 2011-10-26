@@ -1,0 +1,3 @@
+<?php
+
+include_once('promo_sortable_fieldsets.features.inc');
